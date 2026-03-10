@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velvet Match — Creador de Negocios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="agregarEmpresa.css">
+</head>
+<body class="bg-velvet-cream min-h-screen">
+
+    <div class="bg-white shadow-sm sticky top-0 z-40 border-b-2 border-velvet-blush">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between mb-2">
+
+                <div class="flex items-center gap-3">
+                    <img src="../paginaPrincipal/logo.jpeg"
+                         alt="Velvet Match logo"
+                         class="vm-logo">
+                    <span class="vm-brand-name">Velvet Match</span>
+                </div>
+
+                <span class="text-sm text-velvet-plum font-semibold" id="progressText">Paso 1 de 6</span>
+            </div>
+
+            <div class="w-full bg-velvet-blush rounded-full h-2">
+                <div id="progressBar" class="bg-velvet-plum h-2 rounded-full transition-all duration-300" style="width: 16.6%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <div id="step1" class="step-container">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-velvet-dark mb-4">¿Qué tipo de negocio quieres crear?</h1>
+                <p class="text-velvet-plum">Selecciona el tipo de negocio para comenzar</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <button onclick="selectBusinessType('Barbería')" class="business-type-btn group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform text-velvet-plum">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-velvet-dark">Barbería</h3>
+                </button>
+
+                <button onclick="selectBusinessType('Estética')" class="business-type-btn group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform text-velvet-plum">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-velvet-dark">Estética</h3>
+                </button>
+
+                <button onclick="selectBusinessType('Salón de belleza (maquillaje)')" class="business-type-btn group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform text-velvet-plum">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-velvet-dark">Salón de belleza</h3>
+                </button>
+
+                <button onclick="selectBusinessType('Salón de uñas')" class="business-type-btn group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform text-velvet-plum">
+                        <i class="fas fa-hand-sparkles"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-velvet-dark">Salón de uñas</h3>
+                </button>
+            </div>
+        </div>
+
+        <div id="step2" class="step-container hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-velvet-plum">
+                    <h2 class="text-3xl font-bold text-velvet-dark mb-2">Información de tu negocio</h2>
+                    <p class="text-velvet-plum mb-6">Estos datos aparecerán en la página pública de tu <span id="businessTypeText"></span></p>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Nombre del negocio *</label>
+                        <input type="text" id="businessName"
+                               class="vm-input"
+                               placeholder="Ej. Studio Velvet">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="businessNameError">El nombre es obligatorio</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Eslogan</label>
+                        <input type="text" id="businessSlogan"
+                               class="vm-input"
+                               placeholder="Ej. Belleza que te define">
+                        <p class="text-xs text-gray-400 mt-1">Una frase corta que represente tu negocio</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Descripción</label>
+                        <textarea id="businessDescription" rows="3"
+                                  class="vm-input"
+                                  placeholder="Cuéntale a tus clientes de qué trata tu negocio..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Ícono del negocio (URL)</label>
+                        <input type="url" id="businessIcon"
+                               class="vm-input"
+                               placeholder="https://ejemplo.com/icono.png">
+                        <p class="text-xs text-gray-400 mt-1">Logo o ícono cuadrado de tu negocio</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Banner del negocio</label>
+
+                        <div id="bannerDropZone" class="banner-dropzone" onclick="document.getElementById('businessBanner').click()">
+                            <img id="bannerPreview" src="" alt="Banner preview" class="hidden w-full h-full object-cover rounded-lg">
+
+                            <div id="bannerPlaceholder" class="flex flex-col items-center justify-center h-full gap-2">
+                                <i class="fas fa-image text-4xl" style="color: var(--velvet-pink)"></i>
+                                <p class="text-sm font-semibold" style="color: var(--velvet-plum)">Subir imagen de banner</p>
+                                <p class="text-xs text-gray-400">JPG, PNG o WEBP · Recomendado 1200×400 px</p>
+                                <p class="text-xs text-gray-400">Si no subes ninguna se usará un banner por defecto</p>
+                            </div>
+                        </div>
+
+                        <input type="file" id="businessBanner" accept="image/*"
+                               class="hidden" onchange="previewBanner(event)">
+
+                        <button type="button" id="bannerRemoveBtn"
+                                onclick="removeBanner()"
+                                class="hidden mt-2 text-xs text-red-400 hover:text-red-600 transition">
+                            <i class="fas fa-times mr-1"></i> Quitar imagen
+                        </button>
+                    </div>
+
+                    <hr class="my-6 border-velvet-blush">
+                    <h3 class="text-xl font-bold text-velvet-dark mb-4">Contacto</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2">Teléfono / WhatsApp</label>
+                            <input type="tel" id="businessPhone"
+                                   class="vm-input"
+                                   placeholder="+52 81 1234 5678">
+                        </div>
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2">Email de contacto</label>
+                            <input type="email" id="businessEmail"
+                                   class="vm-input"
+                                   placeholder="hola@minegocio.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2"><i class="fab fa-instagram text-velvet-pink"></i> Instagram</label>
+                            <input type="text" id="businessInstagram"
+                                   class="vm-input"
+                                   placeholder="@minegocio">
+                        </div>
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2"><i class="fab fa-facebook text-velvet-dark"></i> Facebook</label>
+                            <input type="text" id="businessFacebook"
+                                   class="vm-input"
+                                   placeholder="facebook.com/minegocio">
+                        </div>
+                    </div>
+
+                    <hr class="my-6 border-velvet-blush">
+                    <h3 class="text-xl font-bold text-velvet-dark mb-1">Horario del negocio</h3>
+                    <p class="text-xs text-gray-400 mb-4">Marca los días que abres y el horario de atención</p>
+                    <div id="businessScheduleContainer" class="space-y-3">
+                    </div>
+
+                    <hr class="my-6 border-velvet-blush">
+                    <h3 class="text-xl font-bold text-velvet-dark mb-4">Ubicación</h3>
+
+                    <div class="mb-4">
+                        <label class="block text-velvet-dark font-semibold mb-2">Dirección</label>
+                        <input type="text" id="businessAddress"
+                               class="vm-input"
+                               placeholder="Calle, número, colonia">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2">Ciudad</label>
+                            <input type="text" id="businessCity"
+                                   class="vm-input"
+                                   placeholder="Monterrey">
+                        </div>
+                        <div>
+                            <label class="block text-velvet-dark font-semibold mb-2">Estado</label>
+                            <input type="text" id="businessState"
+                                   class="vm-input"
+                                   placeholder="Nuevo León">
+                        </div>
+                    </div>
+
+                    <button onclick="goToStep3()" class="vm-btn-primary w-full">
+                        Continuar <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="step3" class="step-container hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-velvet-plum">
+                    <h2 class="text-3xl font-bold text-velvet-dark mb-2">Registro de Administrador</h2>
+                    <p class="text-velvet-plum mb-6">Tus datos como dueño/a del negocio</p>
+
+                    <form id="adminForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-velvet-dark font-semibold mb-2">Nombre *</label>
+                                <input type="text" id="adminFirstName" class="vm-input" placeholder="Juan">
+                                <p class="text-red-500 text-sm mt-1 hidden" id="adminFirstNameError">El nombre es obligatorio</p>
+                            </div>
+                            <div>
+                                <label class="block text-velvet-dark font-semibold mb-2">Apellido *</label>
+                                <input type="text" id="adminLastName" class="vm-input" placeholder="Pérez">
+                                <p class="text-red-500 text-sm mt-1 hidden" id="adminLastNameError">El apellido es obligatorio</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-velvet-dark font-semibold mb-2">Email *</label>
+                            <input type="email" id="adminEmail" class="vm-input" placeholder="admin@negocio.com">
+                            <p class="text-red-500 text-sm mt-1 hidden" id="adminEmailError">Email inválido</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-velvet-dark font-semibold mb-2">Contraseña *</label>
+                            <input type="password" id="adminPassword" class="vm-input" placeholder="Mínimo 8 caracteres">
+                            <p class="text-red-500 text-sm mt-1 hidden" id="adminPasswordError">Mínimo 8 caracteres</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-velvet-dark font-semibold mb-2">Fecha de Nacimiento *</label>
+                            <input type="date" id="adminBirthdate" class="vm-input">
+                            <p class="text-red-500 text-sm mt-1 hidden" id="adminBirthdateError">La fecha de nacimiento es obligatoria</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-velvet-dark font-semibold mb-2">Foto de Perfil (URL)</label>
+                            <input type="url" id="adminProfilePicture" class="vm-input" placeholder="https://ejemplo.com/foto.jpg">
+                        </div>
+
+                        <button type="button" onclick="registerAdmin()" class="vm-btn-primary w-full">
+                            Registrar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="step4" class="step-container hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6 border-t-4 border-velvet-plum">
+                <h2 class="text-3xl font-bold text-velvet-dark mb-6">Servicios y Empleados</h2>
+
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-semibold text-velvet-dark">Servicios</h3>
+                        <button onclick="openServiceModal()" class="vm-btn-primary flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Agregar Servicio
+                        </button>
+                    </div>
+                    <div id="servicesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="border-2 border-dashed border-velvet-blush rounded-lg p-8 flex flex-col items-center justify-center min-h-[200px] hover:border-velvet-pink cursor-pointer transition"
+                             onclick="openServiceModal()">
+                            <i class="fas fa-plus text-4xl text-velvet-blush mb-2"></i>
+                            <p class="text-velvet-plum font-semibold">Agregar primer servicio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-8 border-velvet-blush">
+
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-semibold text-velvet-dark">Empleados</h3>
+                        <button onclick="openEmployeeModal()" class="vm-btn-secondary flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Agregar Empleado
+                        </button>
+                    </div>
+                    <div id="employeesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Estado vacío inicial -->
+                        <div class="border-2 border-dashed border-velvet-blush rounded-lg p-8 flex flex-col items-center justify-center min-h-[200px] hover:border-velvet-dark cursor-pointer transition"
+                             onclick="openEmployeeModal()">
+                            <i class="fas fa-plus text-4xl text-velvet-blush mb-2"></i>
+                            <p class="text-velvet-plum font-semibold">Agregar empleado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-8 border-velvet-blush">
+
+                <div class="mb-2">
+                    <h3 class="text-2xl font-semibold text-velvet-dark mb-1">Anticipo de servicios</h3>
+                    <p class="text-sm text-gray-400 mb-5">Define si tus clientes deberán pagar un porcentaje al momento de agendar su cita.</p>
+
+
+                    <div id="anticipoPanel" class="bg-velvet-cream rounded-xl p-6 border border-velvet-blush">
+
+                        <label class="block text-velvet-dark font-semibold mb-3">Porcentaje de anticipo</label>
+                        <div class="flex items-center gap-4 mb-2">
+                            <input type="range" id="anticipoSlider" min="1" max="100" value="30"
+                                   class="flex-1 accent-velvet-plum cursor-pointer"
+                                   oninput="syncAnticipo('slider')">
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="anticipoInput" min="1" max="100" value="30"
+                                       class="vm-input w-20 text-center font-bold text-velvet-plum"
+                                       oninput="syncAnticipo('input')">
+                                <span class="text-velvet-dark font-bold text-lg">%</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 flex-wrap mb-5">
+                            <button type="button" onclick="setAnticipo(25)" class="anticipo-quick-btn">25%</button>
+                            <button type="button" onclick="setAnticipo(30)" class="anticipo-quick-btn active">30%</button>
+                            <button type="button" onclick="setAnticipo(50)" class="anticipo-quick-btn">50%</button>
+                            <button type="button" onclick="setAnticipo(75)" class="anticipo-quick-btn">75%</button>
+                            <button type="button" onclick="setAnticipo(100)" class="anticipo-quick-btn">100%</button>
+                        </div>
+
+                        <div class="bg-white rounded-lg p-4 border border-velvet-blush">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">Ejemplo</p>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-velvet-dark">Servicio de $<span id="ejemploPrecio">350</span> MXN</span>
+                                <span class="font-bold text-velvet-plum">Anticipo: $<span id="ejemploAnticipo">105</span> MXN</span>
+                            </div>
+                            <div class="mt-2 w-full bg-velvet-blush rounded-full h-2">
+                                <div id="anticipoBarra" class="bg-velvet-plum h-2 rounded-full transition-all duration-300" style="width: 30%"></div>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-400 mt-3">⚠️ El resto del pago se cobra de forma presencial al momento del servicio.</p>
+                    </div>
+                </div>
+
+                <button onclick="goToStep5()" class="vm-btn-primary w-full mt-8">
+                    Continuar a Personalización <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="step5" class="step-container hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-velvet-plum">
+                    <h2 class="text-3xl font-bold text-velvet-dark mb-2">Personalización de Colores</h2>
+                    <p class="text-velvet-plum mb-6">Elige los colores de tu página</p>
+
+                    <div class="mb-6">
+                        <label class="block text-velvet-dark font-semibold mb-2">Color Principal *</label>
+                        <div class="flex gap-4 items-center">
+                            <input type="color" id="primaryColor" value="#7F055F"
+                                   class="w-20 h-12 rounded-lg cursor-pointer border-2 border-velvet-blush">
+                            <input type="text" id="primaryColorText" value="#7F055F"
+                                   class="flex-1 vm-input" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-velvet-dark font-semibold mb-2">Color Secundario *</label>
+                        <div class="flex gap-4 items-center">
+                            <input type="color" id="secondaryColor" value="#E5A4CB"
+                                   class="w-20 h-12 rounded-lg cursor-pointer border-2 border-velvet-blush">
+                            <input type="text" id="secondaryColorText" value="#E5A4CB"
+                                   class="flex-1 vm-input" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 p-6 rounded-xl" id="colorPreview"
+                         style="background: linear-gradient(135deg, #7F055F 0%, #E5A4CB 100%)">
+                        <h4 class="text-white text-xl font-bold mb-1 drop-shadow">Vista Previa</h4>
+                        <p class="text-white drop-shadow text-sm">Así se verán los colores en tu página</p>
+                    </div>
+
+                    <button onclick="finishSetup()" class="vm-btn-primary w-full">
+                        ✨ Crear Página
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="step6" class="step-container hidden">
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-velvet-plum">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-bold text-velvet-dark mb-4">¡Página creada!</h2>
+                    <p class="text-velvet-plum mb-6">Tu negocio ha sido configurado exitosamente.</p>
+                    <div id="summaryContent" class="text-left bg-velvet-cream rounded-lg p-6 text-sm text-velvet-dark space-y-2 mb-6"></div>
+                    <button onclick="resetApp()" class="vm-btn-primary w-full">
+                        <i class="fas fa-redo mr-2"></i> Crear otro negocio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="serviceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-velvet-dark">Agregar Servicio</h3>
+                <button onclick="closeServiceModal()" class="text-gray-400 hover:text-velvet-dark text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="serviceForm">
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Nombre del Servicio *</label>
+                    <input type="text" id="serviceName" class="vm-input" placeholder="Ej. Corte de cabello">
+                    <p class="text-red-500 text-sm mt-1 hidden" id="serviceNameError">El nombre es obligatorio</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Descripción *</label>
+                    <textarea id="serviceDescription" rows="3" class="vm-input" placeholder="Describe el servicio"></textarea>
+                    <p class="text-red-500 text-sm mt-1 hidden" id="serviceDescriptionError">La descripción es obligatoria</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">URLs de Imágenes (separadas por coma)</label>
+                    <input type="text" id="serviceImages" class="vm-input" placeholder="https://example.com/img1.jpg">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">URLs de Videos (separadas por coma)</label>
+                    <input type="text" id="serviceVideos" class="vm-input" placeholder="https://example.com/video.mp4">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-velvet-dark font-semibold mb-2">Duración (min) *</label>
+                        <input type="number" id="serviceDuration" min="1" class="vm-input" placeholder="30">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="serviceDurationError">Requerido</p>
+                    </div>
+                    <div>
+                        <label class="block text-velvet-dark font-semibold mb-2">Precio (MXN) *</label>
+                        <input type="number" id="servicePrice" min="0" step="0.01" class="vm-input" placeholder="150.00">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="servicePriceError">Requerido</p>
+                    </div>
+                </div>
+
+                <button type="button" onclick="addService()" class="vm-btn-primary w-full">
+                    Guardar Servicio
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="employeeModal" class="modal hidden">
+        <div class="modal-content max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-velvet-dark">Agregar Empleado</h3>
+                <button onclick="closeEmployeeModal()" class="text-gray-400 hover:text-velvet-dark text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="employeeForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-velvet-dark font-semibold mb-2">Nombre *</label>
+                        <input type="text" id="employeeFirstName" class="vm-input" placeholder="María">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="employeeFirstNameError">Requerido</p>
+                    </div>
+                    <div>
+                        <label class="block text-velvet-dark font-semibold mb-2">Apellido *</label>
+                        <input type="text" id="employeeLastName" class="vm-input" placeholder="García">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="employeeLastNameError">Requerido</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Año de Nacimiento *</label>
+                    <input type="number" id="employeeBirthYear" min="1940" max="2010" class="vm-input" placeholder="1990">
+                    <p class="text-red-500 text-sm mt-1 hidden" id="employeeBirthYearError">Año inválido</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Foto de Perfil (URL)</label>
+                    <input type="url" id="employeeProfilePicture" class="vm-input" placeholder="https://ejemplo.com/foto.jpg">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Servicios que Ofrece</label>
+                    <div id="employeeServicesCheckboxes" class="space-y-2 p-4 bg-velvet-cream rounded-lg max-h-40 overflow-y-auto">
+                        <p class="text-gray-500 text-sm">No hay servicios disponibles. Agrega servicios primero.</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-velvet-dark font-semibold mb-2">Horario de Trabajo *</label>
+                    <div id="scheduleContainer" class="space-y-3">
+                    </div>
+                </div>
+
+                <button type="button" onclick="addEmployee()" class="vm-btn-secondary w-full">
+                    Guardar Empleado
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden">
+        <div class="flex items-center gap-3">
+            <i id="toastIcon" class="text-2xl"></i>
+            <p id="toastMessage"></p>
+        </div>
+    </div>
+
+    <script src="agregarEmpresa.js"></script>
+    <style>
+        .anticipo-quick-btn {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid #EBD2BE;
+            background: white;
+            color: #7F055F;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .anticipo-quick-btn:hover,
+        .anticipo-quick-btn.active {
+            background: #7F055F;
+            color: white;
+            border-color: #7F055F;
+        }
+    </style>
+    <script>
+
+        function syncAnticipo(source) {
+            const slider = document.getElementById('anticipoSlider');
+            const input  = document.getElementById('anticipoInput');
+            let val = source === 'slider' ? parseInt(slider.value) : parseInt(input.value);
+            if (isNaN(val) || val < 1)  val = 1;
+            if (val > 100) val = 100;
+            slider.value = val;
+            input.value  = val;
+            updateAnticipoPreview(val);
+            document.querySelectorAll('.anticipo-quick-btn').forEach(b => {
+                b.classList.toggle('active', parseInt(b.textContent) === val);
+            });
+        }
+
+        function setAnticipo(val) {
+            document.getElementById('anticipoSlider').value = val;
+            document.getElementById('anticipoInput').value  = val;
+            updateAnticipoPreview(val);
+            document.querySelectorAll('.anticipo-quick-btn').forEach(b => {
+                b.classList.toggle('active', parseInt(b.textContent) === val);
+            });
+        }
+
+        function updateAnticipoPreview(pct) {
+            const precio   = 350;
+            const anticipo = Math.round(precio * pct / 100);
+            document.getElementById('ejemploAnticipo').textContent = anticipo;
+            document.getElementById('anticipoBarra').style.width   = pct + '%';
+        }
+    </script>
+</body>
+</html>

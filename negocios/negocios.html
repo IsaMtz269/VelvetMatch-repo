@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Negocios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="negocios.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Velvet Match</div>
+      <div class="brand-sub">Super Admin</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <a class="nav-link" href="../dashboard/dashboard.html"><span class="ic">🏠</span> Dashboard</a>
+    <div class="nav-label" style="margin-top:6px">Gestión</div>
+    <a class="nav-link active" href="../negocios/negocios.html"><span class="ic">🏪</span> Negocios</a>
+    <a class="nav-link" href="../usuarios/usuarios.html"><span class="ic">👥</span> Usuarios</a>
+    <a class="nav-link" href="../analytics/analytics.html"><span class="ic">📊</span> Analytics</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">D</div>
+    <div class="user-info">
+      <div class="name">Dev Admin</div>
+      <div class="role">Super Administrador</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Negocios</span>
+    <div class="topbar-right">
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="filter-row">
+      <span class="filter-label">Tipo:</span>
+      <div class="filter-chips">
+        <button class="chip-btn active" onclick="setFilter(this)">Todos</button>
+        <button class="chip-btn" onclick="setFilter(this)">Barbería</button>
+        <button class="chip-btn" onclick="setFilter(this)">Estética</button>
+        <button class="chip-btn" onclick="setFilter(this)">Salón de uñas</button>
+        <button class="chip-btn" onclick="setFilter(this)">Salón de belleza</button>
+      </div>
+      <input class="search-input" placeholder="Buscar por nombre..." />
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Negocios registrados</span>
+        <button class="btn-sm">⬇ Exportar</button>
+      </div>
+      
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Negocio</th>
+              <th>Tipo</th>
+              <th>URL</th>
+              <th>Citas este mes</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💅</div><div><div class="biz-name">Chapi's Nails</div><div class="biz-owner">Adriana López</div></div></div></td>
+              <td><span class="badge badge-type">Salón de uñas</span></td>
+              <td class="biz-url">/nails/chapis-nails</td>
+              <td><strong>142</strong></td>
+              <td><span class="badge badge-active">● Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">✂️</div><div><div class="biz-name">Barbería Regia</div><div class="biz-owner">Carlos Garza</div></div></div></td>
+              <td><span class="badge badge-type">Barbería</span></td>
+              <td class="biz-url">/barber/barberia-regia</td>
+              <td><strong>89</strong></td>
+              <td><span class="badge badge-active">● Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💆</div><div><div class="biz-name">Estética Lumière</div><div class="biz-owner">María Fernanda</div></div></div></td>
+              <td><span class="badge badge-type">Estética</span></td>
+              <td class="biz-url">/estetica/lumiere</td>
+              <td><strong>214</strong></td>
+              <td><span class="badge badge-active">● Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💇</div><div><div class="biz-name">Glam Studio</div><div class="biz-owner">Sofía Ramírez</div></div></div></td>
+              <td><span class="badge badge-type">Salón de belleza</span></td>
+              <td class="biz-url">/salon/glam-studio</td>
+              <td><strong>37</strong></td>
+              <td><span class="badge badge-inactive">● Inactivo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💄</div><div><div class="biz-name">Beauty Corner</div><div class="biz-owner">Valentina Cruz</div></div></div></td>
+              <td><span class="badge badge-type">Estética</span></td>
+              <td class="biz-url">/estetica/beauty-corner</td>
+              <td><strong>176</strong></td>
+              <td><span class="badge badge-active">● Activo</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mobile-cards">
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💅</div>
+            <div class="mobile-card-title">
+              <div class="biz-name">Chapi's Nails</div>
+              <div class="biz-owner">Adriana López</div>
+            </div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Salón de uñas</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">URL:</span> <span class="biz-url">/nails/chapis-nails</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> <strong>142</strong> este mes</div>
+            <div class="mobile-detail-row"><span class="detail-label">Estado:</span> <span class="badge badge-active">● Activo</span></div>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn-sm">Ver</button>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">✂️</div>
+            <div class="mobile-card-title">
+              <div class="biz-name">Barbería Regia</div>
+              <div class="biz-owner">Carlos Garza</div>
+            </div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Barbería</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">URL:</span> <span class="biz-url">/barber/barberia-regia</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> <strong>89</strong> este mes</div>
+            <div class="mobile-detail-row"><span class="detail-label">Estado:</span> <span class="badge badge-active">● Activo</span></div>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn-sm">Ver</button>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💆</div>
+            <div class="mobile-card-title">
+              <div class="biz-name">Estética Lumière</div>
+              <div class="biz-owner">María Fernanda</div>
+            </div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Estética</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">URL:</span> <span class="biz-url">/estetica/lumiere</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> <strong>214</strong> este mes</div>
+            <div class="mobile-detail-row"><span class="detail-label">Estado:</span> <span class="badge badge-active">● Activo</span></div>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn-sm">Ver</button>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💇</div>
+            <div class="mobile-card-title">
+              <div class="biz-name">Glam Studio</div>
+              <div class="biz-owner">Sofía Ramírez</div>
+            </div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Salón de belleza</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">URL:</span> <span class="biz-url">/salon/glam-studio</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> <strong>37</strong> este mes</div>
+            <div class="mobile-detail-row"><span class="detail-label">Estado:</span> <span class="badge badge-inactive">● Inactivo</span></div>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn-sm">Ver</button>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💄</div>
+            <div class="mobile-card-title">
+              <div class="biz-name">Beauty Corner</div>
+              <div class="biz-owner">Valentina Cruz</div>
+            </div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Estética</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">URL:</span> <span class="biz-url">/estetica/beauty-corner</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> <strong>176</strong> este mes</div>
+            <div class="mobile-detail-row"><span class="detail-label">Estado:</span> <span class="badge badge-active">● Activo</span></div>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn-sm">Ver</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-footer">
+        <span>Mostrando 5 de 38 negocios</span>
+        <div class="pagination">
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+<script>
+  function setFilter(el) {
+    const chips = el.parentElement.querySelectorAll('.chip-btn');
+    chips.forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

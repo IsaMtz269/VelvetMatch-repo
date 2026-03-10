@@ -1,0 +1,37 @@
+:root {
+            --primary-color: #4A0E4E;   /* Morado */
+            --secondary-color: #CFB53B; /* Dorado */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Utilidades de color vinculadas a las variables */
+        .bg-primary-theme { background-color: var(--primary-color) !important; }
+        .text-primary-theme { color: var(--primary-color) !important; }
+        .border-primary-theme { border-color: var(--primary-color) !important; }
+        
+        .btn-theme {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-theme:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a051c 100%);
+            min-height: 100vh;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(207, 181, 59, 0.25);
+        }

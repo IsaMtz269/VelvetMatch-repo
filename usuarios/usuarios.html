@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="usuarios.css">
+</head>
+<body>
+
+<!-- Sidebar para desktop / menú hamburguesa para móvil -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Velvet Match</div>
+      <div class="brand-sub">Super Admin</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <a class="nav-link" href="../dashboard/dashboard.html"><span class="ic">🏠</span> Dashboard</a>
+    <div class="nav-label" style="margin-top:6px">Gestión</div>
+    <a class="nav-link" href="../negocios/negocios.html"><span class="ic">🏪</span> Negocios</a>
+    <a class="nav-link active" href="../usuarios/usuarios.html"><span class="ic">👥</span> Usuarios</a>
+    <a class="nav-link" href="../analytics/analytics.html"><span class="ic">📊</span> Analytics</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">D</div>
+    <div class="user-info">
+      <div class="name">Dev Admin</div>
+      <div class="role">Super Administrador</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Overlay para móvil (fondo oscuro al abrir menú) -->
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Usuarios</span>
+    <div class="topbar-right">
+      <!-- Espacio vacío para mantener el diseño -->
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="layout">
+      <!-- Lista de usuarios -->
+      <div class="list-card">
+        <div class="list-head">
+          <span class="list-head-title">Todos los usuarios</span>
+          <span class="count-badge">214</span>
+        </div>
+        <div class="list-search">
+          <input placeholder="Buscar usuario..." />
+        </div>
+        <div class="role-tabs">
+          <button class="role-tab active" onclick="setTab(this)">Todos</button>
+          <button class="role-tab" onclick="setTab(this)">Admin</button>
+          <button class="role-tab" onclick="setTab(this)">Empleado</button>
+          <button class="role-tab" onclick="setTab(this)">Cliente</button>
+        </div>
+        <div class="list-scroll">
+          <div class="list-item selected" onclick="selectItem(this)">
+            <div class="list-avatar">A</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Adriana López</div>
+              <div class="list-item-meta">Admin · Chapi's Nails</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">C</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Carlos Garza</div>
+              <div class="list-item-meta">Admin · Barbería Regia</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">M</div>
+            <div class="list-item-info">
+              <div class="list-item-name">María Fernanda</div>
+              <div class="list-item-meta">Admin · Estética Lumière</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">P</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Paola Ríos</div>
+              <div class="list-item-meta">Empleado · Chapi's Nails</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">L</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Lucía Mendoza</div>
+              <div class="list-item-meta">Cliente · —</div>
+            </div>
+            <div class="status-dot dot-inactive"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">R</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Roberto Salinas</div>
+              <div class="list-item-meta">Cliente · —</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">S</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Sofía Ramírez</div>
+              <div class="list-item-meta">Admin · Glam Studio</div>
+            </div>
+            <div class="status-dot dot-inactive"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">V</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Valentina Cruz</div>
+              <div class="list-item-meta">Admin · Beauty Corner</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+          <div class="list-item" onclick="selectItem(this)">
+            <div class="list-avatar">J</div>
+            <div class="list-item-info">
+              <div class="list-item-name">Jorge Mendez</div>
+              <div class="list-item-meta">Empleado · Barbería Regia</div>
+            </div>
+            <div class="status-dot dot-active"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalle de usuario -->
+      <div class="detail-card">
+        <div class="detail-header">
+          <div class="detail-avatar">A</div>
+          <div class="detail-header-info">
+            <div class="detail-name">Adriana López</div>
+            <div class="detail-role-tag">🔑 Administrador · Chapi's Nails</div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-outline-light">Editar</button>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div class="detail-section-title">Información personal</div>
+          <div class="detail-grid">
+            <div class="field"><label>Nombre completo</label><p>Adriana López Martínez</p></div>
+            <div class="field"><label>Email</label><p>adriana@chapisnails.com</p></div>
+            <div class="field"><label>Fecha de nacimiento</label><p>14 de marzo, 1990</p></div>
+            <div class="field"><label>Fecha de ingreso</label><p>5 de enero, 2025</p></div>
+            <div class="field"><label>Rol</label><p><span class="badge badge-role">Administrador</span></p></div>
+            <div class="field"><label>Estado</label><p><span class="badge badge-active">● Activo</span></p></div>
+          </div>
+
+          <div class="detail-section-title">Negocio</div>
+          <div class="detail-grid">
+            <div class="field"><label>Nombre del negocio</label><p>Chapi's Nails</p></div>
+            <div class="field"><label>Tipo</label><p>Salón de uñas</p></div>
+            <div class="field"><label>URL</label><p class="biz-url">/nails/chapis-nails</p></div>
+            <div class="field"><label>Empleados a cargo</label><p>4 empleados</p></div>
+            <div class="field"><label>Citas este mes</label><p>142</p></div>
+            <div class="field"><label>Cancelaciones</label><p>12</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JavaScript para el menú hamburguesa -->
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+<!-- JavaScript para tabs y selección -->
+<script>
+  function setTab(el) {
+    const tabs = el.parentElement.querySelectorAll('.role-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function selectItem(el) {
+    const items = document.querySelectorAll('.list-item');
+    items.forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+</script>
+
+</body>
+</html>

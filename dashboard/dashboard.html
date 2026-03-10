@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Velvet Match</div>
+      <div class="brand-sub">Super Admin</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <a class="nav-link active" href="../dashboard/dashboard.html"><span class="ic">🏠</span> Dashboard</a>
+    <div class="nav-label" style="margin-top:6px">Gestión</div>
+    <a class="nav-link" href="../negocios/negocios.html"><span class="ic">🏪</span> Negocios</a>
+    <a class="nav-link" href="../usuarios/usuarios.html"><span class="ic">👥</span> Usuarios</a>
+    <a class="nav-link" href="../analytics/analytics.html"><span class="ic">📊</span> Analytics</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">D</div>
+    <div class="user-info">
+      <div class="name">Dev Admin</div>
+      <div class="role">Super Administrador</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Dashboard</span>
+    <div class="topbar-right">
+    </div>
+  </header>
+
+  <div class="content">
+    <p class="page-intro">Bienvenido. Aquí tienes un resumen general de la plataforma.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total negocios</div>
+        <div class="stat-value">38</div>
+        <div class="stat-sub">▲ 4 nuevos este mes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Usuarios registrados</div>
+        <div class="stat-value">214</div>
+        <div class="stat-sub">▲ 21 nuevos este mes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Citas este mes</div>
+        <div class="stat-value">1,082</div>
+        <div class="stat-sub">▲ 8% vs mes anterior</div>
+      </div>
+    </div>
+
+    <div class="section-title">Acceso rápido</div>
+    <div class="quick-grid">
+      <a class="quick-card" href="../negocios/negocios.html">
+        <div class="quick-icon">🏪</div>
+        <div class="quick-name">Negocios</div>
+        <div class="quick-desc">Visualiza y filtra los negocios registrados en la plataforma.</div>
+        <span class="chip">38 activos</span>
+      </a>
+      <a class="quick-card" href="../usuarios/usuarios.html">
+        <div class="quick-icon">👥</div>
+        <div class="quick-name">Usuarios</div>
+        <div class="quick-desc">Lista completa de usuarios con roles y detalles personales.</div>
+        <span class="chip">214 usuarios</span>
+      </a>
+      <a class="quick-card" href="../analytics/analytics.html">
+        <div class="quick-icon">📊</div>
+        <div class="quick-name">Analytics</div>
+        <div class="quick-desc">Estadísticas y reportes por negocio, exportables a Excel.</div>
+        <span class="chip">Exportable</span>
+      </a>
+    </div>
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+</body>
+</html>

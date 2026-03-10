@@ -1,0 +1,228 @@
+
+:root {
+  --azul-oscuro: #011638;
+  --azul-gris: #2E4057;
+  --morado: #340068;
+  --verde: #99C24D;
+  --blanco: #ffffff;
+  --negro: #000000;
+}
+
+
+body {
+  background-color: var(--azul-oscuro);
+  color: var(--blanco);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+
+
+.navbar {
+  background-color: var(--morado) !important;
+  border-bottom: 2px solid var(--verde);
+}
+
+.navbar-brand {
+  color: var(--verde) ;
+  font-weight: bold;
+}
+
+.nav-link {
+  color: var(--blanco) ;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--verde);
+}
+
+
+.hero {
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  color: var(--blanco);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+
+.profile-img {
+  border: 2px solid var(--verde);
+}
+
+
+input.form-control {
+  background-color: var(--azul-gris);
+  color: var(--blanco);
+  border: 1px solid var(--verde);
+}
+
+input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input.form-control:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 5px var(--verde);
+}
+
+
+.btn-success {
+  background-color: var(--verde);
+  border: none;
+  color: var(--negro);
+  font-weight: 600;
+}
+
+.btn-success:hover {
+  background-color: #87a740;
+}
+
+.btn-outline-success {
+  color: var(--verde);
+  border: 1px solid var(--verde);
+}
+
+.btn-outline-success:hover {
+  background-color: var(--verde);
+  color: var(--negro);
+}
+
+
+
+
+.card {
+  background-color: var(--azul-gris);
+  border: 1px solid var(--blanco);
+  color: var(--blanco);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px var(--verde);
+}
+
+.card-title {
+  color: var(--verde);
+}
+
+.card .extra-info {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.card:hover .extra-info {
+  max-height: 200px; 
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+  .list-group-item {
+    background-color: transparent;
+     color: #fff; 
+  }
+
+
+.carousel-item img {
+  height: 70vh;
+  object-fit: cover;
+  filter: brightness(70%);
+}
+
+.carousel-caption {
+  bottom: 20%;
+}
+
+.carousel-caption h5 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--verde);
+  text-shadow: 2px 2px 5px black;
+}
+
+.carousel-caption p {
+  font-size: 1.2rem;
+  color: var(--blanco);
+}
+
+
+.card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card .flag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: auto;
+  border: 2px solid var(--blanco);
+  border-radius: 4px;
+}
+
+.perfil-bar {
+  position: sticky;
+  top: 56px; 
+  z-index: 1020;
+  background-color: #212529; 
+}
+
+
+.publication-card {
+  background-color: var(--azul-gris);
+  border: 1px solid var(--blanco);
+}
+
+.publication-card .card-title {
+  color: var(--verde);
+}
+
+
+.profile-card-container {
+  margin-top: 140px; 
+}
+
+
+
+footer {
+  width: 100%;
+  background-color: var(--morado);
+  border-top: 2px solid var(--verde);
+  color: var(--blanco);
+  padding: 40px 0 20px;
+  margin-top: auto;
+}

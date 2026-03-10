@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Chapi's Nails</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Chapi's Nails</div>
+      <div class="brand-sub">Salón de uñas</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">MENÚ</div>
+    <a class="nav-link active" href="../dashboard/cliente-dashboard.html"><span class="ic">🏠</span> Inicio</a>
+    <a class="nav-link" href="../calendario/cliente-calendario.html"><span class="ic">📅</span> Calendario</a>
+    <a class="nav-link" href="../perfil/cliente-perfil.html"><span class="ic">👤</span> Mi perfil</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">L</div>
+    <div class="user-info">
+      <div class="name">Lucía Mendoza</div>
+      <div class="role">Cliente</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Chapi's Nails</span>
+    <div class="topbar-right">
+      <a class="btn-cita" href="../calendario/cliente-calendario.html">+ Agendar cita</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="negocio-hero">
+      <div class="negocio-logo">💅</div>
+      <div>
+        <div class="negocio-name">Chapi's Nails</div>
+        <div class="negocio-type">Salón de uñas</div>
+        <div class="negocio-desc">Especialistas en uñas acrílicas, gel, semipermanente y nail art. Nos dedicamos a realzar tu belleza con calidad y dedicación en cada servicio.</div>
+      </div>
+      <div class="negocio-meta">
+        <div class="meta-item">📍 Monterrey, NL</div>
+        <div class="meta-item">⏰ Lun – Sáb, 10am – 7pm</div>
+        <div class="meta-item">⭐ 4.8 / 5.0</div>
+      </div>
+    </div>
+
+    <div class="two-columns">
+      <div class="servicios-column">
+        <div class="section-title">Nuestros servicios</div>
+        <div class="servicios-grid">
+          <div class="servicio-card">
+            <div class="servicio-icon">💅</div>
+            <div class="servicio-nombre">Uñas acrílicas</div>
+            <div class="servicio-desc">Extensión y diseño en acrílico de larga duración.</div>
+            <div class="servicio-footer">
+              <span class="servicio-precio">$350</span>
+              <span class="servicio-duracion">90 min</span>
+            </div>
+          </div>
+          <div class="servicio-card">
+            <div class="servicio-icon">✨</div>
+            <div class="servicio-nombre">Gel semipermanente</div>
+            <div class="servicio-desc">Color de larga duración con acabado brillante.</div>
+            <div class="servicio-footer">
+              <span class="servicio-precio">$250</span>
+              <span class="servicio-duracion">60 min</span>
+            </div>
+          </div>
+          <div class="servicio-card">
+            <div class="servicio-icon">🎨</div>
+            <div class="servicio-nombre">Nail art</div>
+            <div class="servicio-desc">Diseños personalizados y decoraciones exclusivas.</div>
+            <div class="servicio-footer">
+              <span class="servicio-precio">$150</span>
+              <span class="servicio-duracion">45 min</span>
+            </div>
+          </div>
+          <div class="servicio-card">
+            <div class="servicio-icon">🌸</div>
+            <div class="servicio-nombre">Manicure clásico</div>
+            <div class="servicio-desc">Limpieza, forma y esmalte tradicional.</div>
+            <div class="servicio-footer">
+              <span class="servicio-precio">$120</span>
+              <span class="servicio-duracion">40 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="posts-column">
+        <div class="section-title">Publicaciones</div>
+        <div class="posts-list">
+          <div class="post-card">
+            <div class="post-avatar">👩</div>
+            <div class="post-content">
+              <div class="post-author">Adriana López</div>
+              <div class="post-role">Administradora</div>
+              <div class="post-text">¡Hola a todas! Esta semana tenemos promoción especial: 20% de descuento en uñas acrílicas con cualquier diseño. ¡Aprovéchenla! 💅✨</div>
+              <div class="post-date">Hace 2 días</div>
+            </div>
+          </div>
+          <div class="post-card">
+            <div class="post-avatar">💆</div>
+            <div class="post-content">
+              <div class="post-author">Paola Ríos</div>
+              <div class="post-role">Empleada</div>
+              <div class="post-text">Nuevos diseños de nail art disponibles esta temporada. ¡Pidan sus citas con anticipación, tengo agenda llena! 🎨</div>
+              <div class="post-date">Hace 4 días</div>
+            </div>
+          </div>
+          <div class="post-card">
+            <div class="post-avatar">👩</div>
+            <div class="post-content">
+              <div class="post-author">Adriana López</div>
+              <div class="post-role">Administradora</div>
+              <div class="post-text">Recuerda que para cancelar tu cita debes hacerlo con al menos 6 horas de anticipación. ¡Gracias por tu comprensión!</div>
+              <div class="post-date">Hace 1 semana</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+</body>
+</html>

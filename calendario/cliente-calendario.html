@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Calendario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="calendario.css">
+  <style>
+    .anticipo-box {
+      background: var(--cream);
+      border: 1px solid var(--petal);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0 10px;
+    }
+    .anticipo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .anticipo-label { font-size: 12.5px; font-weight: 600; color: #6a3050; }
+    .anticipo-monto-top { font-size: 15px; font-weight: 700; color: var(--plum); }
+    .anticipo-barra-wrap {
+      width: 100%; background: var(--petal);
+      border-radius: 20px; height: 6px; margin-bottom: 8px;
+    }
+    .anticipo-barra {
+      width: 30%; height: 6px;
+      background: var(--plum); border-radius: 20px;
+    }
+    .anticipo-detalle {
+      display: flex; justify-content: space-between;
+      font-size: 11.5px; color: #8a5070;
+    }
+    .anticipo-resto { font-size: 12px; color: #8a5070; }
+    .pago-label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: #8a5070; margin: 12px 0 8px;
+    }
+    .pago-opciones { display: flex; gap: 7px; margin-bottom: 7px; }
+    .pago-opcion {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      padding: 9px 6px; border-radius: 9px;
+      border: 1.5px solid var(--petal); background: white;
+      cursor: pointer; transition: all 0.14s;
+    }
+    .pago-opcion input { display: none; }
+    .pago-opcion:hover { border-color: var(--blush); }
+    .pago-opcion.active { border-color: var(--plum); background: var(--cream); }
+    .pago-icon { font-size: 18px; }
+    .pago-nombre { font-size: 11px; font-weight: 600; color: #6a3050; }
+    .pago-nota { font-size: 10.5px; color: #aaa; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Chapi's Nails</div>
+      <div class="brand-sub">Salón de uñas</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">MENÚ</div>
+    <a class="nav-link" href="../dashboard/cliente-dashboard.html"><span class="ic">🏠</span> Inicio</a>
+    <a class="nav-link active" href="../calendario/cliente-calendario.html"><span class="ic">📅</span> Calendario</a>
+    <a class="nav-link" href="../perfil/cliente-perfil.html"><span class="ic">👤</span> Mi perfil</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">L</div>
+    <div class="user-info">
+      <div class="name">Lucía Mendoza</div>
+      <div class="role">Cliente</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Agendar cita</span>
+    <div class="topbar-right">
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="aviso">
+      ℹ️ &nbsp;Puedes agendar citas con un mínimo de <strong>48 horas</strong> de anticipación. Las cancelaciones deben realizarse con al menos <strong>6 horas</strong> antes del servicio.
+    </div>
+
+    <div class="cal-layout">
+      <div class="cal-card">
+        <div class="cal-head">
+          <span class="cal-month">Febrero 2026</span>
+          <div class="cal-nav">
+            <button class="cal-nav-btn">‹</button>
+            <button class="cal-nav-btn">›</button>
+          </div>
+        </div>
+        <div class="month-tabs">
+          <div class="month-tab active">Febrero</div>
+          <div class="month-tab">Marzo</div>
+          <div class="month-tab">Abril</div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-weekdays">
+            <div class="cal-weekday">Do</div>
+            <div class="cal-weekday">Lu</div>
+            <div class="cal-weekday">Ma</div>
+            <div class="cal-weekday">Mi</div>
+            <div class="cal-weekday">Ju</div>
+            <div class="cal-weekday">Vi</div>
+            <div class="cal-weekday">Sá</div>
+          </div>
+          <div class="cal-days">
+            <!-- Semana 1: Feb empieza en Domingo -->
+            <div class="cal-day empty"></div>
+            <div class="cal-day empty"></div>
+            <div class="cal-day empty"></div>
+            <div class="cal-day empty"></div>
+            <div class="cal-day empty"></div>
+            <div class="cal-day empty"></div>
+            <div class="cal-day blocked">1</div>
+
+            <!-- Sem 2 -->
+            <div class="cal-day blocked">2</div>
+            <div class="cal-day blocked">3</div>
+            <div class="cal-day blocked">4</div>
+            <div class="cal-day blocked">5</div>
+            <div class="cal-day blocked">6</div>
+            <div class="cal-day blocked">7</div>
+            <div class="cal-day blocked">8</div>
+
+            <!-- Sem 3 -->
+            <div class="cal-day blocked">9</div>
+            <div class="cal-day blocked">10</div>
+            <div class="cal-day blocked">11</div>
+            <div class="cal-day blocked">12</div>
+            <div class="cal-day blocked">13</div>
+            <div class="cal-day blocked">14</div>
+            <div class="cal-day blocked">15</div>
+
+            <!-- Sem 4 -->
+            <div class="cal-day blocked">16</div>
+            <div class="cal-day blocked">17</div>
+            <div class="cal-day blocked">18</div>
+            <div class="cal-day blocked">19</div>
+            <div class="cal-day blocked">20</div>
+            <div class="cal-day blocked">21</div>
+            <div class="cal-day today">22</div>
+
+            <!-- Sem 5 - disponibles (>48h) -->
+            <div class="cal-day blocked">23</div>
+            <div class="cal-day blocked">24</div>
+            <div class="cal-day available has-cita">25</div>
+            <div class="cal-day available selected">26</div>
+            <div class="cal-day available">27</div>
+            <div class="cal-day available">28</div>
+            <div class="cal-day blocked">—</div>
+          </div>
+        </div>
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-box" style="background:var(--cream); border:1px solid var(--petal)"></div> Disponible</div>
+          <div class="legend-item"><div class="legend-box" style="background:#f0e8f0; border:1px solid var(--blush)"></div> Con cita</div>
+          <div class="legend-item"><div class="legend-box" style="background:#f5e8e8;"></div> No disponible</div>
+          <div class="legend-item"><div class="legend-box" style="background:var(--crimson);"></div> Seleccionado</div>
+        </div>
+      </div>
+
+      <!-- Panel de agendado -->
+      <div class="side-panel">
+
+        <!-- Hora -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">Selecciona un horario</div>
+            <div class="panel-sub">Miércoles 26 de febrero</div>
+          </div>
+          <div class="panel-body">
+            <div class="time-grid">
+              <div class="time-slot ocupado">10:00</div>
+              <div class="time-slot ocupado">10:30</div>
+              <div class="time-slot">11:00</div>
+              <div class="time-slot">11:30</div>
+              <div class="time-slot selected">12:00</div>
+              <div class="time-slot">12:30</div>
+              <div class="time-slot ocupado">13:00</div>
+              <div class="time-slot">14:00</div>
+              <div class="time-slot">14:30</div>
+              <div class="time-slot">15:00</div>
+              <div class="time-slot">15:30</div>
+              <div class="time-slot">16:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicio -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">Elige un servicio</div>
+          </div>
+          <div class="panel-body">
+            <div class="servicio-list">
+              <label class="servicio-option selected">
+                <input type="radio" name="servicio" checked>
+                <div>
+                  <div class="so-name">Uñas acrílicas</div>
+                  <div class="so-info">⏱ 90 min</div>
+                </div>
+                <span class="so-precio">$350</span>
+              </label>
+              <label class="servicio-option">
+                <input type="radio" name="servicio">
+                <div>
+                  <div class="so-name">Gel semipermanente</div>
+                  <div class="so-info">⏱ 60 min</div>
+                </div>
+                <span class="so-precio">$250</span>
+              </label>
+              <label class="servicio-option">
+                <input type="radio" name="servicio">
+                <div>
+                  <div class="so-name">Nail art</div>
+                  <div class="so-info">⏱ 45 min</div>
+                </div>
+                <span class="so-precio">$150</span>
+              </label>
+              <label class="servicio-option">
+                <input type="radio" name="servicio">
+                <div>
+                  <div class="so-name">Manicure clásico</div>
+                  <div class="so-info">⏱ 40 min</div>
+                </div>
+                <span class="so-precio">$120</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">Resumen</div>
+          </div>
+          <div class="panel-body">
+            <div class="resumen">
+              <div class="resumen-row"><span>Fecha</span><span>Mié 26 feb 2026</span></div>
+              <div class="resumen-row"><span>Hora</span><span>12:00 pm</span></div>
+              <div class="resumen-row"><span>Servicio</span><span>Uñas acrílicas</span></div>
+              <div class="resumen-row"><span>Duración</span><span>90 min</span></div>
+              <div class="resumen-row total"><span>Total estimado</span><span>$350</span></div>
+            </div>
+
+            <!-- ANTICIPO -->
+            <div class="anticipo-box">
+              <div class="anticipo-header">
+                <span class="anticipo-label">Anticipo requerido (30%)</span>
+                <span class="anticipo-monto-top">$105 MXN</span>
+              </div>
+              <div class="anticipo-barra-wrap">
+                <div class="anticipo-barra"></div>
+              </div>
+              <div class="anticipo-detalle">
+                <span class="anticipo-sub">Se paga al confirmar la cita</span>
+                <span class="anticipo-resto">Resta en sucursal: <strong>$245 MXN</strong></span>
+              </div>
+            </div>
+
+            <!-- Método de pago -->
+            <div class="pago-label">Método de pago del anticipo</div>
+            <div class="pago-opciones">
+              <label class="pago-opcion active" onclick="selectPago(this)">
+                <input type="radio" name="pago" checked>
+                <span class="pago-icon">💳</span>
+                <span class="pago-nombre">Tarjeta</span>
+              </label>
+              <label class="pago-opcion" onclick="selectPago(this)">
+                <input type="radio" name="pago">
+                <span class="pago-icon">🏦</span>
+                <span class="pago-nombre">Transferencia</span>
+              </label>
+              <label class="pago-opcion" onclick="selectPago(this)">
+                <input type="radio" name="pago">
+                <span class="pago-icon">💸</span>
+                <span class="pago-nombre">Efectivo*</span>
+              </label>
+            </div>
+            <p class="pago-nota">*Efectivo solo disponible presencialmente antes de la cita.</p>
+
+            <button class="btn-agendar">Solicitar cita y pagar anticipo</button>
+            <p class="nota-48">Tu cita quedará en estado <strong>Pendiente</strong> hasta que el administrador la apruebe.</p>
+
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+<!-- JavaScript para interacciones del calendario -->
+<script>
+  // Funciones para seleccionar elementos (opcional)
+  document.querySelectorAll('.cal-day.available').forEach(day => {
+    day.addEventListener('click', function() {
+      document.querySelectorAll('.cal-day.available').forEach(d => d.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  document.querySelectorAll('.time-slot:not(.ocupado)').forEach(slot => {
+    slot.addEventListener('click', function() {
+      document.querySelectorAll('.time-slot:not(.ocupado)').forEach(t => t.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  document.querySelectorAll('.servicio-option').forEach(option => {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.servicio-option').forEach(s => s.classList.remove('selected'));
+      this.classList.add('selected');
+      this.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+  function selectPago(el) {
+    document.querySelectorAll(".pago-opcion").forEach(p => p.classList.remove("active"));
+    el.classList.add("active");
+    el.querySelector("input").checked = true;
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Mi Perfil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Chapi's Nails</div>
+      <div class="brand-sub">Salón de uñas</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">MENÚ</div>
+    <a class="nav-link" href="../dashboard/cliente-dashboard.html"><span class="ic">🏠</span> Inicio</a>
+    <a class="nav-link" href="../calendario/cliente-calendario.html"><span class="ic">📅</span> Calendario</a>
+    <a class="nav-link active" href="../perfil/cliente-perfil.html"><span class="ic">👤</span> Mi perfil</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">L</div>
+    <div class="user-info">
+      <div class="name">Lucía Mendoza</div>
+      <div class="role">Cliente</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Mi perfil</span>
+    <div class="topbar-right">
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="main-tabs">
+      <div class="main-tab active" onclick="showMain('perfil', this)">Perfil</div>
+      <div class="main-tab" onclick="showMain('citas', this)">Mis citas</div>
+    </div>
+
+    <div class="section active" id="sec-perfil">
+      <div class="perfil-layout">
+        <div class="perfil-card">
+          <div class="perfil-header">
+            <div class="perfil-avatar">L</div>
+            <div class="perfil-nombre">Lucía Mendoza</div>
+            <div class="perfil-rol">Cliente</div>
+          </div>
+          <div class="perfil-body">
+            <div class="perfil-field">
+              <label>Usuario</label>
+              <p>@lucia.mendoza</p>
+            </div>
+            <div class="perfil-field">
+              <label>Correo</label>
+              <p>lucia@email.com</p>
+            </div>
+            <div class="perfil-field">
+              <label>Miembro desde</label>
+              <p>Enero 2025</p>
+            </div>
+            <div class="perfil-field">
+              <label>Citas completadas</label>
+              <p>8 citas</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="datos-card">
+          <div class="datos-title">Información personal</div>
+          <div class="datos-grid">
+            <div class="datos-field">
+              <label>Nombre(s)</label>
+              <input type="text" value="Lucía" />
+            </div>
+            <div class="datos-field">
+              <label>Apellidos</label>
+              <input type="text" value="Mendoza García" />
+            </div>
+            <div class="datos-field">
+              <label>Correo electrónico</label>
+              <input type="email" value="lucia@email.com" />
+            </div>
+            <div class="datos-field">
+              <label>Fecha de nacimiento</label>
+              <input type="date" value="1998-06-14" />
+            </div>
+            <div class="datos-field">
+              <label>Teléfono</label>
+              <input type="tel" value="81 1234 5678" />
+            </div>
+            <div class="datos-field">
+              <label>Contraseña</label>
+              <input type="password" value="••••••••" />
+            </div>
+          </div>
+          <button class="btn-save">Editar perfil</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-citas">
+
+      <div class="citas-tabs">
+        <button class="cita-tab-btn active" onclick="showCitas('pendientes', this)">Pendientes <span class="count">2</span></button>
+        <button class="cita-tab-btn" onclick="showCitas('programadas', this)">Programadas <span class="count">1</span></button>
+        <button class="cita-tab-btn" onclick="showCitas('completadas', this)">Completadas <span class="count">5</span></button>
+        <button class="cita-tab-btn" onclick="showCitas('canceladas', this)">Canceladas <span class="count">1</span></button>
+        <button class="cita-tab-btn" onclick="showCitas('rechazadas', this)">Rechazadas <span class="count">1</span></button>
+      </div>
+
+      <div class="cita-panel active" id="panel-pendientes">
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">26</div>
+            <div class="cita-mes">Feb</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Uñas acrílicas</div>
+            <div class="cita-details">
+              <span>⏰ 12:00 pm</span>
+              <span>⏱ 90 min</span>
+              <span>💰 $350</span>
+            </div>
+            <div class="cita-empleada">Empleada aún por asignar</div>
+            <span class="badge badge-pendiente">⏳ Pendiente de aprobación</span>
+          </div>
+        </div>
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">28</div>
+            <div class="cita-mes">Feb</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Nail art</div>
+            <div class="cita-details">
+              <span>⏰ 3:00 pm</span>
+              <span>⏱ 45 min</span>
+              <span>💰 $150</span>
+            </div>
+            <div class="cita-empleada">Empleada aún por asignar</div>
+            <span class="badge badge-pendiente">⏳ Pendiente de aprobación</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cita-panel" id="panel-programadas">
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">5</div>
+            <div class="cita-mes">Mar</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Gel semipermanente</div>
+            <div class="cita-details">
+              <span>⏰ 11:00 am</span>
+              <span>⏱ 60 min</span>
+              <span>💰 $250</span>
+            </div>
+            <div class="cita-empleada">👩 Paola Ríos</div>
+            <span class="badge badge-programada">✅ Programada</span>
+          </div>
+          <div class="cita-actions">
+            <button class="btn-cancelar">Cancelar cita</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cita-panel" id="panel-completadas">
+        <div class="cita-card cita-card-column">
+          <div class="cita-header-row">
+            <div class="cita-fecha-box">
+              <div class="cita-dia">15</div>
+              <div class="cita-mes">Feb</div>
+            </div>
+            <div class="cita-info">
+              <div class="cita-servicio">Manicure clásico</div>
+              <div class="cita-details">
+                <span>⏰ 10:00 am</span>
+                <span>⏱ 40 min</span>
+                <span>💰 $120</span>
+              </div>
+              <div class="cita-empleada">👩 Paola Ríos</div>
+              <span class="badge badge-completada">✔ Completada</span>
+            </div>
+          </div>
+          <div class="rating-section">
+            <div class="rating-label">¿Cómo fue tu experiencia? Deja una calificación:</div>
+            <div class="stars">
+              <span class="star filled" onclick="rate(this,1)">★</span>
+              <span class="star filled" onclick="rate(this,2)">★</span>
+              <span class="star filled" onclick="rate(this,3)">★</span>
+              <span class="star" onclick="rate(this,4)">★</span>
+              <span class="star" onclick="rate(this,5)">★</span>
+            </div>
+            <textarea class="rating-comment" rows="2" placeholder="Escribe un comentario (opcional)..."></textarea>
+            <br><button class="btn-review">Enviar reseña</button>
+          </div>
+        </div>
+
+        <div class="cita-card cita-card-column">
+          <div class="cita-header-row">
+            <div class="cita-fecha-box">
+              <div class="cita-dia">8</div>
+              <div class="cita-mes">Feb</div>
+            </div>
+            <div class="cita-info">
+              <div class="cita-servicio">Uñas acrílicas</div>
+              <div class="cita-details">
+                <span>⏰ 12:00 pm</span>
+                <span>⏱ 90 min</span>
+                <span>💰 $350</span>
+              </div>
+              <div class="cita-empleada">👩 Paola Ríos</div>
+              <span class="badge badge-completada">✔ Completada</span>
+            </div>
+          </div>
+          <div class="review-done">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">"Excelente servicio, quedé muy satisfecha con el resultado. Muy recomendada."</div>
+          </div>
+        </div>
+
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">20</div>
+            <div class="cita-mes">Ene</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Nail art</div>
+            <div class="cita-details"><span>⏰ 2:30 pm</span><span>⏱ 45 min</span><span>💰 $150</span></div>
+            <div class="cita-empleada">👩 Paola Ríos</div>
+            <span class="badge badge-completada">✔ Completada</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cita-panel" id="panel-canceladas">
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">10</div>
+            <div class="cita-mes">Ene</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Gel semipermanente</div>
+            <div class="cita-details"><span>⏰ 11:00 am</span><span>⏱ 60 min</span><span>💰 $250</span></div>
+            <div class="cita-empleada">—</div>
+            <span class="badge badge-cancelada">✕ Cancelada por cliente</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cita-panel" id="panel-rechazadas">
+        <div class="cita-card">
+          <div class="cita-fecha-box">
+            <div class="cita-dia">3</div>
+            <div class="cita-mes">Ene</div>
+          </div>
+          <div class="cita-info">
+            <div class="cita-servicio">Manicure clásico</div>
+            <div class="cita-details"><span>⏰ 3:00 pm</span><span>⏱ 40 min</span><span>💰 $120</span></div>
+            <div class="cita-empleada">—</div>
+            <span class="badge badge-rechazada">✕ Rechazada por administrador</span>
+            <div style="font-size: 12px; color: #8a5070; margin-top: 6px;">Motivo: Sin disponibilidad en ese horario.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+<script>
+  function showMain(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function showCitas(id, el) {
+    document.querySelectorAll('.cita-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.cita-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function rate(el, n) {
+    const stars = el.parentElement.querySelectorAll('.star');
+    stars.forEach((s, i) => {
+      s.classList.toggle('filled', i < n);
+    });
+  }
+</script>
+
+</body>
+</html>

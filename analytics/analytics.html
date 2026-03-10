@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Match — Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="analytics.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-name">Velvet Match</div>
+      <div class="brand-sub">Super Admin</div>
+    </div>
+    <button class="close-sidebar" id="closeSidebar">✕</button>
+  </div>
+  
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <a class="nav-link" href="../dashboard/dashboard.html"><span class="ic">🏠</span> Dashboard</a>
+    <div class="nav-label" style="margin-top:6px">Gestión</div>
+    <a class="nav-link" href="../negocios/negocios.html"><span class="ic">🏪</span> Negocios</a>
+    <a class="nav-link" href="../usuarios/usuarios.html"><span class="ic">👥</span> Usuarios</a>
+    <a class="nav-link active" href="../analytics/analytics.html"><span class="ic">📊</span> Analytics</a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="user-dot">D</div>
+    <div class="user-info">
+      <div class="name">Dev Admin</div>
+      <div class="role">Super Administrador</div>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <span class="topbar-title">Analytics</span>
+    <div class="topbar-right">
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="selector-row">
+      <div class="selector-group">
+        <label>Negocio:</label>
+        <select>
+          <option>Todos los negocios</option>
+          <option>Chapi's Nails</option>
+          <option>Barbería Regia</option>
+          <option>Estética Lumière</option>
+          <option>Glam Studio</option>
+          <option>Beauty Corner</option>
+        </select>
+      </div>
+      <div class="selector-group">
+        <label>Año:</label>
+        <select>
+          <option>2025</option>
+          <option>2024</option>
+        </select>
+      </div>
+      <button class="btn-export">⬇ Exportar a Excel</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Ventas totales</div>
+        <div class="kpi-value">$84k</div>
+        <div class="kpi-trend">▲ 12% vs año anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Citas agendadas</div>
+        <div class="kpi-value">1,082</div>
+        <div class="kpi-trend">▲ 8% este mes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Cancelaciones</div>
+        <div class="kpi-value">97</div>
+        <div class="kpi-trend down">▼ 3% vs mes anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Empleados activos</div>
+        <div class="kpi-value">34</div>
+        <div class="kpi-trend">▲ 2 nuevos este mes</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Citas por mes</div>
+        <div class="chart-sub">Agendadas vs Canceladas · 2025</div>
+        <div class="bar-chart-container">
+          <div class="bar-chart">
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:75px"></div>
+                <div class="bar bar-b" style="height:14px"></div>
+              </div>
+              <div class="bar-lbl">Ene</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:90px"></div>
+                <div class="bar bar-b" style="height:18px"></div>
+              </div>
+              <div class="bar-lbl">Feb</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:105px"></div>
+                <div class="bar bar-b" style="height:22px"></div>
+              </div>
+              <div class="bar-lbl">Mar</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:85px"></div>
+                <div class="bar bar-b" style="height:10px"></div>
+              </div>
+              <div class="bar-lbl">Abr</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:125px"></div>
+                <div class="bar bar-b" style="height:24px"></div>
+              </div>
+              <div class="bar-lbl">May</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:115px"></div>
+                <div class="bar bar-b" style="height:16px"></div>
+              </div>
+              <div class="bar-lbl">Jun</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:140px"></div>
+                <div class="bar bar-b" style="height:20px"></div>
+              </div>
+              <div class="bar-lbl">Jul</div>
+            </div>
+            <div class="bar-col">
+              <div class="bars">
+                <div class="bar bar-a" style="height:148px"></div>
+                <div class="bar bar-b" style="height:12px"></div>
+              </div>
+              <div class="bar-lbl">Ago</div>
+            </div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:var(--plum)"></span>Agendadas</span>
+          <span><span class="legend-dot" style="background:var(--blush)"></span>Canceladas</span>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Tipos de negocio</div>
+        <div class="chart-sub">Distribución de los 38 registrados</div>
+        <div class="donut-wrap">
+          <div class="donut-svg-container">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#f3e4ed" stroke-width="20"/>
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#7F055F" stroke-width="20" stroke-dasharray="111 216" stroke-dashoffset="82" />
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#45062E" stroke-width="20" stroke-dasharray="79 248" stroke-dashoffset="-29" />
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#E5A4CB" stroke-width="20" stroke-dasharray="85 242" stroke-dashoffset="-108" />
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#EBD2BE" stroke-width="20" stroke-dasharray="52 275" stroke-dashoffset="-193" />
+              <text x="65" y="61" text-anchor="middle" font-size="20" font-weight="700" fill="#45062E" font-family="Playfair Display,serif">38</text>
+              <text x="65" y="75" text-anchor="middle" font-size="9" fill="#8a5070" font-family="DM Sans,sans-serif">negocios</text>
+            </svg>
+          </div>
+          <div class="donut-legend">
+            <div class="dl-item"><div class="dl-left"><span class="dl-dot" style="background:#7F055F"></span>Salón de uñas</div><span class="dl-pct">34%</span></div>
+            <div class="dl-item"><div class="dl-left"><span class="dl-dot" style="background:#45062E"></span>Barbería</div><span class="dl-pct">24%</span></div>
+            <div class="dl-item"><div class="dl-left"><span class="dl-dot" style="background:#E5A4CB"></span>Estética</div><span class="dl-pct">26%</span></div>
+            <div class="dl-item"><div class="dl-left"><span class="dl-dot" style="background:#EBD2BE"></span>Salón de belleza</div><span class="dl-pct">16%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Resumen por negocio</span>
+        <button class="btn-sm">⬇ Exportar tabla</button>
+      </div>
+      
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Negocio</th>
+              <th>Tipo</th>
+              <th>Citas</th>
+              <th>Cancelaciones</th>
+              <th>Ventas est.</th>
+              <th>Empleados</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💅</div><div class="biz-name">Chapi's Nails</div></div></td>
+              <td><span class="badge badge-type">Salón de uñas</span></td>
+              <td>142</td><td>12</td><td><strong>$18,400</strong></td><td>4</td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">✂️</div><div class="biz-name">Barbería Regia</div></div></td>
+              <td><span class="badge badge-type">Barbería</span></td>
+              <td>89</td><td>7</td><td><strong>$11,250</strong></td><td>3</td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💆</div><div class="biz-name">Estética Lumière</div></div></td>
+              <td><span class="badge badge-type">Estética</span></td>
+              <td>214</td><td>18</td><td><strong>$32,100</strong></td><td>6</td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">💄</div><div class="biz-name">Beauty Corner</div></div></td>
+              <td><span class="badge badge-type">Estética</span></td>
+              <td>176</td><td>14</td><td><strong>$22,800</strong></td><td>5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mobile-cards">
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💅</div>
+            <div class="mobile-card-title">Chapi's Nails</div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Salón de uñas</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> 142</div>
+            <div class="mobile-detail-row"><span class="detail-label">Cancelaciones:</span> 12</div>
+            <div class="mobile-detail-row"><span class="detail-label">Ventas:</span> <strong>$18,400</strong></div>
+            <div class="mobile-detail-row"><span class="detail-label">Empleados:</span> 4</div>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">✂️</div>
+            <div class="mobile-card-title">Barbería Regia</div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Barbería</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> 89</div>
+            <div class="mobile-detail-row"><span class="detail-label">Cancelaciones:</span> 7</div>
+            <div class="mobile-detail-row"><span class="detail-label">Ventas:</span> <strong>$11,250</strong></div>
+            <div class="mobile-detail-row"><span class="detail-label">Empleados:</span> 3</div>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💆</div>
+            <div class="mobile-card-title">Estética Lumière</div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Estética</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> 214</div>
+            <div class="mobile-detail-row"><span class="detail-label">Cancelaciones:</span> 18</div>
+            <div class="mobile-detail-row"><span class="detail-label">Ventas:</span> <strong>$32,100</strong></div>
+            <div class="mobile-detail-row"><span class="detail-label">Empleados:</span> 6</div>
+          </div>
+        </div>
+
+        <div class="mobile-card">
+          <div class="mobile-card-header">
+            <div class="biz-avatar">💄</div>
+            <div class="mobile-card-title">Beauty Corner</div>
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-detail-row"><span class="detail-label">Tipo:</span> <span class="badge badge-type">Estética</span></div>
+            <div class="mobile-detail-row"><span class="detail-label">Citas:</span> 176</div>
+            <div class="mobile-detail-row"><span class="detail-label">Cancelaciones:</span> 14</div>
+            <div class="mobile-detail-row"><span class="detail-label">Ventas:</span> <strong>$22,800</strong></div>
+            <div class="mobile-detail-row"><span class="detail-label">Empleados:</span> 5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-footer">
+        <span>Mostrando 4 de 38 negocios</span>
+        <div class="pagination">
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const closeSidebar = document.getElementById('closeSidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSidebarFunc);
+  overlay.addEventListener('click', closeSidebarFunc);
+</script>
+
+</body>
+</html>

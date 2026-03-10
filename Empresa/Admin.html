@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velvet Match - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="Admin.css">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand d-flex align-items-center text-white">
+                <i class="fas fa-gem fa-lg me-2 text-warning" style="color: var(--secondary-color) !important;"></i>
+                <div>
+                    <div class="brand-name">Velvet Admin</div>
+                    <div class="brand-sub" style="color: var(--secondary-color);">Panel de Negocio</div>
+                </div>
+            </div>
+            <button class="close-sidebar" id="closeSidebar">✕</button>
+        </div>
+        
+        <nav class="nav nav-tabs flex-column border-0 custom-sidebar-nav" role="tablist">
+            <div class="nav-label">Módulos</div>
+            
+            <button class="nav-link active text-start" id="gestion-tab" data-bs-toggle="tab" data-bs-target="#gestion" type="button" role="tab" aria-controls="gestion" aria-selected="true">
+                <span class="ic"><i class="fas fa-tasks"></i></span> Gestión
+            </button>
+            
+            <button class="nav-link text-start" id="informacion-tab" data-bs-toggle="tab" data-bs-target="#informacion" type="button" role="tab" aria-controls="informacion" aria-selected="false">
+                <span class="ic"><i class="fas fa-calendar-alt"></i></span> Agenda y Equipo
+            </button>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-dot text-primary-custom bg-white">I</div>
+            <div class="user-info text-white">
+                <div class="name">Isabella M.</div>
+                <div class="role text-white-50">Propietaria</div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main">
+        <header class="topbar shadow-sm">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <span class="topbar-title font-playfair fw-bold text-primary-custom d-none d-md-block">Dashboard General</span>
+            <div class="topbar-right ms-auto d-flex align-items-center gap-3">
+                <div class="text-end d-none d-sm-block">
+                    <h6 class="m-0 fw-bold text-dark font-dm small">Glamour Haven</h6>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=Isabella+M&background=random" class="rounded-circle border border-2 shadow-sm" width="40" height="40">
+            </div>
+        </header>
+
+        <div class="content container-fluid py-4 px-4 px-xl-5">
+            
+            <div class="tab-content" id="adminTabsContent">
+                
+                <div class="tab-pane fade show active animate__animated animate__fadeIn" id="gestion" role="tabpanel" aria-labelledby="gestion-tab">
+                    
+                    <div class="admin-banner shadow-sm mb-4 text-white">
+                        <div class="admin-banner-left">
+                            <div class="detail-avatar bg-white text-primary-custom shadow-lg" style="width: 70px; height: 70px; font-size: 28px;">I</div>
+                            <div>
+                                <h3 class="font-playfair mb-1 fs-3 fw-bold text-white">Isabella Martínez</h3>
+                                <div class="d-flex flex-wrap gap-2 align-items-center font-dm mt-2">
+                                    <span class="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill"><i class="fas fa-key text-warning me-1"></i> Administrador</span>
+                                    <span class="text-white-50 small"><i class="fas fa-store me-1"></i> Glamour Haven (Estética)</span>
+                                    <span class="text-white font-monospace small bg-dark bg-opacity-25 px-2 py-1 rounded">/estetica/glamour-haven</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-banner-stats mt-4 mt-md-0 ps-md-4 border-start-md border-light border-opacity-25 font-dm">
+                            <div class="px-4">
+                                <h3 class="fw-bold text-white mb-0">142</h3>
+                                <small class="text-white-50 text-uppercase" style="font-size: 11px; letter-spacing: 1px;">Citas</small>
+                            </div>
+                            <div class="px-4 border-start border-light border-opacity-25">
+                                <h3 class="fw-bold mb-0" style="color: var(--secondary-color);">$15k</h3>
+                                <small class="text-white-50 text-uppercase" style="font-size: 11px; letter-spacing: 1px;">Ingresos</small>
+                            </div>
+                            <div class="px-4 border-start border-light border-opacity-25">
+                                <h3 class="fw-bold text-white mb-0">8</h3>
+                                <small class="text-white-50 text-uppercase" style="font-size: 11px; letter-spacing: 1px;">Personal</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-4 font-dm align-items-center">
+                        <span class="text-muted small fw-bold text-uppercase me-2" style="letter-spacing: 1px;">Acciones Rápidas:</span>
+                        
+                        <button class="action-chip" data-bs-toggle="modal" data-bs-target="#newServiceModal">
+                            <i class="fas fa-plus-circle"></i> Nuevo Servicio
+                        </button>
+                        <button class="action-chip" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                            <i class="fas fa-camera"></i> Crear Post
+                        </button>
+                        <button class="action-chip" data-bs-toggle="modal" data-bs-target="#manualApptModal">
+                            <i class="fas fa-phone-alt"></i> Cita Manual
+                        </button>
+                        
+                        <button class="action-chip danger ms-md-auto mt-2 mt-md-0 px-4" data-bs-toggle="modal" data-bs-target="#blockDateModal">
+                            <i class="fas fa-ban me-2"></i> Bloquear Fecha Especial
+                        </button>
+                    </div>
+
+                    <div class="card detail-card shadow-sm border-0 mb-5">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center px-4">
+                            <div>
+                                <h4 class="font-playfair text-primary-custom m-0">Solicitudes Pendientes</h4>
+                                <p class="font-dm small text-muted m-0">Citas web esperando asignación de empleado</p>
+                            </div>
+                            <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm font-dm">6 Nuevas</span>
+                        </div>
+                        
+                        <div class="table-responsive font-dm">
+                            <table class="table custom-data-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Servicio Solicitado</th>
+                                        <th>Fecha y Hora</th>
+                                        <th>Anticipo (15%)</th>
+                                        <th style="min-width: 200px;">Asignar Profesional</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">M</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">María Pérez</div>
+                                                    <div class="small text-muted">Cliente Recurrente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Corte & Estilo</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Jue 22 Feb</div><div class="small text-muted">10:00 AM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$52.50</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="1">Elena Torres</option>
+                                                <option value="2">Carlos Ruiz</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">C</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">Carla Ruiz</div>
+                                                    <div class="small text-muted">Nuevo Cliente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Manicura Gelish</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Jue 22 Feb</div><div class="small text-muted">11:30 AM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$67.50</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="3">Ana Méndez</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">J</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">Juan Hernández</div>
+                                                    <div class="small text-muted">Nuevo Cliente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Barba Clásica</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Vie 23 Feb</div><div class="small text-muted">04:00 PM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$45.00</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="2">Carlos Ruiz</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">S</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">Sofía Mendoza</div>
+                                                    <div class="small text-muted">Cliente Recurrente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Maquillaje Social</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Sáb 24 Feb</div><div class="small text-muted">01:00 PM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$120.00</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="1">Elena Torres</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">A</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">Andrea Garza</div>
+                                                    <div class="small text-muted">Nuevo Cliente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Pedicure Spa</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Sáb 24 Feb</div><div class="small text-muted">03:30 PM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$75.00</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="3">Ana Méndez</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-sm bg-light text-primary-custom fw-bold rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">V</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">Valeria Santos</div>
+                                                    <div class="small text-muted">Cliente Recurrente</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">Tinte Completo</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">Lun 26 Feb</div><div class="small text-muted">11:00 AM</div>
+                                        </td>
+                                        <td><span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-dollar-sign me-1"></i>$150.00</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm border border-secondary-subtle shadow-none">
+                                                <option selected disabled>Seleccionar...</option>
+                                                <option value="1">Elena Torres</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i>Aceptar</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div> <div class="tab-pane fade animate__animated animate__fadeIn" id="informacion" role="tabpanel" aria-labelledby="informacion-tab">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card detail-card shadow-sm border-0 mb-5">
+                                <div class="card-header main-header-bg text-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="font-playfair text-white mb-0">Agenda Semanal</h3>
+                                        <p class="font-dm text-white-50 mb-0 small">Visualización completa de citas y empleados asignados</p>
+                                    </div>
+                                    <div class="d-flex gap-2 font-dm">
+                                        <button class="btn btn-light btn-sm rounded-circle"><i class="fas fa-chevron-left"></i></button>
+                                        <div class="bg-white text-dark px-4 py-2 rounded-pill shadow-sm fw-bold">
+                                            <i class="fas fa-calendar me-2"></i>Febrero 2024
+                                        </div>
+                                        <button class="btn btn-light btn-sm rounded-circle"><i class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body p-0 font-dm">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered text-center align-middle mb-0 custom-calendar w-100">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="py-3 text-uppercase small text-muted" style="width: 80px;">Hora</th>
+                                                    <th class="py-3">Dom 18</th>
+                                                    <th class="py-3">Lun 19</th>
+                                                    <th class="py-3">Mar 20</th>
+                                                    <th class="py-3">Mié 21</th>
+                                                    <th class="py-3">Jue 22</th>
+                                                    <th class="py-3">Vie 23</th>
+                                                    <th class="py-3">Sáb 24</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">09:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td> 
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Corte</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-blue text-blue rounded-3 p-2 shadow-sm text-start border-start border-4 border-blue">
+                                                            <div class="fw-bold small">Uñas</div>
+                                                            <div class="xsmall text-muted">Ana M.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-gold text-dark rounded-3 p-2 shadow-sm text-start border-start border-4 border-warning">
+                                                            <div class="fw-bold small">Boda</div>
+                                                            <div class="xsmall text-muted">Todos</div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">10:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-gold text-dark rounded-3 p-2 shadow-sm text-start border-start border-4 border-warning">
+                                                            <div class="fw-bold small">Tinte</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Barba</div>
+                                                            <div class="xsmall text-muted">Carlos</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">11:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Corte</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">12:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-blue text-blue rounded-3 p-2 shadow-sm text-start border-start border-4 border-blue">
+                                                            <div class="fw-bold small">Manicura</div>
+                                                            <div class="xsmall text-muted">Ana M.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-gold text-dark rounded-3 p-2 shadow-sm text-start border-start border-4 border-warning">
+                                                            <div class="fw-bold small">Retoque</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">13:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td colspan="6" class="bg-light text-muted small fw-bold" style="vertical-align: middle; background-image: none;">HORA DE COMIDA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">14:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Barba</div>
+                                                            <div class="xsmall text-muted">Carlos</div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-blue text-blue rounded-3 p-2 shadow-sm text-start border-start border-4 border-blue">
+                                                            <div class="fw-bold small">Acrílico</div>
+                                                            <div class="xsmall text-muted">Ana M.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">15:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-gold text-dark rounded-3 p-2 shadow-sm text-start border-start border-4 border-warning">
+                                                            <div class="fw-bold small">Tinte Comp.</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Corte</div>
+                                                            <div class="xsmall text-muted">Carlos</div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">16:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-blue text-blue rounded-3 p-2 shadow-sm text-start border-start border-4 border-blue">
+                                                            <div class="fw-bold small">Retiro Gel</div>
+                                                            <div class="xsmall text-muted">Ana M.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">17:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-purple text-purple rounded-3 p-2 shadow-sm text-start border-start border-4 border-purple">
+                                                            <div class="fw-bold small">Corte</div>
+                                                            <div class="xsmall text-muted">Elena T.</div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-blue text-blue rounded-3 p-2 shadow-sm text-start border-start border-4 border-blue">
+                                                            <div class="fw-bold small">Maquillaje</div>
+                                                            <div class="xsmall text-muted">Sofia</div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted fw-bold bg-light">18:00</td>
+                                                    <td class="bg-light-stripe text-muted small">CERRADO</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="bg-light-stripe text-muted small">DESC.</td>
+                                                    <td></td>
+                                                    <td class="p-2">
+                                                        <div class="appt-pill bg-soft-gold text-dark rounded-3 p-2 shadow-sm text-start border-start border-4 border-warning">
+                                                            <div class="fw-bold small">Corte</div>
+                                                            <div class="xsmall text-muted">Carlos</div>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-footer bg-white border-top py-4 px-4">
+                                    <h6 class="font-dm text-primary-custom mb-3 text-uppercase small fw-bold">Equipo de Trabajo Activo</h6>
+                                    <div class="d-flex gap-4 overflow-auto pb-2 font-dm">
+                                        <div class="d-flex align-items-center gap-3 pe-4 border-end">
+                                            <img src="https://ui-avatars.com/api/?name=Elena+T&background=random" class="rounded-circle shadow-sm" width="45">
+                                            <div>
+                                                <h6 class="fw-bold m-0 text-dark">Elena Torres</h6>
+                                                <small class="text-muted">Estilista Senior</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3 pe-4 border-end">
+                                            <img src="https://ui-avatars.com/api/?name=Carlos+R&background=random" class="rounded-circle shadow-sm" width="45">
+                                            <div>
+                                                <h6 class="fw-bold m-0 text-dark">Carlos Ruiz</h6>
+                                                <small class="text-muted">Barbero</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="https://ui-avatars.com/api/?name=Ana+M&background=random" class="rounded-circle shadow-sm" width="45">
+                                            <div>
+                                                <h6 class="fw-bold m-0 text-dark">Ana Méndez</h6>
+                                                <small class="text-muted">Manicurista</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> </div> 
+        </div> 
+    </main>
+
+    <div class="modal fade" id="newServiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i>Crear Nuevo Servicio</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Nombre del Servicio</label>
+                            <input type="text" class="form-control form-control-lg bg-light border-0" placeholder="Ej. Depilación Láser">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Precio ($)</label>
+                                <input type="number" class="form-control bg-light border-0" placeholder="0.00">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Duración (min)</label>
+                                <input type="number" class="form-control bg-light border-0" placeholder="30">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Descripción</label>
+                            <textarea class="form-control bg-light border-0" rows="3" placeholder="Detalles del servicio..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Imagen (URL)</label>
+                            <input type="url" class="form-control bg-light border-0" placeholder="https://...">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm">Guardar Servicio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-header bg-info text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold text-white"><i class="fas fa-bullhorn me-2"></i>Publicar Novedad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Título</label>
+                            <input type="text" class="form-control form-control-lg bg-light border-0" placeholder="Ej. ¡Promoción de Verano!">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Contenido</label>
+                            <textarea class="form-control bg-light border-0" rows="4" placeholder="Escribe aquí lo que verán tus clientes..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Multimedia</label>
+                            <div class="border-2 border-dashed border-secondary rounded-3 p-4 text-center bg-light cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt fs-2 text-muted mb-2"></i>
+                                <p class="small text-muted mb-0">Arrastra una imagen o video aquí</p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-info text-white rounded-pill px-4 shadow-sm fw-bold">Publicar Ahora</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="blockDateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-ban me-2"></i>Cerrar Día</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">Nadie podrá agendar citas en este día.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-danger text-uppercase">Fecha a Bloquear</label>
+                        <input type="date" class="form-control bg-light border-0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Motivo del Cierre</label>
+                        <textarea class="form-control bg-light border-0" rows="2" placeholder="Ej. Día Festivo, Mantenimiento, Vacaciones..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill w-100 mb-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger rounded-pill w-100 shadow-sm">Confirmar Bloqueo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="manualApptModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-header bg-success text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-phone-alt me-2"></i>Cita Telefónica</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Nombre del Cliente</label>
+                            <input type="text" class="form-control bg-light border-0" placeholder="Ej. Juan Pérez">
+                        </div>
+                         <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Fecha</label>
+                                <input type="date" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Hora</label>
+                                <input type="time" class="form-control bg-light border-0">
+                            </div>
+                        </div>
+                         <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Servicio</label>
+                            <select class="form-select bg-light border-0">
+                                <option selected>Seleccionar...</option>
+                                <option>Corte</option>
+                                <option>Manicura</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-success rounded-pill w-100 shadow-sm">Agendar Cita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        menuToggle.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        overlay.addEventListener('click', closeSidebarFunc);
+    </script>
+</body>
+</html>
