@@ -332,3 +332,27 @@ a { text-decoration: none; }
     .admin-banner-stats { border-left: none !important; padding-left: 0 !important; width: 100%; justify-content: space-between; }
     .admin-banner-stats > div { border-left: none !important; }
 }
+
+.day-row {
+    transition: background-color 0.2s ease;
+}
+
+.day-row:hover {
+    background-color: rgba(74, 14, 78, 0.02);
+}
+
+.schedule-setup .form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
+
+.schedule-setup .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.schedule-setup .form-control:disabled {
+    background-color: #f1f2f6 !important;
+    opacity: 0.5;
+}
