@@ -95,11 +95,14 @@
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap gap-2 mb-4 font-dm align-items-center">
+                 <div class="d-flex flex-wrap gap-2 mb-4 font-dm align-items-center">
                         <span class="text-muted small fw-bold text-uppercase me-2" style="letter-spacing: 1px;">Acciones Rápidas:</span>
                         
                         <button class="action-chip" data-bs-toggle="modal" data-bs-target="#newServiceModal">
                             <i class="fas fa-plus-circle"></i> Nuevo Servicio
+                        </button>
+                        <button class="action-chip" data-bs-toggle="modal" data-bs-target="#newEmployeeModal">
+                            <i class="fas fa-user-plus"></i> Nuevo Empleado
                         </button>
                         <button class="action-chip" data-bs-toggle="modal" data-bs-target="#newPostModal">
                             <i class="fas fa-camera"></i> Crear Post
@@ -560,14 +563,101 @@
         </div> 
     </main>
 
+<div class="modal fade" id="newEmployeeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header bg-primary text-white border-0 flex-column align-items-start p-4">
+                    <div class="d-flex justify-content-between w-100 mb-3">
+                        <h5 class="modal-title fw-bold" id="empModalTitle"><i class="fas fa-user-plus me-2"></i>Registrar Profesional</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="w-100">
+                        <div class="progress rounded-pill" style="height: 6px; background-color: rgba(255,255,255,0.2);">
+                            <div class="progress-bar bg-white rounded-pill" id="empProgressBar" style="width: 50%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 text-white-50 small fw-bold" style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">
+                            <span id="empStep1-label" class="text-white">1. Perfil y Servicios</span>
+                            <span id="empStep2-label">2. Horario Visual</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-body p-0 font-dm">
+                    <div id="emp-step-1" class="p-4 p-md-5 animate__animated animate__fadeIn">
+                        <h6 class="text-primary-custom fw-bold text-uppercase small mb-4 border-bottom pb-2">Datos de Identidad</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Nombres</label>
+                                <input type="text" class="form-control bg-light border-0" placeholder="Ej. Elena">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Apellidos</label>
+                                <input type="text" class="form-control bg-light border-0" placeholder="Ej. Torres">
+                            </div>
+                        </div>
+                        <h6 class="text-primary-custom fw-bold text-uppercase small mb-4 border-bottom pb-2">Especialidades</h6>
+                        <div class="row px-2">
+                            <div class="col-6 col-md-4 mb-2"><div class="form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label small">Corte</label></div></div>
+                            <div class="col-6 col-md-4 mb-2"><div class="form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label small">Tinte</label></div></div>
+                            <div class="col-6 col-md-4 mb-2"><div class="form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label small">Manicura</label></div></div>
+                        </div>
+                    </div>
+
+                    <div id="emp-step-2" class="p-4 p-md-5 d-none animate__animated animate__fadeInRight">
+                        <div class="mb-5">
+                            <h6 class="text-primary-custom fw-bold text-uppercase small mb-3 text-center">Edición de Jornada (00:00 - 24:00)</h6>
+                            <div class="d-flex mx-auto" style="height: 220px; max-width: 580px;">
+                                <div class="d-flex flex-column justify-content-between text-muted fw-bold pe-2 text-end" style="width: 40px; font-size: 10px; padding-bottom: 26px; padding-top: 4px;">
+                                    <span>24h</span><span>18h</span><span>12h</span><span>06h</span><span>00h</span>
+                                </div>
+                                <div id="vertical-chart" class="d-flex justify-content-between flex-grow-1 h-100 position-relative" style="background: repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(0,0,0,0.04) 24px, rgba(0,0,0,0.04) 25px); border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light rounded-4 p-4 shadow-sm border border-light-subtle max-w-600 mx-auto">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small text-primary-custom">Seleccionar Día</label>
+                                    <select id="daySelector" class="form-select border-secondary-subtle fw-bold" onchange="loadDayData()">
+                                        <option value="0">Lunes</option><option value="1">Martes</option><option value="2">Miércoles</option><option value="3">Jueves</option><option value="4">Viernes</option><option value="5">Sábado</option><option value="6">Domingo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 text-center pb-2">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input cursor-pointer" type="checkbox" id="activeSwitch" onchange="saveDayData()">
+                                        <label class="form-check-label fw-bold small" for="activeSwitch">Activo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-muted">Entrada</label>
+                                    <input type="time" id="timeIn" class="form-control border-0 shadow-sm" onchange="saveDayData()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-muted">Salida</label>
+                                    <input type="time" id="timeOut" class="form-control border-0 shadow-sm" onchange="saveDayData()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button class="btn btn-light rounded-pill px-4 fw-bold d-none" id="empBtnPrev" onclick="changeEmpStep(-1)">Atrás</button>
+                    <button class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold ms-auto" id="empBtnNext" onclick="changeEmpStep(1)">Continuar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="newServiceModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg">
                 <div class="modal-header bg-primary text-white rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i>Crear Nuevo Servicio</h5>
+                    <h5 class="modal-title fw-bold font-playfair"><i class="fas fa-magic me-2"></i>Crear Nuevo Servicio</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 font-dm">
                     <form>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Nombre del Servicio</label>
@@ -594,8 +684,8 @@
                     </form>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm">Guardar Servicio</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">Guardar Servicio</button>
                 </div>
             </div>
         </div>
@@ -605,10 +695,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg">
                 <div class="modal-header bg-info text-white rounded-top-4">
-                    <h5 class="modal-title fw-bold text-white"><i class="fas fa-bullhorn me-2"></i>Publicar Novedad</h5>
+                    <h5 class="modal-title fw-bold font-playfair"><i class="fas fa-bullhorn me-2"></i>Publicar Novedad</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 font-dm">
                     <form>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Título</label>
@@ -620,7 +710,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Multimedia</label>
-                            <div class="border-2 border-dashed border-secondary rounded-3 p-4 text-center bg-light cursor-pointer">
+                            <div class="border-2 border-dashed border-secondary-subtle rounded-3 p-4 text-center bg-light cursor-pointer">
                                 <i class="fas fa-cloud-upload-alt fs-2 text-muted mb-2"></i>
                                 <p class="small text-muted mb-0">Arrastra una imagen o video aquí</p>
                             </div>
@@ -628,49 +718,21 @@
                     </form>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-info text-white rounded-pill px-4 shadow-sm fw-bold">Publicar Ahora</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="blockDateModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg">
-                <div class="modal-header bg-danger text-white rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-ban me-2"></i>Cerrar Día</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <p class="small text-muted mb-3">Nadie podrá agendar citas en este día.</p>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-danger text-uppercase">Fecha a Bloquear</label>
-                        <input type="date" class="form-control bg-light border-0">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Motivo del Cierre</label>
-                        <textarea class="form-control bg-light border-0" rows="2" placeholder="Ej. Día Festivo, Mantenimiento, Vacaciones..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill w-100 mb-2" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger rounded-pill w-100 shadow-sm">Confirmar Bloqueo</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-     <div class="modal fade" id="manualApptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="manualApptModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg">
                 <div class="modal-header bg-success text-white rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-phone-alt me-2"></i>Cita Telefónica</h5>
+                    <h5 class="modal-title fw-bold font-playfair"><i class="fas fa-phone-alt me-2"></i>Cita Telefónica</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 font-dm">
                     <form>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Nombre del Cliente</label>
@@ -697,11 +759,41 @@
                     </form>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-success rounded-pill w-100 shadow-sm">Agendar Cita</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">Agendar Cita</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="blockDateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold font-playfair"><i class="fas fa-ban me-2"></i>Cerrar Día</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 font-dm">
+                    <p class="small text-muted mb-3">Nadie podrá agendar citas en este día.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-danger text-uppercase">Fecha a Bloquear</label>
+                        <input type="date" class="form-control bg-light border-0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Motivo del Cierre</label>
+                        <textarea class="form-control bg-light border-0" rows="2" placeholder="Ej. Día Festivo, Mantenimiento, Vacaciones..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill w-100 mb-2 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger rounded-pill w-100 shadow-sm fw-bold">Confirmar Bloqueo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -725,6 +817,95 @@
         menuToggle.addEventListener('click', openSidebar);
         closeSidebar.addEventListener('click', closeSidebarFunc);
         overlay.addEventListener('click', closeSidebarFunc);
+
+        // --- Lógica del Empleado ---
+        const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        let currentStep = 1;
+        let selectedDayIndex = 0;
+        
+        let employeeData = {
+            horario: days.map(d => ({ 
+                dia: d, 
+                activo: (d !== 'Sábado' && d !== 'Domingo'),
+                entrada: '09:00', 
+                salida: '18:00' 
+            }))
+        };
+
+        function loadDayData() {
+            selectedDayIndex = parseInt(document.getElementById('daySelector').value);
+            const dayData = employeeData.horario[selectedDayIndex];
+            document.getElementById('activeSwitch').checked = dayData.activo;
+            document.getElementById('timeIn').value = dayData.entrada;
+            document.getElementById('timeOut').value = dayData.salida;
+            document.getElementById('timeIn').disabled = !dayData.activo;
+            document.getElementById('timeOut').disabled = !dayData.activo;
+            drawChart();
+        }
+
+        function saveDayData() {
+            const activo = document.getElementById('activeSwitch').checked;
+            employeeData.horario[selectedDayIndex].activo = activo;
+            employeeData.horario[selectedDayIndex].entrada = document.getElementById('timeIn').value;
+            employeeData.horario[selectedDayIndex].salida = document.getElementById('timeOut').value;
+            document.getElementById('timeIn').disabled = !activo;
+            document.getElementById('timeOut').disabled = !activo;
+            drawChart();
+        }
+
+        function drawChart() {
+            const chartContainer = document.getElementById('vertical-chart');
+            chartContainer.innerHTML = employeeData.horario.map((item, index) => {
+                const isSelected = index === selectedDayIndex;
+                let barHtml = '';
+
+                if (!item.activo) {
+                    barHtml = `<div class="bg-secondary bg-opacity-25 w-100" style="height: 12px; border-radius: 4px;"></div>`;
+                } else {
+                    const startDec = timeToDecimal(item.entrada);
+                    const endDec = timeToDecimal(item.salida);
+                    let heightPct = ((endDec - startDec) / 24) * 100;
+                    let bottomPct = (startDec / 24) * 100;
+                    if (heightPct < 0) heightPct = 0;
+
+                    const color = isSelected ? 'var(--secondary-color)' : 'var(--primary-color)';
+                    const opacity = isSelected ? '1' : '0.8';
+
+                    barHtml = `<div class="w-100 position-absolute" 
+                                    style="background-color: ${color}; opacity: ${opacity}; height: ${heightPct}%; bottom: ${bottomPct}% !important; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);"></div>`;
+                }
+
+                return `
+                    <div class="d-flex flex-column align-items-center h-100 cursor-pointer" style="width: 12%;" onclick="selectDayFromChart(${index})">
+                        <div class="w-75 flex-grow-1 position-relative d-flex align-items-end justify-content-center mb-2" style="background-color: rgba(0,0,0,0.06); border-radius: 8px;">
+                            ${barHtml}
+                        </div>
+                        <span class="small fw-bold ${isSelected ? 'text-primary-custom' : 'text-muted'}" style="font-size: 11px;">${item.dia.substring(0,3)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectDayFromChart(index) {
+            document.getElementById('daySelector').value = index;
+            loadDayData();
+        }
+
+        function timeToDecimal(t) {
+            if(!t) return 0;
+            const [h, m] = t.split(':');
+            return parseInt(h) + (parseInt(m) / 60);
+        }
+
+        function changeEmpStep(dir) {
+            document.getElementById('emp-step-' + currentStep).classList.add('d-none');
+            currentStep += dir;
+            document.getElementById('emp-step-' + currentStep).classList.remove('d-none');
+            document.getElementById('empBtnPrev').classList.toggle('d-none', currentStep === 1);
+            document.getElementById('empProgressBar').style.width = (currentStep === 1) ? '50%' : '100%';
+            document.getElementById('empBtnNext').innerHTML = (currentStep === 2) ? '<i class="fas fa-save me-2"></i>Guardar' : 'Continuar';
+            if (currentStep === 2) loadDayData();
+        }
     </script>
 </body>
 </html>
