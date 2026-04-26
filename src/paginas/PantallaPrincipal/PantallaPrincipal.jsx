@@ -1,11 +1,26 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./PantallaPrincipal.css";
-import logo from "./logo.jpeg";
+
+const negociosEjemplo = [
+  { id: 1, nombre: "Studio Noir", categoria: "Barbería", rating: 4.8, reseñas: 124, ubicacion: "Monterrey, NL", emoji: "✂️" },
+  { id: 2, nombre: "Blush & Co.", categoria: "Uñas", rating: 4.9, reseñas: 87, ubicacion: "San Pedro, NL", emoji: "💅" },
+  { id: 3, nombre: "Glow Studio", categoria: "Estética", rating: 4.7, reseñas: 203, ubicacion: "Monterrey, NL", emoji: "🌿" },
+  { id: 4, nombre: "Velvet Beauty", categoria: "Maquillaje", rating: 5.0, reseñas: 56, ubicacion: "Guadalupe, NL", emoji: "💄" },
+  { id: 5, nombre: "The Barber Room", categoria: "Barbería", rating: 4.6, reseñas: 311, ubicacion: "Monterrey, NL", emoji: "✂️" },
+  { id: 6, nombre: "Pink Nails", categoria: "Uñas", rating: 4.8, reseñas: 142, ubicacion: "San Pedro, NL", emoji: "💅" },
+];
+
+const categorias = [
+  { label: "Todos", emoji: "✨" },
+  { label: "Barbería", emoji: "✂️" },
+  { label: "Uñas", emoji: "💅" },
+  { label: "Maquillaje", emoji: "💄" },
+  { label: "Estética", emoji: "🌿" },
+];
 
 export default function PantallaPrincipal() {
   useEffect(() => {
-    // Smooth scroll for anchor links
     const handleAnchorClick = (e) => {
       const href = e.currentTarget.getAttribute("href");
       if (href && href.startsWith("#")) {
@@ -27,13 +42,13 @@ export default function PantallaPrincipal() {
       <header className="header">
         <div className="logo-container">
           <div className="logo">
-            {<img src={logo} alt="Velvet Match" style={{width:"100%", height:"100%", objectFit:"cover", borderRadius:"50%"}} />}
+            <span className="logo-text">VM</span>
           </div>
           <span className="brand-name">Velvet Match</span>
         </div>
         <nav className="nav">
+          <a href="#negocios" className="nav-link">Explorar</a>
           <a href="#about" className="nav-link">Nosotros</a>
-          {/* Link de React Router — no recarga la página */}
           <Link to="/login" className="nav-link">Iniciar Sesión</Link>
         </nav>
       </header>
@@ -43,18 +58,37 @@ export default function PantallaPrincipal() {
         <div className="hero-content">
           <div className="hero-badge">Sector Belleza · Sin código · En minutos</div>
           <h1 className="hero-title">
-            Tu negocio de belleza,{" "}
-            <span className="gradient-text">en línea en minutos</span>
+            Tu plataforma de belleza,{" "}
+            <span className="gradient-text">para clientes y negocios</span>
           </h1>
           <p className="hero-description">
-            Digitaliza tu barbería, estética, salón de uñas o maquillaje sin
-            conocimientos técnicos. Crea tu sitio web, gestiona citas y
-            administra tu equipo, todo desde un solo lugar.
+            Encuentra estilistas, barberías y salones cerca de ti o digitaliza
+            tu negocio de belleza en minutos, sin conocimientos técnicos.
           </p>
-          <Link to="/agregar-empresa" className="cta-button">
-            <span className="button-content">Crea tu web</span>
-            <div className="button-glow" />
-          </Link>
+
+          {/* Barra de búsqueda */}
+          <div className="search-bar">
+            <div className="search-input-wrapper">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Busca barberías, salones, estéticas..."
+              />
+            </div>
+            <button className="search-button">Buscar</button>
+          </div>
+
+          {/* Dos CTAs */}
+          <div className="hero-ctas">
+            <a href="#negocios" className="cta-button">
+              <span className="button-content">Explorar servicios</span>
+              <div className="button-glow" />
+            </a>
+            <Link to="/agregar-empresa" className="cta-button cta-button--outline">
+              <span className="button-content">Registra tu negocio</span>
+            </Link>
+          </div>
         </div>
 
         <div className="hero-visual">
@@ -73,6 +107,47 @@ export default function PantallaPrincipal() {
         </div>
       </section>
 
+      {/* ── Explorar Negocios ── */}
+      <section id="negocios" className="negocios-section">
+        <div className="container">
+          <div className="section-header">
+            <span className="section-label">Para Clientes</span>
+            <h2 className="section-title">Encuentra tu servicio ideal</h2>
+          </div>
+
+          {/* Filtros por categoría */}
+          <div className="categorias-filter">
+            {categorias.map((cat) => (
+              <button key={cat.label} className="categoria-chip">
+                <span>{cat.emoji}</span> {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Grid de negocios */}
+          <div className="negocios-grid">
+            {negociosEjemplo.map((negocio) => (
+              <div key={negocio.id} className="negocio-card">
+                <div className="negocio-card__image">
+                  <span className="negocio-card__emoji">{negocio.emoji}</span>
+                  <span className="negocio-card__categoria">{negocio.categoria}</span>
+                </div>
+                <div className="negocio-card__body">
+                  <h3 className="negocio-card__nombre">{negocio.nombre}</h3>
+                  <div className="negocio-card__rating">
+                    <span className="rating-star">★</span>
+                    <span className="rating-score">{negocio.rating}</span>
+                    <span className="rating-count">({negocio.reseñas} reseñas)</span>
+                  </div>
+                  <p className="negocio-card__ubicacion">📍 {negocio.ubicacion}</p>
+                  <button className="negocio-card__btn">Ver negocio</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── About ── */}
       <section id="about" className="about">
         <div className="container">
@@ -83,16 +158,14 @@ export default function PantallaPrincipal() {
           <div className="about-content">
             <div className="about-text">
               <p className="about-intro">
-                Crea tu sitio web profesional, gestiona citas, empleados y
-                servicios. Todo en una plataforma centralizada sin complicaciones
-                técnicas.
+                Crea tu sitio web profesional, gestiona citas, empleados y servicios.
+                Todo en una plataforma centralizada sin complicaciones técnicas.
               </p>
               <p className="about-description">
-                En Velvet Match, nacimos con la misión de hacer accesible la
-                presencia digital para barberías, estéticas, salones de uñas y
-                maquillaje. Permitiendo que emprendedores sin conocimientos
-                técnicos puedan crear y gestionar su sitio web profesional en
-                minutos, no en meses.
+                En Velvet Match, nacimos con la misión de hacer accesible la presencia
+                digital para barberías, estéticas, salones de uñas y maquillaje.
+                Permitiendo que emprendedores sin conocimientos técnicos puedan crear
+                y gestionar su sitio web profesional en minutos, no en meses.
               </p>
             </div>
             <div className="about-grid">
@@ -116,9 +189,12 @@ export default function PantallaPrincipal() {
         </div>
       </section>
 
-      {/* ── Values ── */}
+      {/* ── Para Negocios ── */}
       <section className="values">
         <div className="container">
+          <div className="section-header">
+            <span className="section-label">Para Negocios</span>
+          </div>
           <h2 className="section-title centered">Todo lo que necesitas en un solo lugar</h2>
           <div className="values-grid">
             {[
@@ -137,15 +213,20 @@ export default function PantallaPrincipal() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* ── CTA Final ── */}
       <section className="cta-section">
         <div className="cta-content">
-          <h2>¿Listo para llevar tu negocio al siguiente nivel?</h2>
-          <p>Crea el sitio web de tu negocio hoy — rápido, sencillo y sin conocimientos técnicos</p>
-          <Link to="/agregar-empresa" className="cta-button">
-            <span className="button-content">Crea tu web</span>
-            <div className="button-glow" />
-          </Link>
+          <h2>¿Listo para empezar?</h2>
+          <p>Encuentra tu servicio ideal o lleva tu negocio al siguiente nivel</p>
+          <div className="cta-buttons">
+            <a href="#negocios" className="cta-button">
+              <span className="button-content">Soy cliente</span>
+              <div className="button-glow" />
+            </a>
+            <Link to="/agregar-empresa" className="cta-button cta-button--white">
+              <span className="button-content">Tengo un negocio</span>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -164,8 +245,7 @@ export default function PantallaPrincipal() {
               <div className="footer-column">
                 <h4>Compañía</h4>
                 <a href="#about">Sobre nosotros</a>
-                <a href="#services">Servicios</a>
-                <a href="#team">Equipo</a>
+                <a href="#negocios">Explorar</a>
               </div>
               <div className="footer-column">
                 <h4>Contacto</h4>

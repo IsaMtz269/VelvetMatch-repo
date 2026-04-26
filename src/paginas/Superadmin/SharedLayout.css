@@ -1,0 +1,248 @@
+/* =============================================
+   SHARED LAYOUT — sidebar + topbar + logout
+   Prefijo: .sh-  (shared)
+   Importar en Dashboard.css, Negocios.css,
+   Usuarios.css y Analytics.css
+   ============================================= */
+
+:root {
+  --sh-crimson: #45062E;
+  --sh-plum:    #7F055F;
+  --sh-blush:   #E5A4CB;
+  --sh-petal:   #EBD2BE;
+  --sh-cream:   #FFE8D4;
+  --sh-sidebar: 240px;
+}
+
+/* ── Wrapper ── */
+.sh-root {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+  background: #fdf8f5;
+  color: #2a0020;
+  overflow-x: hidden;
+}
+
+/* ── Overlay móvil ── */
+.sh-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 90;
+}
+.sh-overlay.active { display: block; }
+
+/* ── Sidebar ── */
+.sh-sidebar {
+  width: var(--sh-sidebar);
+  background: var(--sh-crimson);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  z-index: 100;
+}
+
+.sh-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sh-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--sh-cream);
+  line-height: 1.2;
+}
+
+.sh-brand-sub {
+  font-size: 10px;
+  color: var(--sh-blush);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 3px;
+  opacity: 0.7;
+}
+
+.sh-close-btn {
+  display: none;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: var(--sh-cream);
+  font-size: 18px;
+  cursor: pointer;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Nav ── */
+.sh-nav {
+  padding: 20px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sh-nav-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(229,164,203,0.4);
+  padding: 10px 12px 4px;
+  font-weight: 600;
+}
+
+.sh-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,232,212,0.6);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sh-nav-item:hover,
+.sh-nav-item.active {
+  background: rgba(229,164,203,0.15);
+  color: var(--sh-cream);
+}
+
+/* ── Footer sidebar ── */
+.sh-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sh-footer-avatar {
+  width: 35px; height: 35px;
+  background: var(--sh-blush);
+  color: var(--sh-crimson);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sh-footer-name {
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sh-footer-role {
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+}
+
+/* ── Main ── */
+.sh-main {
+  margin-left: var(--sh-sidebar);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+/* ── Topbar ── */
+.sh-topbar {
+  height: 60px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--sh-petal);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 16px;
+}
+
+.sh-menu-toggle {
+  display: none;
+  background: var(--sh-cream);
+  border: none;
+  font-size: 22px;
+  color: var(--sh-crimson);
+  cursor: pointer;
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sh-topbar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--sh-crimson);
+  flex: 1;
+}
+
+.sh-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Logout button ── */
+.sh-logout-btn {
+  padding: 6px 16px;
+  border: 2px solid var(--sh-crimson);
+  border-radius: 8px;
+  color: var(--sh-crimson);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sh-logout-btn:hover {
+  background: var(--sh-crimson);
+  color: white;
+}
+
+/* ── Responsive ── */
+@media screen and (max-width: 768px) {
+  .sh-sidebar { transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+  .sh-sidebar.active { transform: translateX(0); }
+  .sh-main { margin-left: 0; }
+  .sh-menu-toggle { display: flex; }
+  .sh-close-btn { display: flex; }
+}
+
+@media screen and (max-width: 480px) {
+  .sh-sidebar { width: 85%; }
+  .sh-topbar-title { font-size: 16px; }
+}
