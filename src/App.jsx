@@ -8,6 +8,9 @@ import Dashboard from "./paginas/Superadmin/Dashboard";
 import Negocios from "./paginas/Superadmin/Negocios";
 import Usuarios from "./paginas/Superadmin/Usuarios";
 import Analytics from "./paginas/Superadmin/Analytics";
+import ClienteDashboard from "./paginas/Cliente/ClienteDashboard";
+import ClienteCitas from "./paginas/Cliente/ClienteCalendario";
+import ClientePerfil from "./paginas/Cliente/ClientePerfil";
 
 
  
@@ -23,6 +26,10 @@ export default function App() {
         {<Route path="/negocios" element={<Negocios />} /> }
         {<Route path="/usuarios" element={<Usuarios />} /> }
         {<Route path="/analytics" element={<Analytics />} /> }
+        {<Route path="/clienteDashboard" element={<ClienteDashboard />} /> }
+        {<Route path="/clienteCalendario" element={<ClienteCitas />} /> }
+        {<Route path="/clientePerfil" element={<ClientePerfil />} /> }
+
         
       </Routes>
     </BrowserRouter>
