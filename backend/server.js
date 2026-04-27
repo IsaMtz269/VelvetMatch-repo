@@ -345,6 +345,309 @@ app.post('/api/citas/:id_cita/resena', async (req, res) => {
 });
 
 
+// CONSULTAS DE NEGOCIOS (GET y PUT)
+
+// 1. Obtener todos los negocios 
+app.get('/api/negocios', async (req, res) => {
+    try {
+        const negocios = await Negocio.find();
+        res.status(200).json(negocios);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener la lista de negocios', error: error.message });
+    }
+});
+
+// 2. Obtener un negocio específico 
+app.get('/api/negocios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const negocio = await Negocio.findById(id);
+
+        if (!negocio) {
+            return res.status(404).json({ message: 'Negocio no encontrado' });
+        }
+
+        res.status(200).json(negocio);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el negocio', error: error.message });
+    }
+});
+
+
+// 3. Actualizar un negocio 
+//verificar si esta correcto y una validacion de que el admin sea el que lo este cambiando
+app.put('/api/negocios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const negocioActualizado = await Negocio.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true, runValidators: true } 
+        );
+
+        if (!negocioActualizado) {
+            return res.status(404).json({ message: 'Negocio no encontrado para actualizar' });
+        }
+
+        res.status(200).json({ 
+            message: 'Información del negocio actualizada exitosamente', 
+            negocio: negocioActualizado 
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar el negocio', error: error.message });
+    }
+});
+
+
+// CONSULTAS POR NEGOCIO / CATALOGOS (GET)
+
+// 1. Obtener Servicios de un negocio
+app.get('/api/servicios/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+        const servicios = await Servicio.find({ id_negocio: id_negocio });
+        res.status(200).json(servicios);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los servicios', error: error.message });
+    }
+});
+
+// 2. Obtener Empleados de un negocio 
+app.get('/api/empleados/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+        
+        const empleados = await Usuario.find({ 
+            trabaja_en: id_negocio,
+            roles: 'empleado' 
+        });
+        
+        res.status(200).json(empleados);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los empleados', error: error.message });
+    }
+});
+
+// 3. Obtener Posts de un negocio
+app.get('/api/posts/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+        
+        const posts = await Post.find({ id_negocio: id_negocio }).sort({ createdAt: -1 });
+        
+        res.status(200).json(posts);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los posts', error: error.message });
+    }
+});
+
+// 4. Obtener Fechas Prohibidas de un negocio
+app.get('/api/fechas-prohibidas/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+        const fechas = await FechaProhibida.find({ id_negocio: id_negocio });
+        
+        res.status(200).json(fechas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener las fechas prohibidas', error: error.message });
+    }
+});
+
+// 5. Obtener Reseñas de un Negocio (Para la página pública)
+app.get('/api/resenas/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+
+        const resenas = await Cita.find({ 
+            id_negocio: id_negocio, 
+            review_done: true 
+        })
+        .select('review_stars review_texto id_cliente updatedAt') 
+        .populate('id_cliente', 'nombre apellido'); 
+
+        res.status(200).json(resenas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al cargar los testimonios', error: error.message });
+    }
+});
+
+
+
+// CONSULTAS DE CITAS (GET y PATCH)
+
+
+// 1. Obtener citas de un Negocio (Dashboard del Admin)
+app.get('/api/citas/negocio/:id_negocio', async (req, res) => {
+    try {
+        const citas = await Cita.find({ id_negocio: req.params.id_negocio })
+            .populate('id_cliente', 'nombre apellido email')
+            .populate('id_servicio', 'nombre precio duracion')
+            .populate('id_empleado', 'nombre apellido');
+            
+        res.status(200).json(citas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener citas del negocio', error: error.message });
+    }
+});
+
+// 2. Obtener citas de un Empleado (Agenda propia)
+app.get('/api/citas/empleado/:id_empleado', async (req, res) => {
+    try {
+        const citas = await Cita.find({ id_empleado: req.params.id_empleado })
+            .populate('id_cliente', 'nombre apellido')
+            .populate('id_servicio', 'nombre duracion');
+            
+        res.status(200).json(citas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener citas del empleado', error: error.message });
+    }
+});
+
+// 3. Obtener citas de un Cliente (Historial de reservaciones)
+app.get('/api/citas/cliente/:id_cliente', async (req, res) => {
+    try {
+        const citas = await Cita.find({ id_cliente: req.params.id_cliente })
+            .populate('id_negocio', 'nombre ubicacion celular')
+            .populate('id_servicio', 'nombre precio')
+            .populate('id_empleado', 'nombre apellido');
+            
+        res.status(200).json(citas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener historial del cliente', error: error.message });
+    }
+});
+
+// 4. APROBAR una cita (Pasa de 'pendiente' a 'programada' y se le asigna empleado)
+app.patch('/api/citas/aprobar/:id_cita', async (req, res) => {
+    try {
+        const { id_empleado } = req.body;
+
+        if (!id_empleado) {
+            return res.status(400).json({ message: 'Debes seleccionar un profesional para aprobar la cita' });
+        }
+
+        const citaActualizada = await Cita.findByIdAndUpdate(
+            req.params.id_cita,
+            { 
+                estado: 'programada', 
+                id_empleado: id_empleado 
+            },
+            { new: true } 
+        );
+
+        if (!citaActualizada) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        res.status(200).json({ message: 'Cita aprobada y asignada con éxito', cita: citaActualizada });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al aprobar la cita', error: error.message });
+    }
+});
+
+// 5. CANCELAR / RECHAZAR una cita (Con regla estricta de 6 horas)
+app.patch('/api/citas/cancelar/:id_cita', async (req, res) => {
+    try {
+        // 'es_admin' nos dirá si es el dueño rechazando (true) o el cliente cancelando (false)
+        const { motivo_rechazo, es_admin } = req.body;
+        
+        const cita = await Cita.findById(req.params.id_cita);
+        if (!cita) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        // --- VALIDACIÓN ESTRICTA: REGLA DE LAS 6 HORAS ---
+        // Según el documento de diseño técnico, la cancelación tiene un límite de 6 horas.
+        // Solo aplicamos esta restricción si es el CLIENTE quien cancela. El Admin puede cancelar cuando sea.
+        if (!es_admin) {
+            const fechaHoraCita = new Date(`${cita.fecha}T${cita.hora}:00`); 
+            const ahora = new Date();
+            
+            // Calculamos la diferencia en horas
+            const diferenciaHoras = (fechaHoraCita - ahora) / (1000 * 60 * 60);
+
+            if (diferenciaHoras < 6 && diferenciaHoras > 0) {
+                return res.status(400).json({ 
+                    message: 'Por políticas de la plataforma, las cancelaciones deben realizarse con al menos 6 horas de anticipación.' 
+                });
+            }
+            
+            // Si la cita ya pasó (diferenciaHoras < 0) tampoco se puede cancelar
+            if (diferenciaHoras <= 0) {
+                 return res.status(400).json({ message: 'No puedes cancelar una cita que ya ocurrió o está en proceso.' });
+            }
+        }
+        // ------------------------------------------------
+
+        // Asignamos el estado correcto dependiendo de quién hizo la acción
+        cita.estado = es_admin ? 'rechazada' : 'cancelada';
+        
+        // Si el administrador mandó un motivo desde su modal de Rechazo, lo guardamos
+        if (motivo_rechazo) {
+            cita.motivo_rechazo = motivo_rechazo;
+        }
+
+        await cita.save();
+
+        res.status(200).json({ 
+            message: `La cita fue ${cita.estado} exitosamente`, 
+            citaActualizada: cita 
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error al procesar la cancelación', error: error.message });
+    }
+});
+
+// CONSULTAS DE ANALYTICS (GET)
+
+// 1. Analytics del Negocio (Dashboard Admin)
+app.get('/api/analytics/negocio/:id_negocio', async (req, res) => {
+    try {
+        const { id_negocio } = req.params;
+
+        const citasCompletadas = await Cita.find({ 
+            id_negocio: id_negocio, 
+            estado: 'completada' 
+        });
+
+        const totalCitas = citasCompletadas.length;
+        
+        const ingresosTotales = citasCompletadas.reduce((acc, cita) => acc + (cita.precio_final || 0), 0);
+
+        res.status(200).json({
+            id_negocio,
+            totalCitas,
+            ingresosTotales,
+            moneda: 'MXN'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al generar analytics del negocio', error: error.message });
+    }
+});
+
+// 2. Analytics Global (Panel Super Administrador)
+app.get('/api/analytics/global', async (req, res) => {
+    try {
+        const totalEmpresas = await Negocio.countDocuments();
+        const totalUsuarios = await Usuario.countDocuments();
+        const totalOperaciones = await Cita.countDocuments();
+
+        res.status(200).json({
+            plataforma: 'Velvet Match',
+            totalEmpresas,
+            totalUsuarios,
+            totalOperaciones,
+            mensaje: 'Estadísticas globales de la plataforma'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al generar analytics globales', error: error.message });
+    }
+});
+
+
+
 app.get('/api/', (req, res) => {
     res.json({ message: 'API funcionando' });
 });

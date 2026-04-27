@@ -107,10 +107,24 @@ export default function Admin() {
                     <div className="admin-banner-left">
                       <div className="detail-avatar bg-white text-primary-custom shadow-lg d-flex align-items-center justify-content-center rounded-circle" style={{ width: '70px', height: '70px', fontSize: '28px' }}>I</div>
                       <div>
-                        <h3 className="font-playfair mb-1 fs-3 fw-bold text-white">Isabella Martínez</h3>
+                        <div className="d-flex align-items-center gap-3 mb-1">
+                          <h3 className="font-playfair m-0 fs-3 fw-bold text-white">Isabella Martínez</h3>
+                          {/* BOTÓN EDITAR PERFIL ADMIN */}
+                          <button className="btn btn-sm btn-light bg-white bg-opacity-25 text-white border-0 rounded-pill px-3 shadow-sm" title="Editar Perfil" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i className="fas fa-user-edit me-2"></i>Editar Perfil
+                          </button>
+                        </div>
                         <div className="d-flex flex-wrap gap-2 align-items-center font-dm mt-2">
                           <span className="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill"><i className="fas fa-key text-warning me-1"></i> Administrador</span>
-                          <span className="text-white-50 small"><i className="fas fa-store me-1"></i> Glamour Haven (Estética)</span>
+                          
+                          {/* BOTÓN EDITAR NEGOCIO */}
+                          <span className="text-white small d-flex align-items-center bg-dark bg-opacity-25 px-3 py-2 rounded-pill shadow-sm">
+                            <i className="fas fa-store me-2"></i> Glamour Haven (Estética)
+                            <button className="btn btn-sm text-white bg-white bg-opacity-10 ms-2 rounded-circle" style={{width: '28px', height: '28px', padding: '0'}} title="Editar Negocio" data-bs-toggle="modal" data-bs-target="#editBusinessModal">
+                              <i className="fas fa-pencil-alt" style={{fontSize: '12px'}}></i>
+                            </button>
+                          </span>
+                          
                           <span className="text-white font-monospace small bg-dark bg-opacity-25 px-2 py-1 rounded">/estetica/glamour-haven</span>
                         </div>
                       </div>
@@ -321,6 +335,65 @@ export default function Admin() {
                           </tr>
                         </tbody>
                       </table>
+                    </div>
+                  </div>
+                  {/* ================= SECCIÓN: LISTA DE SERVICIOS Y POSTS ================= */}
+                  <div className="row mt-4">
+                    {/* Tarjeta de Servicios */}
+                    <div className="col-md-6 mb-4">
+                      <div className="card shadow-sm border-0 h-100 rounded-4">
+                        <div className="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                          <h5 className="font-playfair text-primary-custom m-0"><i className="fas fa-cut me-2"></i>Mis Servicios</h5>
+                        </div>
+                        <div className="card-body p-0">
+                          <ul className="list-group list-group-flush font-dm">
+                            {/* Ejemplo de un servicio */}
+                            <li className="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom">
+                              <div>
+                                <h6 className="mb-0 fw-bold text-dark">Corte & Estilo</h6>
+                                <small className="text-muted">$350.00 MXN • 45 min</small>
+                              </div>
+                              {/* BOTÓN ELIMINAR SERVICIO */}
+                              <button className="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" title="Eliminar Servicio">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </li>
+                            <li className="list-group-item d-flex justify-content-between align-items-center p-3">
+                              <div>
+                                <h6 className="mb-0 fw-bold text-dark">Manicura Gelish</h6>
+                                <small className="text-muted">$450.00 MXN • 60 min</small>
+                              </div>
+                              <button className="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" title="Eliminar Servicio">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tarjeta de Posts */}
+                    <div className="col-md-6 mb-4">
+                      <div className="card shadow-sm border-0 h-100 rounded-4">
+                        <div className="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                          <h5 className="font-playfair text-primary-custom m-0"><i className="fas fa-bullhorn me-2"></i>Mis Publicaciones</h5>
+                        </div>
+                        <div className="card-body p-0">
+                          <ul className="list-group list-group-flush font-dm">
+                            {/* Ejemplo de un post */}
+                            <li className="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom">
+                              <div>
+                                <h6 className="mb-0 fw-bold text-dark">Tendencias de Verano 2024</h6>
+                                <small className="text-muted"><i className="far fa-calendar-alt me-1"></i>Hace 2 días</small>
+                              </div>
+                              {/* BOTÓN ELIMINAR POST */}
+                              <button className="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" title="Eliminar Publicación">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -883,6 +956,147 @@ export default function Admin() {
             <div className="modal-footer border-0 pt-0 px-4 pb-4">
               <button type="button" className="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
               <button type="button" className="btn btn-danger rounded-pill px-4 shadow-sm fw-bold" data-bs-dismiss="modal">Confirmar Rechazo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 7. MODAL: EDITAR PERFIL ADMIN */}
+      <div className="modal fade" id="editProfileModal" tabIndex="-1" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0 rounded-4 shadow-lg">
+            <div className="modal-header bg-primary text-white rounded-top-4">
+              <h5 className="modal-title fw-bold font-playfair"><i className="fas fa-user-edit me-2"></i>Editar Mi Perfil</h5>
+              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body p-4 font-dm">
+              <form>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Nombres</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" defaultValue="Isabella" />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Apellidos</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" defaultValue="Martínez" />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Correo Electrónico</label>
+                  <input type="email" className="form-control bg-light border-0 shadow-sm" defaultValue="admin@glamourhaven.com" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Fecha de Nacimiento</label>
+                  <input type="date" className="form-control bg-light border-0 shadow-sm" defaultValue="1995-08-15" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Nueva Contraseña</label>
+                  <input type="password" className="form-control bg-light border-0 shadow-sm" placeholder="Dejar en blanco para no cambiarla" />
+                  <small className="text-muted" style={{ fontSize: '11px' }}>* Solo llena este campo si deseas actualizar tu contraseña actual.</small>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer border-0 pt-0 px-4 pb-4">
+              <button type="button" className="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" className="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">Actualizar Perfil</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 8. MODAL: EDITAR NEGOCIO */}
+      <div className="modal fade" id="editBusinessModal" tabIndex="-1" aria-hidden="true">
+        <div className="modal-dialog modal-lg modal-dialog-centered">
+          <div className="modal-content border-0 rounded-4 shadow-lg">
+            <div className="modal-header bg-dark text-white rounded-top-4">
+              <h5 className="modal-title fw-bold font-playfair"><i className="fas fa-store me-2"></i>Ajustes del Negocio</h5>
+              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body p-4 p-md-5 font-dm">
+              <form>
+                {/* Sección 1: Información Básica */}
+                <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2">Información Principal</h6>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Nombre del Negocio</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" defaultValue="Glamour Haven" />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Eslogan</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" defaultValue="Tu mejor versión comienza aquí" />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Descripción Corta</label>
+                  <textarea className="form-control bg-light border-0 shadow-sm" rows="2" defaultValue="Expertos en resaltar tu belleza natural con servicios de alta calidad."></textarea>
+                </div>
+
+                {/* Sección 2: Contacto */}
+                <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2 mt-4">Contacto y Ubicación</h6>
+                <div className="row g-3 mb-4">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Celular / Teléfono</label>
+                    <div className="input-group shadow-sm rounded-3">
+                      <span className="input-group-text bg-light border-0"><i className="fas fa-phone text-muted"></i></span>
+                      <input type="text" className="form-control bg-light border-0" defaultValue="5551234567" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Dirección Completa</label>
+                    <div className="input-group shadow-sm rounded-3">
+                      <span className="input-group-text bg-light border-0"><i className="fas fa-map-marker-alt text-muted"></i></span>
+                      <input type="text" className="form-control bg-light border-0" defaultValue="Av. Principal 123, Centro" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sección 3: Redes y Multimedia */}
+                <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2 mt-4">Identidad y Redes Sociales</h6>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Instagram (URL o Usuario)</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" placeholder="@glamour_haven" />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Facebook (URL o Usuario)</label>
+                    <input type="text" className="form-control bg-light border-0 shadow-sm" placeholder="/GlamourHaven" />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Banner de Portada (URL)</label>
+                  <input type="url" className="form-control bg-light border-0 shadow-sm" placeholder="https://ejemplo.com/imagen.jpg" />
+                </div>
+
+                {/* Sección 4: Colores y Pagos */}
+                <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2 mt-4">Configuración del Sistema</h6>
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Color Primario</label>
+                    <div className="d-flex align-items-center gap-2">
+                      <input type="color" className="form-control form-control-color border-0 p-0 shadow-sm" defaultValue="#4A0E4E" style={{ width: '40px', height: '40px' }} />
+                      <span className="small text-muted font-monospace">#4A0E4E</span>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Color Secundario</label>
+                    <div className="d-flex align-items-center gap-2">
+                      <input type="color" className="form-control form-control-color border-0 p-0 shadow-sm" defaultValue="#CFB53B" style={{ width: '40px', height: '40px' }} />
+                      <span className="small text-muted font-monospace">#CFB53B</span>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase">Anticipo Citas (%)</label>
+                    <div className="input-group shadow-sm rounded-3">
+                      <input type="number" className="form-control bg-light border-0" defaultValue="15" min="0" max="100" />
+                      <span className="input-group-text bg-light border-0">%</span>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer border-0 pt-0 px-4 pb-4">
+              <button type="button" className="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" className="btn btn-dark rounded-pill px-4 shadow-sm fw-bold">Guardar Negocio</button>
             </div>
           </div>
         </div>
