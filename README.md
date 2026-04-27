@@ -2,7 +2,7 @@
 
 Esta rama (`backend-consultas`) contiene la implementación de todas las rutas de lectura (GET) y modificación (PUT/PATCH) necesarias para alimentar los Dashboards y la vista pública de los negocios.
 
-## 🚀 APIs Implementadas
+## APIs Implementadas
 
 ### Módulo de Negocios
 * `GET /api/negocios` - Obtiene la lista completa de negocios para la pestaña "Explorar".
