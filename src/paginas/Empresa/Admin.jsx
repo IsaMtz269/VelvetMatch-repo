@@ -199,7 +199,7 @@ export default function Admin() {
                             <td>
                               <div className="d-flex gap-2 justify-content-center">
                                 <button className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i className="fas fa-check me-1"></i>Aceptar</button>
-                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                               <button className="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectApptModal">Rechazar</button>
                               </div>
                             </td>
                           </tr>
@@ -228,7 +228,7 @@ export default function Admin() {
                             <td>
                               <div className="d-flex gap-2 justify-content-center">
                                 <button className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i className="fas fa-check me-1"></i>Aceptar</button>
-                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                               <button className="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectApptModal">Rechazar</button>
                               </div>
                             </td>
                           </tr>
@@ -257,7 +257,7 @@ export default function Admin() {
                             <td>
                               <div className="d-flex gap-2 justify-content-center">
                                 <button className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i className="fas fa-check me-1"></i>Aceptar</button>
-                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectApptModal">Rechazar</button>
                               </div>
                             </td>
                           </tr>
@@ -286,7 +286,7 @@ export default function Admin() {
                             <td>
                               <div className="d-flex gap-2 justify-content-center">
                                 <button className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i className="fas fa-check me-1"></i>Aceptar</button>
-                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectApptModal">Rechazar</button>
                               </div>
                             </td>
                           </tr>
@@ -315,7 +315,7 @@ export default function Admin() {
                             <td>
                               <div className="d-flex gap-2 justify-content-center">
                                 <button className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i className="fas fa-check me-1"></i>Aceptar</button>
-                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3">Rechazar</button>
+                               <button className="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectApptModal">Rechazar</button>
                               </div>
                             </td>
                           </tr>
@@ -604,8 +604,10 @@ export default function Admin() {
             <div className="modal-body p-0 font-dm">
               {currentStep === 1 ? (
                 <div id="emp-step-1" className="p-4 p-md-5 animate__animated animate__fadeIn">
-                  <h6 className="text-primary-custom fw-bold text-uppercase small mb-4 border-bottom pb-2">Datos de Identidad</h6>
-                  <div className="row g-3 mb-4">
+                  <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2">Datos Personales y Acceso</h6>
+                  
+                  {/* Fila 1: Nombre y Apellido */}
+                  <div className="row g-3 mb-3">
                     <div className="col-md-6">
                       <label className="form-label fw-bold small text-muted">Nombres</label>
                       <input type="text" className="form-control bg-light border-0" placeholder="Ej. Elena" />
@@ -615,7 +617,21 @@ export default function Admin() {
                       <input type="text" className="form-control bg-light border-0" placeholder="Ej. Torres" />
                     </div>
                   </div>
-                  <h6 className="text-primary-custom fw-bold text-uppercase small mb-4 border-bottom pb-2">Especialidades</h6>
+
+                  {/* Fila 2: Correo y Contraseña (¡NUEVOS CAMPOS!) */}
+                  <div className="row g-3 mb-4">
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold small text-muted">Correo Electrónico</label>
+                      <input type="email" className="form-control bg-light border-0" placeholder="empleado@velvetmatch.com" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold small text-muted">Contraseña Provisional</label>
+                      {/* Lo ponemos type="text" para que el admin pueda ver qué contraseña le está asignando */}
+                      <input type="text" className="form-control bg-light border-0" placeholder="Mínimo 8 caracteres" />
+                    </div>
+                  </div>
+
+                  <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 border-bottom pb-2 mt-2">Especialidades</h6>
                   <div className="row px-2">
                     <div className="col-6 col-md-4 mb-2"><div className="form-check"><input className="form-check-input" type="checkbox" /><label className="form-check-label small">Corte</label></div></div>
                     <div className="col-6 col-md-4 mb-2"><div className="form-check"><input className="form-check-input" type="checkbox" /><label className="form-check-label small">Tinte</label></div></div>
@@ -835,6 +851,31 @@ export default function Admin() {
             <div className="modal-footer border-0 pt-0 px-4 pb-4">
               <button type="button" className="btn btn-light rounded-pill w-100 mb-2 fw-bold" data-bs-dismiss="modal">Cancelar</button>
               <button type="button" className="btn btn-danger rounded-pill w-100 shadow-sm fw-bold">Confirmar Bloqueo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 6. MODAL: RECHAZAR CITA */}
+      <div className="modal fade" id="rejectApptModal" tabIndex="-1" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0 rounded-4 shadow-lg">
+            <div className="modal-header bg-danger text-white rounded-top-4">
+              <h5 className="modal-title fw-bold font-playfair"><i className="fas fa-times-circle me-2"></i>Rechazar Cita</h5>
+              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body p-4 font-dm">
+              <p className="text-muted small mb-4">Por favor, indica el motivo por el cual no puedes aceptar esta cita. Esta información se le mostrará al cliente en su perfil para que pueda reagendar.</p>
+              <form>
+                <div className="mb-3">
+                  <label className="form-label fw-bold small text-muted text-uppercase">Motivo del Rechazo <span className="text-danger">*</span></label>
+                  <textarea className="form-control bg-light border-0 shadow-sm" rows="3" placeholder="Ej. Lo sentimos, no contamos con disponibilidad de personal en ese horario..."></textarea>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer border-0 pt-0 px-4 pb-4">
+              <button type="button" className="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" className="btn btn-danger rounded-pill px-4 shadow-sm fw-bold" data-bs-dismiss="modal">Confirmar Rechazo</button>
             </div>
           </div>
         </div>
