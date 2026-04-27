@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./PantallaPrincipal.css";
 
 const negociosEjemplo = [
@@ -20,7 +20,15 @@ const categorias = [
 ];
 
 export default function PantallaPrincipal() {
+  const navigate = useNavigate();
+  const [usuarioActivo, setUsuarioActivo] = useState(null);
+
   useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuario");
+    if (usuarioGuardado) {
+      setUsuarioActivo(JSON.parse(usuarioGuardado));
+    }
+
     const handleAnchorClick = (e) => {
       const href = e.currentTarget.getAttribute("href");
       if (href && href.startsWith("#")) {
@@ -34,22 +42,45 @@ export default function PantallaPrincipal() {
     return () => anchors.forEach((a) => a.removeEventListener("click", handleAnchorClick));
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    setUsuarioActivo(null);
+    navigate("/");
+  };
+
+  const iniciales = usuarioActivo 
+    ? `${usuarioActivo.nombre.charAt(0)}${usuarioActivo.apellido.charAt(0)}`.toUpperCase() 
+    : "";
+
   return (
     <>
-      <div className="background-animation" />
+     <div className="background-animation" />
 
-      {/* ── Header ── */}
+      {/* ── Header Modificado ── */}
       <header className="header">
         <div className="logo-container">
-          <div className="logo">
-            <span className="logo-text">VM</span>
-          </div>
+          <div className="logo"><span className="logo-text">VM</span></div>
           <span className="brand-name">Velvet Match</span>
         </div>
-        <nav className="nav">
+        <nav className="nav d-flex align-items-center">
           <a href="#negocios" className="nav-link">Explorar</a>
           <a href="#about" className="nav-link">Nosotros</a>
-          <Link to="/login" className="nav-link">Iniciar Sesión</Link>
+          
+          {/* LÓGICA CONDICIONAL AQUÍ */}
+          {usuarioActivo ? (
+            <div className="d-flex align-items-center ms-3 gap-3">
+              <div className="d-flex align-items-center gap-2">
+                <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: '35px', height: '35px', fontSize: '14px' }}>
+                  {iniciales}
+                </div>
+                <span className="text-dark fw-bold text-capitalize">{usuarioActivo.nombre}</span>
+              </div>
+              <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Salir</button>
+            </div>
+          ) : (
+            <Link to="/login" className="nav-link login-btn">Iniciar Sesión</Link>
+          )}
         </nav>
       </header>
 

@@ -609,25 +609,32 @@ export default function Admin() {
                   {/* Fila 1: Nombre y Apellido */}
                   <div className="row g-3 mb-3">
                     <div className="col-md-6">
-                      <label className="form-label fw-bold small text-muted">Nombres</label>
+                      <label className="form-label fw-bold small text-muted">Nombres <span className="text-danger">*</span></label>
                       <input type="text" className="form-control bg-light border-0" placeholder="Ej. Elena" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label fw-bold small text-muted">Apellidos</label>
+                      <label className="form-label fw-bold small text-muted">Apellidos <span className="text-danger">*</span></label>
                       <input type="text" className="form-control bg-light border-0" placeholder="Ej. Torres" />
                     </div>
                   </div>
 
-                  {/* Fila 2: Correo y Contraseña (¡NUEVOS CAMPOS!) */}
-                  <div className="row g-3 mb-4">
+                  {/* Fila 2: Correo y Contraseña */}
+                  <div className="row g-3 mb-3">
                     <div className="col-md-6">
-                      <label className="form-label fw-bold small text-muted">Correo Electrónico</label>
+                      <label className="form-label fw-bold small text-muted">Correo Electrónico <span className="text-danger">*</span></label>
                       <input type="email" className="form-control bg-light border-0" placeholder="empleado@velvetmatch.com" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label fw-bold small text-muted">Contraseña Provisional</label>
-                      {/* Lo ponemos type="text" para que el admin pueda ver qué contraseña le está asignando */}
+                      <label className="form-label fw-bold small text-muted">Contraseña Provisional <span className="text-danger">*</span></label>
                       <input type="text" className="form-control bg-light border-0" placeholder="Mínimo 8 caracteres" />
+                    </div>
+                  </div>
+
+                  {/* Fila 3: Fecha de Nacimiento */}
+                  <div className="row g-3 mb-4">
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold small text-muted">Fecha de Nacimiento <span className="text-danger">*</span></label>
+                      <input type="date" className="form-control bg-light border-0" />
                     </div>
                   </div>
 

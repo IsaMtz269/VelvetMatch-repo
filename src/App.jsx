@@ -17,7 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<PantallaPrincipal />} />
         <Route path="/login" element={<Login />} />
-        {<Route path="/register" element={<Register />} /> }
+        {<Route path="/registro" element={<Register />} /> }
         { <Route path="/agregar-empresa" element={<AgregarEmpresa />} />}
         {<Route path="/dashboard" element={<Dashboard />} /> }
         {<Route path="/negocios" element={<Negocios />} /> }
