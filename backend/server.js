@@ -344,6 +344,8 @@ app.post('/api/citas/:id_cita/resena', async (req, res) => {
     }
 });
 
+// Marcar cita como completado empleado
+
 
 // CONSULTAS DE NEGOCIOS (GET y PUT)
 
@@ -518,7 +520,7 @@ app.get('/api/citas/cliente/:id_cliente', async (req, res) => {
     }
 });
 
-// 4. APROBAR una cita (Pasa de 'pendiente' a 'programada' y se le asigna empleado)
+// 4. APROBAR una cita administrador (Pasa de 'pendiente' a 'programada' y se le asigna empleado)
 app.patch('/api/citas/aprobar/:id_cita', async (req, res) => {
     try {
         const { id_empleado } = req.body;
@@ -549,7 +551,6 @@ app.patch('/api/citas/aprobar/:id_cita', async (req, res) => {
 // 5. CANCELAR / RECHAZAR una cita (Con regla estricta de 6 horas)
 app.patch('/api/citas/cancelar/:id_cita', async (req, res) => {
     try {
-        // 'es_admin' nos dirá si es el dueño rechazando (true) o el cliente cancelando (false)
         const { motivo_rechazo, es_admin } = req.body;
         
         const cita = await Cita.findById(req.params.id_cita);
@@ -557,14 +558,10 @@ app.patch('/api/citas/cancelar/:id_cita', async (req, res) => {
             return res.status(404).json({ message: 'Cita no encontrada' });
         }
 
-        // --- VALIDACIÓN ESTRICTA: REGLA DE LAS 6 HORAS ---
-        // Según el documento de diseño técnico, la cancelación tiene un límite de 6 horas.
-        // Solo aplicamos esta restricción si es el CLIENTE quien cancela. El Admin puede cancelar cuando sea.
         if (!es_admin) {
             const fechaHoraCita = new Date(`${cita.fecha}T${cita.hora}:00`); 
             const ahora = new Date();
             
-            // Calculamos la diferencia en horas
             const diferenciaHoras = (fechaHoraCita - ahora) / (1000 * 60 * 60);
 
             if (diferenciaHoras < 6 && diferenciaHoras > 0) {
@@ -573,17 +570,13 @@ app.patch('/api/citas/cancelar/:id_cita', async (req, res) => {
                 });
             }
             
-            // Si la cita ya pasó (diferenciaHoras < 0) tampoco se puede cancelar
             if (diferenciaHoras <= 0) {
                  return res.status(400).json({ message: 'No puedes cancelar una cita que ya ocurrió o está en proceso.' });
             }
         }
-        // ------------------------------------------------
 
-        // Asignamos el estado correcto dependiendo de quién hizo la acción
         cita.estado = es_admin ? 'rechazada' : 'cancelada';
         
-        // Si el administrador mandó un motivo desde su modal de Rechazo, lo guardamos
         if (motivo_rechazo) {
             cita.motivo_rechazo = motivo_rechazo;
         }
