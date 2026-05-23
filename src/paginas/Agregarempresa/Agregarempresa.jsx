@@ -23,6 +23,7 @@ export default function AgregarEmpresa() {
     instagram: "", facebook: "",
   });
   const [bannerPreview, setBannerPreview] = useState("");
+  const [bannerBase64, setBannerBase64] = useState("");
   const bannerRef = useRef();
 
   // Step 3 — admin
@@ -31,22 +32,119 @@ export default function AgregarEmpresa() {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  // Step 4 — colores
+  // Step 4 — colores y anticipo
   const [colors, setColors] = useState({ primary: "#7F055F", secondary: "#E5A4CB" });
+  const [anticipo, setAnticipo] = useState(0); // <-- Nuevo estado para el anticipo
 
   const progress = (step / TOTAL) * 100;
 
-  const handleBanner = (e) => {
-    const file = e.target.files[0];
-    if (file) setBannerPreview(URL.createObjectURL(file));
+  // --- FUNCIONES DE VALIDACIÓN ---
+  
+  // Función para calcular si es mayor de 16 años
+  const esMayorDe16 = (fecha) => {
+    if (!fecha) return false;
+    const hoy = new Date();
+    const cumpleanos = new Date(fecha);
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const mes = hoy.getMonth() - cumpleanos.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+      edad--;
+    }
+    return edad >= 16;
   };
 
-  const canContinueStep2 = info.nombre.trim() && info.telefono.trim() && info.ciudad.trim();
-  const canContinueStep3 = admin.nombre.trim() && admin.apellido.trim() && admin.email.trim() && admin.password.length >= 8 && admin.fechaNacimiento;
+  // Autocompletar el "@" en Instagram cuando el usuario sale del input (onBlur)
+  const handleInstagramBlur = () => {
+    if (info.instagram && !info.instagram.startsWith('@')) {
+      setInfo({ ...info, instagram: '@' + info.instagram });
+    }
+  };
+
+const handleBanner = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+      alert("¡Cuidado! El archivo seleccionado no es válido. Por favor, sube únicamente imágenes JPG, PNG o WEBP.");
+      e.target.value = null; 
+      return;
+    }
+
+    const maxSize = 2 * 1024 * 1024; 
+    if (file.size > maxSize) {
+      alert("La imagen es muy pesada. Por favor, elige una que pese menos de 2MB.");
+      e.target.value = null;
+      return;
+    }
+
+    // 1. Mostrar la vista previa rápidamente
+    setBannerPreview(URL.createObjectURL(file));
+
+    // 2. Convertir la imagen a texto (Base64) para enviarla a la base de datos
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setBannerBase64(reader.result); // Guardamos el texto larguísimo en el estado
+    };
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // 1. Registrar al Administrador
+      const resAdmin = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: admin.nombre,
+          apellido: admin.apellido,
+          email: admin.email,
+          password: admin.password,
+          fechNacimiento: admin.fechaNacimiento,
+          roles: 'admin' 
+        })
+      });
+      const dataAdmin = await resAdmin.json();
+
+      if (!resAdmin.ok) throw new Error(dataAdmin.message);
+
+      // 2. Registrar el Negocio vinculado a ese Administrador
+      const resNegocio = await fetch('http://localhost:5000/api/negocios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: info.nombre,
+          tipo: businessType,
+          descripcion: info.descripcion,
+          celular: info.telefono,
+          ubicacion: info.ciudad,
+          instagram: info.instagram,
+          facebook: info.facebook,
+          primaryColor: colors.primary,
+          secondaryColor: colors.secondary,
+          anticipo: Number(anticipo), // <-- Enviamos el anticipo numérico
+          id_usuario: dataAdmin.usuario._id,
+          banner: bannerBase64
+        })
+      });
+      const dataNegocio = await resNegocio.json();
+
+      if (!resNegocio.ok) throw new Error(dataNegocio.message);
+
+      // 3. Redirigir a la pantalla principal con un mensaje de éxito
+      navigate('/', { state: { successMessage: '¡Tu negocio y cuenta de administrador fueron creados con éxito!' } });
+
+    } catch (error) {
+      alert(`Error al registrar: ${error.message}`);
+    }
+  };
+
+  // Validaciones para habilitar el botón "Continuar"
+  const canContinueStep2 = info.nombre.trim() && info.telefono.length === 10 && info.ciudad.trim();
+  const canContinueStep3 = admin.nombre.trim() && admin.apellido.trim() && admin.email.trim() && admin.password.length >= 8 && esMayorDe16(admin.fechaNacimiento);
 
   return (
     <div className="ae-wrapper">
-
       {/* ── Header / Progress ── */}
       <div className="ae-header">
         <div className="ae-header__inner">
@@ -117,7 +215,6 @@ export default function AgregarEmpresa() {
               )}
             </div>
 
-            {/* Nombre */}
             <div className="ae-form-group">
               <label>Nombre del negocio <span className="ae-required">*</span></label>
               <input
@@ -128,7 +225,6 @@ export default function AgregarEmpresa() {
               />
             </div>
 
-            {/* Descripción */}
             <div className="ae-form-group">
               <label>Descripción <span className="ae-optional">Opcional</span></label>
               <textarea
@@ -140,17 +236,23 @@ export default function AgregarEmpresa() {
               />
             </div>
 
-            {/* Teléfono + Ciudad */}
             <div className="ae-grid-2">
               <div className="ae-form-group">
                 <label>Teléfono / WhatsApp <span className="ae-required">*</span></label>
                 <input
                   className="vm-input"
-                  type="tel"
-                  placeholder="+52 81 1234 5678"
+                  type="text"
+                  placeholder="10 dígitos"
                   value={info.telefono}
-                  onChange={(e) => setInfo({ ...info, telefono: e.target.value })}
+                  onChange={(e) => {
+                    // Validar que solo se ingresen números y máximo 10
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                    setInfo({ ...info, telefono: onlyNums });
+                  }}
                 />
+                {info.telefono.length > 0 && info.telefono.length < 10 && (
+                  <p className="ae-error-text">Debe contener exactamente 10 números.</p>
+                )}
               </div>
               <div className="ae-form-group">
                 <label>Ciudad <span className="ae-required">*</span></label>
@@ -158,12 +260,15 @@ export default function AgregarEmpresa() {
                   className="vm-input"
                   placeholder="Monterrey"
                   value={info.ciudad}
-                  onChange={(e) => setInfo({ ...info, ciudad: e.target.value })}
+                  onChange={(e) => {
+                    // Validar que solo se ingresen letras y espacios
+                    const onlyLetters = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    setInfo({ ...info, ciudad: onlyLetters });
+                  }}
                 />
               </div>
             </div>
 
-            {/* Redes sociales */}
             <div className="ae-grid-2">
               <div className="ae-form-group">
                 <label><i className="fab fa-instagram ae-social-icon"></i> Instagram <span className="ae-optional">Opcional</span></label>
@@ -171,7 +276,11 @@ export default function AgregarEmpresa() {
                   className="vm-input"
                   placeholder="@minegocio"
                   value={info.instagram}
-                  onChange={(e) => setInfo({ ...info, instagram: e.target.value })}
+                  onChange={(e) => {
+                    const sinEspacios = e.target.value.replace(/\s/g, '');
+                    setInfo({ ...info, instagram: sinEspacios });
+                  }}
+                  onBlur={handleInstagramBlur} 
                 />
               </div>
               <div className="ae-form-group">
@@ -211,11 +320,29 @@ export default function AgregarEmpresa() {
             <div className="ae-grid-2">
               <div className="ae-form-group">
                 <label>Nombre <span className="ae-required">*</span></label>
-                <input className="vm-input" placeholder="Juan" value={admin.nombre} onChange={(e) => setAdmin({ ...admin, nombre: e.target.value })} />
+                <input 
+                  className="vm-input" 
+                  placeholder="Juan" 
+                  value={admin.nombre} 
+                  onChange={(e) => {
+                    // Validar solo letras
+                    const onlyLetters = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    setAdmin({ ...admin, nombre: onlyLetters });
+                  }} 
+                />
               </div>
               <div className="ae-form-group">
                 <label>Apellido <span className="ae-required">*</span></label>
-                <input className="vm-input" placeholder="Pérez" value={admin.apellido} onChange={(e) => setAdmin({ ...admin, apellido: e.target.value })} />
+                <input 
+                  className="vm-input" 
+                  placeholder="Pérez" 
+                  value={admin.apellido} 
+                  onChange={(e) => {
+                    // Validar solo letras
+                    const onlyLetters = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    setAdmin({ ...admin, apellido: onlyLetters });
+                  }} 
+                />
               </div>
             </div>
 
@@ -246,6 +373,9 @@ export default function AgregarEmpresa() {
             <div className="ae-form-group">
               <label>Fecha de nacimiento <span className="ae-required">*</span></label>
               <input className="vm-input" type="date" value={admin.fechaNacimiento} onChange={(e) => setAdmin({ ...admin, fechaNacimiento: e.target.value })} />
+              {admin.fechaNacimiento && !esMayorDe16(admin.fechaNacimiento) && (
+                <p className="ae-error-text">Debes ser mayor de 16 años para registrar un negocio.</p>
+              )}
             </div>
 
             <div className="ae-btn-row">
@@ -263,15 +393,15 @@ export default function AgregarEmpresa() {
           </div>
         )}
 
-        {/* ── STEP 4 — Colores + Confirmar ── */}
+        {/* ── STEP 4 — Colores + Anticipo + Confirmar ── */}
         {step === 4 && (
           <div className="step-container ae-card">
             <div className="ae-card-header">
-              <h2>Personalización</h2>
-              <p className="ae-subtitle">Elige los colores de tu página</p>
+              <h2>Configuración Adicional</h2>
+              <p className="ae-subtitle">Personaliza tu página y los pagos de tus clientes</p>
             </div>
 
-            <div className="ae-grid-2">
+            <div className="ae-grid-2 mb-4">
               <div className="ae-form-group">
                 <label>Color principal</label>
                 <div className="ae-color-row">
@@ -298,20 +428,40 @@ export default function AgregarEmpresa() {
               </div>
             </div>
 
+            {/* SECCIÓN DEL ANTICIPO */}
+            <div className="ae-form-group" style={{ padding: '1rem', background: 'var(--velvet-cream)', borderRadius: '0.75rem', border: '1px solid var(--velvet-blush)' }}>
+              <label><i className="fas fa-percentage" style={{ color: 'var(--velvet-plum)', marginRight: '8px' }}></i>Anticipo de citas (%) <span className="ae-optional">Opcional</span></label>
+              <p style={{ fontSize: '0.85rem', color: 'var(--velvet-dark)', opacity: 0.8, marginBottom: '0.8rem', lineHeight: '1.4' }}>
+                El anticipo es el porcentaje del costo total que tus clientes deberán pagar en línea al momento de agendar para asegurar su lugar. Déjalo en 0 si no deseas cobrar anticipo.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', maxWidth: '150px' }}>
+                <input
+                  className="vm-input"
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Ej. 15"
+                  value={anticipo}
+                  onChange={(e) => setAnticipo(e.target.value)}
+                />
+                <span style={{ marginLeft: '10px', fontWeight: 'bold', color: 'var(--velvet-dark)' }}>%</span>
+              </div>
+            </div>
+
             <div
               className="ae-color-preview"
               style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)` }}
             >
-              <h4>Vista previa</h4>
-              <p>Así se verán los colores en tu página</p>
+              <h4>Vista previa de tus colores</h4>
+              <p>Así se verán los botones y detalles en tu página</p>
             </div>
 
             {/* Resumen */}
             <div className="ae-summary">
-              <h3>Resumen</h3>
+              <h3>Resumen Final</h3>
               <div className="ae-summary-row"><span>Tipo</span><strong>{businessType}</strong></div>
               <div className="ae-summary-row"><span>Negocio</span><strong>{info.nombre}</strong></div>
-              <div className="ae-summary-row"><span>Ciudad</span><strong>{info.ciudad}</strong></div>
+              <div className="ae-summary-row"><span>Anticipo a cobrar</span><strong>{anticipo}%</strong></div>
               <div className="ae-summary-row"><span>Admin</span><strong>{admin.nombre} {admin.apellido}</strong></div>
             </div>
 
@@ -319,31 +469,8 @@ export default function AgregarEmpresa() {
               <button className="vm-btn-outline" onClick={() => setStep(3)}>
                 <i className="fas fa-arrow-left"></i> Atrás
               </button>
-              <button className="vm-btn-primary" onClick={() => setStep(5)}>
+              <button className="vm-btn-primary" onClick={handleSubmit}>
                 ✨ Crear negocio
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 5 — Éxito ── */}
-        {step === 5 && (
-          <div className="step-container ae-card ae-success">
-            <div style={{ fontSize: "4rem" }}>🎉</div>
-            <h2>¡Negocio creado!</h2>
-            <p className="ae-subtitle">Tu negocio ha sido configurado exitosamente. Ahora puedes agregar servicios y empleados desde tu dashboard.</p>
-            <div className="ae-summary" style={{ width: "100%" }}>
-              <div className="ae-summary-row"><span>Tipo</span><strong>{businessType}</strong></div>
-              <div className="ae-summary-row"><span>Negocio</span><strong>{info.nombre}</strong></div>
-              <div className="ae-summary-row"><span>Ciudad</span><strong>{info.ciudad}</strong></div>
-              <div className="ae-summary-row"><span>Admin</span><strong>{admin.nombre} {admin.apellido}</strong></div>
-            </div>
-            <div className="ae-btn-row" style={{ justifyContent: "center" }}>
-              <Link to="/dashboard" className="vm-btn-primary" style={{ textDecoration: "none" }}>
-                Ir al Dashboard <i className="fas fa-arrow-right"></i>
-              </Link>
-              <button className="vm-btn-outline" onClick={() => { setStep(1); setBusinessType(""); setInfo({ nombre: "", descripcion: "", telefono: "", ciudad: "", instagram: "", facebook: "" }); setAdmin({ nombre: "", apellido: "", email: "", password: "", fechaNacimiento: "" }); setColors({ primary: "#7F055F", secondary: "#E5A4CB" }); setBannerPreview(""); }}>
-                Crear otro
               </button>
             </div>
           </div>

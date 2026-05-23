@@ -24,7 +24,7 @@ export default function App() {
         <Route path="/usuarios" element={<Usuarios />} /> 
         <Route path="/analytics" element={<Analytics />} /> 
         <Route path="/admin" element={<Admin />} />
-        <Route path="/empresa" element={<EmpresaLanding />} />
+        <Route path="/empresa/:id" element={<EmpresaLanding />} />
         <Route path="/empleado" element={<Empleado />} />
 
       </Routes>

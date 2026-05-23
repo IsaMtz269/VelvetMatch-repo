@@ -68,8 +68,20 @@ export default function PantallaPrincipal() {
           <a href="#about" className="nav-link">Nosotros</a>
           
           {/* LÓGICA CONDICIONAL AQUÍ */}
-          {usuarioActivo ? (
+            {usuarioActivo ? (
             <div className="d-flex align-items-center ms-3 gap-3">
+              
+              {/* BOTÓN VIP: Solo visible si el rol es 'admin' o 'superadmin' */}
+              {(usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin') && (
+                <Link 
+                  to={usuarioActivo.id_negocio ? `/empresa/${usuarioActivo.id_negocio}` : "/dashboard"} 
+                  className="btn btn-sm text-white rounded-pill px-3 fw-bold" 
+                  style={{ background: 'var(--gradient-primary)', boxShadow: 'var(--shadow-soft)' }}
+                >
+                  ✨ Mi Dashboard
+                </Link>
+              )}
+
               <div className="d-flex align-items-center gap-2">
                 <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: '35px', height: '35px', fontSize: '14px' }}>
                   {iniciales}
