@@ -3,11 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import "./registro.css";
 
 export default function Register() {
-  const navigate = useNavigate(); // Para redirigir al login después de registrarse
+  const navigate = useNavigate(); 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  // 1. Estado para guardar los datos del formulario
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -18,17 +17,14 @@ export default function Register() {
   });
   const [errorMensaje, setErrorMensaje] = useState("");
 
-  // 2. Función para actualizar el estado cuando el usuario escribe
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Función principal para enviar a la base de datos
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Evita que la página recargue
+    e.preventDefault();
     setErrorMensaje("");
 
-    // Validar contraseñas
     if (formData.password !== formData.confirmPassword) {
       return setErrorMensaje("Las contraseñas no coinciden.");
     }
@@ -50,7 +46,7 @@ export default function Register() {
 
       if (response.ok) {
         alert("¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.");
-        navigate("/login"); // Redirige al login
+        navigate("/login"); 
       } else {
         setErrorMensaje(data.message || "Hubo un error al registrar.");
       }

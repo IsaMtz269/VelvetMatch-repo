@@ -6,21 +6,18 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // 1. Estado para guardar lo que escribe el usuario
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
   const [errorMensaje, setErrorMensaje] = useState("");
 
-  // 2. Función para capturar los datos
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Función principal para conectarse al backend
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Evita que la página recargue
+    e.preventDefault(); 
     setErrorMensaje("");
 
     try {
@@ -36,14 +33,11 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        // ¡ÉXITO! Guardamos la información del usuario en el navegador
         localStorage.setItem("usuario", JSON.stringify(data.Usuario));
         localStorage.setItem("token", data.token);
         
-        // Lo mandamos a la Pantalla Principal
         navigate("/");
       } else {
-        // Mostramos el error si la contraseña o correo están mal
         setErrorMensaje(data.message || "Credenciales inválidas.");
       }
     } catch (error) {

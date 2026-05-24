@@ -1,38 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import './Empresa.css';
 
 export default function EmpresaLanding() {
+  // Obtenemos el ID del negocio desde la URL
+  const { id } = useParams();
+
   // --- ESTADOS ---
   const [currentStep, setCurrentStep] = useState(1);
+  const [negocio, setNegocio] = useState(null);
+  const [servicios, setServicios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // --- OBTENER DATOS DEL BACKEND ---
+  useEffect(() => {
+    const fetchNegocioData = async () => {
+      try {
+        // 1. Obtener la información del negocio
+        const resNegocio = await fetch(`http://localhost:5000/api/negocios/${id}`);
+        if (!resNegocio.ok) throw new Error('No se encontró el negocio');
+        const dataNegocio = await resNegocio.json();
+        setNegocio(dataNegocio);
+
+        // 2. Obtener los servicios del negocio
+        const resServicios = await fetch(`http://localhost:5000/api/servicios/negocio/${id}`);
+        if (resServicios.ok) {
+          const dataServicios = await resServicios.json();
+          setServicios(dataServicios);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchNegocioData();
+    }
+  }, [id]);
 
   // --- LÓGICA PARA EL MODAL DE CITAS ---
   const nextStep = () => setCurrentStep(prev => prev + 1);
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
   const submitBooking = () => {
-    // Escondemos el modal de reserva actual usando el objeto global de Bootstrap
     const bookingModalEl = document.getElementById('bookingModal');
     const bookingModal = window.bootstrap.Modal.getInstance(bookingModalEl);
     if (bookingModal) bookingModal.hide();
 
-    // Mostramos el modal de éxito con un pequeño retraso para que la animación sea fluida
     setTimeout(() => {
       const successModalEl = document.getElementById('successModal');
       const successModal = new window.bootstrap.Modal(successModalEl);
       successModal.show();
-      
-      // Reiniciamos el wizard al paso 1 después de un tiempo
       setTimeout(() => setCurrentStep(1), 1000);
     }, 500);
   };
 
+  // Si está cargando, mostramos un spinner
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light-custom">
+        <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Si hay error (ej. id incorrecto)
+  if (error || !negocio) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light-custom text-center">
+        <div>
+          <i className="fas fa-store-slash fa-4x text-muted mb-3"></i>
+          <h2 className="fw-bold font-playfair text-dark">Negocio no encontrado</h2>
+          <p className="text-muted">Parece que este negocio no existe o el enlace es incorrecto.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="font-dm bg-light-custom">
+    /* Aquí inyectamos los colores personalizados del negocio a las variables CSS */
+    <div className="font-dm bg-light-custom" style={{ 
+      '--primary-color': negocio.primaryColor || '#4A0E4E',
+      '--secondary-color': negocio.secondaryColor || '#CFB53B' 
+    }}>
       {/* ================= NAVBAR ================= */}
       <nav className="navbar navbar-expand-lg fixed-top animate__animated animate__fadeInDown shadow-sm">
         <div className="container">
-          <a className="navbar-brand fw-bold font-playfair fs-4" href="#">
-            <i className="fas fa-gem me-2"></i>GLAMOUR HAVEN
+          <a className="navbar-brand fw-bold font-playfair fs-4 text-uppercase" href="#">
+            <i className="fas fa-gem me-2"></i>{negocio.nombre}
           </a>
           <button className="navbar-toggler border-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <i className="fas fa-bars text-white"></i>
@@ -44,7 +104,7 @@ export default function EmpresaLanding() {
               <li className="nav-item"><a className="nav-link custom-nav-link" href="#reviews">Opiniones</a></li>
               <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
                 <button className="btn btn-outline-light btn-sm rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#loginModal">
-                  <i className="fas fa-cog me-2"></i> Ir al Panel
+                  <i className="fas fa-user me-2"></i> Iniciar Sesión
                 </button>
               </li>
             </ul>
@@ -53,13 +113,24 @@ export default function EmpresaLanding() {
       </nav>
 
       {/* ================= HERO SECTION ================= */}
-      <header className="hero-section d-flex align-items-center text-center text-white">
+      <header 
+        className="hero-section d-flex align-items-center text-center text-white"
+        style={{
+          backgroundImage: negocio.banner 
+            ? `url(${negocio.banner})` 
+            : "url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')"
+        }}
+      >
         <div className="overlay"></div>
         <div className="container position-relative z-2 animate__animated animate__fadeInUp">
-          <span className="badge bg-secondary mb-3 px-4 py-2 rounded-pill fw-bold" style={{ letterSpacing: '1px' }}>EXPERTOS EN ESTILO</span>
-          <h1 className="display-3 fw-bold mb-4 font-playfair">Tu mejor versión comienza aquí</h1>
+          <span className="badge bg-secondary mb-3 px-4 py-2 rounded-pill fw-bold text-uppercase" style={{ letterSpacing: '1px' }}>
+            {negocio.tipo}
+          </span>
+          <h1 className="display-3 fw-bold mb-4 font-playfair text-capitalize">
+            {negocio.nombre}
+          </h1>
           <p className="lead mb-5 mx-auto opacity-75" style={{ maxWidth: '700px' }}>
-            Descubre servicios profesionales, agenda tu cita en segundos y déjate consentir por nuestros expertos.
+            {negocio.descripcion || 'Descubre servicios profesionales, agenda tu cita en segundos y déjate consentir por nuestros expertos.'}
           </p>
           <a href="#servicios" className="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fw-bold">
             Explorar Servicios <i className="fas fa-arrow-down ms-2"></i>
@@ -76,206 +147,55 @@ export default function EmpresaLanding() {
             <p className="text-muted">Selecciona el tratamiento ideal para ti</p>
           </div>
           
-          <div className="row g-4">
-            {/* Tarjeta 1 */}
-            <div className="col-md-6 col-lg-4 animate__animated animate__fadeInUp" style={{ animationDelay: '0.1s' }}>
-              <div className="card service-card h-100 border-0 shadow-sm rounded-4">
-                <div className="position-relative overflow-hidden rounded-top-4">
-                  <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" className="card-img-top" alt="Corte" />
-                  <span className="price-tag shadow-sm font-dm">$350.00 MXN</span>
-                </div>
-                <div className="card-body p-4 d-flex flex-column">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="card-title fw-bold mb-0 font-playfair">Corte & Estilo</h5>
-                    <small className="text-muted fw-bold"><i className="far fa-clock me-1"></i> 45 min</small>
-                  </div>
-                  <p className="card-text text-muted small flex-grow-1 mt-2">Corte profesional con lavado incluido, masaje capilar y peinado final con productos premium.</p>
-                  <div className="d-flex gap-2 mb-3">
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Ver Video"><i className="fas fa-play me-1"></i> Demo</button>
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Ver Galería"><i className="fas fa-images me-1"></i> Fotos</button>
-                  </div>
-                  <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bookingModal" onClick={() => setCurrentStep(1)}>
-                    Agendar Cita
-                  </button>
-                </div>
+          {/* LÓGICA DE SERVICIOS VACÍOS */}
+          {servicios.length === 0 ? (
+            <div className="text-center py-5 animate__animated animate__fadeInUp bg-white rounded-4 shadow-sm border p-5 mx-auto" style={{ maxWidth: '600px' }}>
+              <div className="bg-primary-light text-primary-custom rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style={{ width: '80px', height: '80px' }}>
+                <i className="fas fa-box-open fa-3x"></i>
               </div>
+              <h3 className="fw-bold font-playfair text-dark">Aún no hay servicios disponibles</h3>
+              <p className="text-muted mb-4">Este negocio es nuevo y está preparando su catálogo de servicios. ¡Vuelve pronto para agendar tu cita!</p>
+              
+              {/* Botón puramente visual por ahora */}
+              <button className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm hover-lift">
+                <i className="fas fa-plus me-2"></i> Agregar servicios
+              </button>
             </div>
-
-            {/* Tarjeta 2 */}
-            <div className="col-md-6 col-lg-4 animate__animated animate__fadeInUp" style={{ animationDelay: '0.2s' }}>
-              <div className="card service-card h-100 border-0 shadow-sm rounded-4">
-                <div className="position-relative overflow-hidden rounded-top-4">
-                  <img src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" className="card-img-top" alt="Manicura" />
-                  <span className="price-tag shadow-sm font-dm">$450.00 MXN</span>
-                </div>
-                <div className="card-body p-4 d-flex flex-column">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="card-title fw-bold mb-0 font-playfair">Manicura Gelish</h5>
-                    <small className="text-muted fw-bold"><i className="far fa-clock me-1"></i> 60 min</small>
+          ) : (
+            <div className="row g-4">
+              {/* Aquí mapearíamos los servicios reales si existieran */}
+              {servicios.map((servicio, index) => (
+                <div className="col-md-6 col-lg-4 animate__animated animate__fadeInUp" key={servicio._id} style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="card service-card h-100 border-0 shadow-sm rounded-4">
+                    <div className="position-relative overflow-hidden rounded-top-4">
+                      <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" className="card-img-top" alt={servicio.nombre} />
+                      <span className="price-tag shadow-sm font-dm">${servicio.precio}.00 MXN</span>
+                    </div>
+                    <div className="card-body p-4 d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h5 className="card-title fw-bold mb-0 font-playfair">{servicio.nombre}</h5>
+                        <small className="text-muted fw-bold"><i className="far fa-clock me-1"></i> {servicio.duracion} min</small>
+                      </div>
+                      <p className="card-text text-muted small flex-grow-1 mt-2">{servicio.descripcion || 'Servicio profesional de alta calidad.'}</p>
+                      <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm mt-3" data-bs-toggle="modal" data-bs-target="#bookingModal" onClick={() => setCurrentStep(1)}>
+                        Agendar Cita
+                      </button>
+                    </div>
                   </div>
-                  <p className="card-text text-muted small flex-grow-1 mt-2">Limpieza profunda de cutícula, diseño personalizado y aplicación de gel de larga duración.</p>
-                  <div className="d-flex gap-2 mb-3">
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3"><i className="fas fa-images me-1"></i> Fotos</button>
-                  </div>
-                  <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bookingModal" onClick={() => setCurrentStep(1)}>
-                    Agendar Cita
-                  </button>
                 </div>
-              </div>
+              ))}
             </div>
-
-            {/* Tarjeta 3 */}
-            <div className="col-md-6 col-lg-4 animate__animated animate__fadeInUp" style={{ animationDelay: '0.3s' }}>
-              <div className="card service-card h-100 border-0 shadow-sm rounded-4">
-                <div className="position-relative overflow-hidden rounded-top-4">
-                  <img src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" className="card-img-top" alt="Maquillaje" />
-                  <span className="price-tag shadow-sm font-dm">$800.00 MXN</span>
-                </div>
-                <div className="card-body p-4 d-flex flex-column">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="card-title fw-bold mb-0 font-playfair">Maquillaje Social</h5>
-                    <small className="text-muted fw-bold"><i className="far fa-clock me-1"></i> 90 min</small>
-                  </div>
-                  <p className="card-text text-muted small flex-grow-1 mt-2">Maquillaje para eventos de día o noche. Incluye preparación de piel y pestañas postizas.</p>
-                  <div className="d-flex gap-2 mb-3">
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill px-3"><i className="fas fa-play me-1"></i> Demo</button>
-                  </div>
-                  <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bookingModal" onClick={() => setCurrentStep(1)}>
-                    Agendar Cita
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* ================= NOVEDADES ================= */}
-      <section id="novedades" className="py-5">
-        <div className="container py-5">
-          <div className="d-flex justify-content-between align-items-end mb-4 animate__animated animate__fadeIn">
-            <div>
-              <h2 className="section-title fw-bold font-playfair">Trabajos Recientes</h2>
-              <div className="divider"></div>
-            </div>
-            <button className="btn btn-outline-primary btn-sm rounded-pill fw-bold px-4 mb-2">Ver todo</button>
-          </div>
-
-          <div className="row g-3">
-            <div className="col-md-6 animate__animated animate__fadeInLeft">
-              <div className="post-card h-100 position-relative rounded-4 overflow-hidden group shadow-sm">
-                <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" className="w-100 h-100 object-fit-cover" alt="Post" />
-                <div className="post-overlay d-flex flex-column justify-content-end p-4">
-                  <div className="d-flex justify-content-between align-items-end w-100">
-                    <h4 className="text-white mb-0 me-3 font-playfair fw-bold text-shadow">Tendencias de Verano 2024</h4>
-                    <p className="text-white-50 small mb-0 text-end text-nowrap fw-bold">Por: Elena Torres • Hace 2 días</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="row g-3">
-                <div className="col-6 animate__animated animate__fadeInRight">
-                  <div className="post-card position-relative rounded-4 overflow-hidden aspect-ratio-1 shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" className="w-100 h-100 object-fit-cover" alt="Post" />
-                    <div className="post-overlay p-3 d-flex align-items-end">
-                      <small className="text-white fw-bold">Nuevo diseño de uñas acrílicas</small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-6 animate__animated animate__fadeInRight" style={{ animationDelay: '0.1s' }}>
-                  <div className="post-card position-relative rounded-4 overflow-hidden aspect-ratio-1 shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1599351431202-6e0c06e724da?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" className="w-100 h-100 object-fit-cover" alt="Post" />
-                    <div className="post-overlay p-3 d-flex align-items-end">
-                      <small className="text-white fw-bold">Promoción de apertura</small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-12 animate__animated animate__fadeInUp" style={{ animationDelay: '0.2s' }}>
-                  <div className="bg-primary-subtle p-4 rounded-4 shadow-sm d-flex align-items-center border border-primary-subtle">
-                    <div className="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm me-4" style={{ width: '50px', height: '50px' }}>
-                      <i className="fas fa-bullhorn fa-lg"></i>
-                    </div>
-                    <div>
-                      <h6 className="mb-1 fw-bold text-dark font-playfair fs-5">Aviso Importante</h6>
-                      <small className="text-muted">Cerrado por vacaciones del 1 al 5 de Abril.</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= REVIEWS ================= */}
-      <section id="reviews" className="py-5 bg-light-custom">
-        <div className="container py-5">
-          <h2 className="text-center fw-bold mb-5 animate__animated animate__fadeIn font-playfair">Lo que dicen nuestros clientes</h2>
-          
-          <div className="row g-4">
-            <div className="col-md-4 animate__animated animate__fadeInUp">
-              <div className="card h-100 border-0 shadow-sm rounded-4 bg-white p-2">
-                <div className="card-body p-4">
-                  <div className="text-warning mb-3">
-                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
-                  </div>
-                  <p className="card-text fst-italic text-muted">"Me encantó el servicio. Elena fue super profesional y entendió exactamente lo que quería. ¡Volveré seguro!"</p>
-                  <div className="d-flex align-items-center mt-4">
-                    <div className="bg-secondary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '45px', height: '45px' }}>S</div>
-                    <div>
-                      <h6 className="mb-0 fw-bold font-playfair">Sofia M.</h6>
-                      <small className="text-muted" style={{ fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase' }}>Corte & Estilo</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 animate__animated animate__fadeInUp" style={{ animationDelay: '0.2s' }}>
-              <div className="card h-100 border-0 shadow-sm rounded-4 bg-white p-2">
-                <div className="card-body p-4">
-                  <div className="text-warning mb-3">
-                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="far fa-star"></i>
-                  </div>
-                  <p className="card-text fst-italic text-muted">"El lugar está increíble y muy limpio. La app para agendar cita es súper fácil de usar. Muy recomendado."</p>
-                  <div className="d-flex align-items-center mt-4">
-                    <div className="bg-secondary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '45px', height: '45px' }}>R</div>
-                    <div>
-                      <h6 className="mb-0 fw-bold font-playfair">Roberto G.</h6>
-                      <small className="text-muted" style={{ fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase' }}>Barbería Clásica</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 animate__animated animate__fadeInUp" style={{ animationDelay: '0.4s' }}>
-              <div className="card h-100 border-0 shadow-sm rounded-4 bg-white p-2">
-                <div className="card-body p-4">
-                  <div className="text-warning mb-3">
-                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
-                  </div>
-                  <p className="card-text fst-italic text-muted">"Manicura perfecta, me ha durado más de 3 semanas intacta. Gran atención de Ana."</p>
-                  <div className="d-flex align-items-center mt-4">
-                    <div className="bg-secondary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '45px', height: '45px' }}>L</div>
-                    <div>
-                      <h6 className="mb-0 fw-bold font-playfair">Laura T.</h6>
-                      <small className="text-muted" style={{ fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase' }}>Manicura Gelish</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= FOOTER ================= */}
+      {/* ================= FOOTER DINÁMICO ================= */}
       <footer className="text-white py-5">
         <div className="container py-4">
           <div className="row g-4">
             <div className="col-md-4 mb-4">
-              <h4 className="fw-bold mb-3 font-playfair"><i className="fas fa-gem me-2"></i>GLAMOUR HAVEN</h4>
-              <p className="small text-white-50 pe-md-4">Expertos en resaltar tu belleza natural con servicios de alta calidad y atención personalizada.</p>
+              <h4 className="fw-bold mb-3 font-playfair text-uppercase"><i className="fas fa-gem me-2"></i>{negocio.nombre}</h4>
+              <p className="small text-white-50 pe-md-4">{negocio.descripcion || 'Expertos en resaltar tu belleza natural con servicios de alta calidad y atención personalizada.'}</p>
             </div>
             <div className="col-md-4 mb-4">
               <h5 className="fw-bold mb-4 font-playfair">Horarios de Atención</h5>
@@ -288,14 +208,15 @@ export default function EmpresaLanding() {
             <div className="col-md-4 mb-4">
               <h5 className="fw-bold mb-4 font-playfair">Contacto</h5>
               <ul className="list-unstyled small text-white-50">
-                <li className="mb-3"><i className="fas fa-phone me-3 fs-5"></i> (555) 123-4567</li>
-                <li className="mb-3"><i className="fas fa-envelope me-3 fs-5"></i> citas@glamourhaven.com</li>
-                <li><i className="fas fa-map-marker-alt me-3 fs-5"></i> Av. Principal 123, Centro</li>
+                <li className="mb-3"><i className="fas fa-phone me-3 fs-5"></i> {negocio.celular}</li>
+                {negocio.ubicacion && <li className="mb-3"><i className="fas fa-map-marker-alt me-3 fs-5"></i> {negocio.ubicacion}</li>}
+                {negocio.instagram && <li className="mb-3"><i className="fab fa-instagram me-3 fs-5"></i> {negocio.instagram}</li>}
+                {negocio.facebook && <li><i className="fab fa-facebook me-3 fs-5"></i> {negocio.facebook}</li>}
               </ul>
             </div>
           </div>
           <div className="text-center small text-white-50 mt-4 pt-4 border-top border-secondary">
-            <p className="mb-0">&copy; 2024 Glamour Haven. Powered by <strong className="text-white">Velvet Match</strong>.</p>
+            <p className="mb-0">&copy; 2024 {negocio.nombre}. Powered by <strong className="text-white">Velvet Match</strong>.</p>
           </div>
         </div>
       </footer>
