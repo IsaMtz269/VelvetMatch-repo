@@ -2,6 +2,7 @@
 const Usuario = require('../models/Usuario');
 const Negocio = require('../models/Negocio');
 const Servicio = require('../models/Servicio');
+const bcrypt = require('bcryptjs');
 
 // Función auxiliar para validar la edad en el servidor
 const esMayorDe16 = (fecha) => {
@@ -87,28 +88,61 @@ exports.obtenerEmpleadosPorNegocio = async (req, res) => {
 // Actualizar perfil de usuario (usada por el cliente para actualizar su perfil)
 exports.actualizarUsuario = async (req, res) => {
   try {
-    const { nombre, apellido, email, fechNacimiento } = req.body;
+    const { nombre, apellido, email, fechNacimiento, password } = req.body;
+    const idUsuario = req.params.id;
+
+    // 1. VALIDACIÓN: Campos obligatorios básicos
+    if (!nombre || !apellido || !email || !fechNacimiento) {
+        return res.status(400).json({ message: 'Nombre, Apellido, Email y Fecha de Nacimiento son campos obligatorios.' });
+    }
+
+    // 2. VALIDACIÓN: Nombre y Apellido solo letras
+    const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
+        return res.status(400).json({ message: 'El nombre y el apellido solo deben contener letras.' });
+    }
+
+    // 3. VALIDACIÓN: Mayor de 16 años (Reutiliza tu función auxiliar esMayorDe16)
+    if (!esMayorDe16(fechNacimiento)) {
+        return res.status(400).json({ message: 'Debes ser mayor de 16 años para actualizar tu perfil.' });
+    }
+
+    // 4. VALIDACIÓN: Correo electrónico único (exceptuando al propio usuario actual)
+    const emailExiste = await Usuario.findOne({ email, _id: { $ne: idUsuario } });
+    if (emailExiste) {
+        return res.status(400).json({ message: 'El correo electrónico ingresado ya pertenece a otro usuario.' });
+    }
+
+    // Estructuramos los datos básicos para actualizar
+    const datosActualizar = { nombre, apellido, email, fechNacimiento };
+
+    // 5. VALIDACIÓN: Contraseña (Solo si decide rellenarla para cambiarla)
+    if (password && password.trim() !== "") {
+        if (password.length < 8) {
+            return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+        }
+        // Encriptamos la contraseña con bcrypt antes de guardarla
+        const salt = await bcrypt.genSalt(10);
+        datosActualizar.password = await bcrypt.hash(password, salt);
+    }
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
-      req.params.id,
-      { nombre, apellido, email, fechNacimiento },
+      idUsuario,
+      datosActualizar,
       { new: true, runValidators: true }
     );
 
     if (!usuarioActualizado) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
     res.status(200).json({ 
-      message: 'Perfil actualizado correctamente', 
+      message: '¡Tu perfil se ha actualizado correctamente!', 
       usuario: usuarioActualizado 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar perfil', error: error.message });
+    res.status(500).json({ message: 'Error interno al actualizar perfil', error: error.message });
   }
-
-    
-
 };
 
 // Obtener todos los usuarios (para superadmin)

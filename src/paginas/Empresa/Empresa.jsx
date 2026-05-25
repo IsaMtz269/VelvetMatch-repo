@@ -24,6 +24,13 @@ export default function EmpresaLanding() {
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
   const [bookingError, setBookingError] = useState("");
+  const [horasOcupadas, setHorasOcupadas] = useState([]);
+  const horasDisponibles = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+
+  // --- 👇 NUEVOS ESTADOS DE LOGIN ---
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginError, setLoginError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState("");
 
   const getContrastColor = (hexcolor) => {
     if (!hexcolor) return '#ffffff';
@@ -34,6 +41,59 @@ export default function EmpresaLanding() {
     var yiq = ((r*299)+(g*587)+(b*114))/1000;
     return (yiq >= 128) ? '#2a0020' : '#ffffff'; 
   };
+
+  useEffect(() => {
+  if (bookingDate && negocio) {
+    const fetchHorasOcupadas = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/citas/ocupadas?id_negocio=${negocio._id}&fecha=${bookingDate}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Se espera que el backend retorne un array de strings, ej: ["10:00", "14:00"]
+          setHorasOcupadas(data.horasOcupadas || data);
+        }
+      } catch (err) {
+        console.error("Error al obtener horas ocupadas:", err);
+      }
+    };
+    fetchHorasOcupadas();
+  }
+}, [bookingDate, negocio]);
+
+const generarDiasCalendario = () => {
+  const hoy = new Date();
+  const añoActual = hoy.getFullYear();
+  const mesActual = hoy.getMonth();
+
+  // Primer día del mes y total de días
+  const primerDiaIndex = new Date(añoActual, mesActual, 1).getDay(); // 0: Dom, 1: Lun...
+  const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
+
+  const dias = [];
+  
+  // Rellenar espacios vacíos antes del primer día del mes
+  for (let i = 0; i < primerDiaIndex; i++) {
+    dias.push({ numero: "", fechaString: "", disabled: true });
+  }
+
+  // Generar los días reales del mes
+  for (let dia = 1; dia <= totalDias; dia++) {
+    const fechaObj = new Date(añoActual, mesActual, dia);
+    const fechaString = fechaObj.toISOString().split('T')[0];
+
+    // Validación de regla de negocio: mínimo 48 horas de anticipación
+    const diffHours = (fechaObj - hoy) / (1000 * 60 * 60);
+    const esPasadoODisabled = diffHours < 48;
+
+    dias.push({
+      numero: dia,
+      fechaString: fechaString,
+      disabled: esPasadoODisabled
+    });
+  }
+
+  return dias;
+};
 
   useEffect(() => {
     const userStr = localStorage.getItem('usuario');
@@ -60,87 +120,109 @@ export default function EmpresaLanding() {
     if (id) fetchAllData();
   }, [id]);
 
-  // --- SLIDERS ---
   const nextServices = () => { if (serviceIndex < servicios.length - 3) setServiceIndex(prev => prev + 1); };
   const prevServices = () => { if (serviceIndex > 0) setServiceIndex(prev => prev - 1); };
   const nextPosts = () => { if (postIndex < posts.length - 4) setPostIndex(prev => prev + 1); };
   const prevPosts = () => { if (postIndex > 0) setPostIndex(prev => prev - 1); };
 
+  // --- 👇 LÓGICA DE INICIO DE SESIÓN ---
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError(""); setLoginSuccess("");
+    
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData)
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.message || "Error al iniciar sesión");
+
+      // Guardamos la sesión exitosa
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('usuario', JSON.stringify(data.Usuario));
+      setUsuarioActivo(data.Usuario);
+      setLoginSuccess("¡Inicio de sesión exitoso!");
+
+      setTimeout(() => {
+        setLoginSuccess("");
+        const modalEl = document.getElementById('loginModal');
+        const modal = window.bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        setLoginData({ email: '', password: '' }); // Limpiamos el form
+      }, 1000);
+
+    } catch (err) {
+      setLoginError(err.message);
+    }
+  };
+
+  // --- 👇 LÓGICA DEL BOTÓN "MI PANEL" ---
   const irAlPanel = () => {
-    if (usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin') navigate('/admin');
-    else if (usuarioActivo.roles === 'empleado') navigate('/empleado');
+    // 1. Verificamos si es un empleado o admin intentando entrar al panel
+    if (usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin' || usuarioActivo.roles === 'empleado') {
+      
+      // 2. Comprobamos que pertenezca a ESTE negocio específicamente
+      if (usuarioActivo.id_negocio !== negocio._id) {
+        alert("Acceso denegado: Tu cuenta de empleado/administrador pertenece a otro establecimiento.");
+        return;
+      }
+
+      // 3. Lo mandamos a su panel correspondiente
+      if (usuarioActivo.roles === 'empleado') {
+        navigate('/empleado');
+      } else {
+        navigate('/admin');
+      }
+    }
   };
 
   // --- LÓGICA DE AGENDAMIENTO ---
   const handleOpenBooking = (servicio) => {
-    // Si no está registrado o no inició sesión, mostramos el modal de Login en lugar del de Cita
     if (!usuarioActivo) {
       const loginModal = new window.bootstrap.Modal(document.getElementById('loginModal'));
       loginModal.show();
       return;
     }
-    
     setSelectedService(servicio);
-    setCurrentStep(1);
-    setBookingDate("");
-    setBookingTime("");
-    setBookingError("");
-    
+    setCurrentStep(1); setBookingDate(""); setBookingTime(""); setBookingError("");
     const bookingModal = new window.bootstrap.Modal(document.getElementById('bookingModal'));
     bookingModal.show();
   };
 
   const handleNextToStep3 = () => {
     setBookingError("");
-    if (!bookingDate || !bookingTime) {
-      return setBookingError("Por favor, selecciona una fecha y una hora.");
-    }
-
-    // Validación Front-End: 48 horas de anticipo
+    if (!bookingDate || !bookingTime) return setBookingError("Por favor, selecciona una fecha y una hora.");
     const fechaHoraCita = new Date(`${bookingDate}T${bookingTime}:00`);
-    const ahora = new Date();
-    const diffHours = (fechaHoraCita - ahora) / (1000 * 60 * 60);
-
-    if (diffHours < 48) {
-      return setBookingError("Las citas deben agendarse con al menos 48 horas de anticipación.");
-    }
-
+    const diffHours = (fechaHoraCita - new Date()) / (1000 * 60 * 60);
+    if (diffHours < 48) return setBookingError("Las citas deben agendarse con al menos 48 horas de anticipación.");
     setCurrentStep(3);
   };
 
   const submitBooking = async () => {
     setBookingError("");
     try {
-      // Cálculos
       const anticipoMonto = selectedService.precio * (negocio.anticipo / 100);
-      
       const res = await fetch('http://localhost:5000/api/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id_cliente: usuarioActivo.id,
-          id_negocio: negocio._id,
-          id_servicio: selectedService._id,
-          fecha: bookingDate,
-          hora: bookingTime,
-          precio_final: selectedService.precio,
-          anticipo_pagado: anticipoMonto
+          id_cliente: usuarioActivo.id, id_negocio: negocio._id, id_servicio: selectedService._id,
+          fecha: bookingDate, hora: bookingTime, precio_final: selectedService.precio, anticipo_pagado: anticipoMonto
         })
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      // Si fue exitoso, cerramos un modal y abrimos el de éxito
-      const bookingModalEl = document.getElementById('bookingModal');
-      const bookingModal = window.bootstrap.Modal.getInstance(bookingModalEl);
+      const bookingModal = window.bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
       if (bookingModal) bookingModal.hide();
 
       setTimeout(() => {
         const successModal = new window.bootstrap.Modal(document.getElementById('successModal'));
         successModal.show();
       }, 500);
-
     } catch (err) {
       setBookingError(err.message);
     }
@@ -152,26 +234,13 @@ export default function EmpresaLanding() {
   const dynamicTextColor = getContrastColor(negocio.primaryColor);
   const serviciosVisibles = servicios.slice(serviceIndex, serviceIndex + 3);
   const postsVisibles = posts.slice(postIndex, postIndex + 4);
-
-  // Variables para el resumen (Paso 3)
   const anticipoMonto = selectedService ? (selectedService.precio * (negocio.anticipo / 100)) : 0;
   const restanteMonto = selectedService ? (selectedService.precio - anticipoMonto) : 0;
-
-  // Fecha mínima permitida (48 hrs desde hoy) para el selector de HTML
-  const getMinDate = () => {
-    const d = new Date();
-    d.setHours(d.getHours() + 48);
-    return d.toISOString().split('T')[0];
-  };
+  const getMinDate = () => { const d = new Date(); d.setHours(d.getHours() + 48); return d.toISOString().split('T')[0]; };
 
   return (
-    <div className="font-dm bg-light-custom" style={{ 
-      '--primary-color': negocio.primaryColor || '#4A0E4E',
-      '--secondary-color': negocio.secondaryColor || '#CFB53B',
-      '--text-on-primary': dynamicTextColor
-    }}>
-      
-     {/* ================= NAVBAR ================= */}
+    <div className="font-dm bg-light-custom" style={{ '--primary-color': negocio.primaryColor || '#4A0E4E', '--secondary-color': negocio.secondaryColor || '#CFB53B', '--text-on-primary': dynamicTextColor }}>
+      {/* ================= NAVBAR ================= */}
       <nav className="navbar navbar-expand-lg fixed-top animate__animated animate__fadeInDown shadow-sm" style={{ backgroundColor: 'var(--primary-color)' }}>
         <div className="container">
           <a className="navbar-brand fw-bold font-playfair fs-4 text-uppercase" style={{ color: 'var(--text-on-primary)' }} href="#">
@@ -184,7 +253,6 @@ export default function EmpresaLanding() {
             <ul className="navbar-nav ms-auto align-items-center">
               <li className="nav-item"><a className="nav-link custom-nav-link" style={{ color: 'var(--text-on-primary)' }} href="#servicios">Servicios</a></li>
               <li className="nav-item"><a className="nav-link custom-nav-link" style={{ color: 'var(--text-on-primary)' }} href="#novedades">Novedades</a></li>
-              <li className="nav-item"><a className="nav-link custom-nav-link" style={{ color: 'var(--text-on-primary)' }} href="#reviews">Opiniones</a></li>
               <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
                 {usuarioActivo ? (
                   (usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin' || usuarioActivo.roles === 'empleado') ? (
@@ -208,28 +276,13 @@ export default function EmpresaLanding() {
       </nav>
 
       {/* ================= HERO SECTION ================= */}
-      <header 
-        className="hero-section d-flex align-items-center text-center text-white"
-        style={{
-          backgroundImage: negocio.banner 
-            ? `url(${negocio.banner})` 
-            : "url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')"
-        }}
-      >
+      <header className="hero-section d-flex align-items-center text-center text-white" style={{ backgroundImage: negocio.banner ? `url(${negocio.banner})` : "url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')" }}>
         <div className="overlay"></div>
         <div className="container position-relative z-2 animate__animated animate__fadeInUp">
-          <span className="badge bg-secondary mb-3 px-4 py-2 rounded-pill fw-bold text-uppercase" style={{ letterSpacing: '1px' }}>
-            {negocio.tipo}
-          </span>
-          <h1 className="display-3 fw-bold mb-4 font-playfair text-capitalize">
-            {negocio.nombre}
-          </h1>
-          <p className="lead mb-5 mx-auto opacity-75" style={{ maxWidth: '700px' }}>
-            {negocio.descripcion || 'Descubre servicios profesionales, agenda tu cita en segundos y déjate consentir por nuestros expertos.'}
-          </p>
-          <a href="#servicios" className="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fw-bold" style={{ color: 'var(--text-on-primary)' }}>
-            Explorar Servicios <i className="fas fa-arrow-down ms-2"></i>
-          </a>
+          <span className="badge bg-secondary mb-3 px-4 py-2 rounded-pill fw-bold text-uppercase" style={{ letterSpacing: '1px' }}>{negocio.tipo}</span>
+          <h1 className="display-3 fw-bold mb-4 font-playfair text-capitalize">{negocio.nombre}</h1>
+          <p className="lead mb-5 mx-auto opacity-75" style={{ maxWidth: '700px' }}>{negocio.descripcion || 'Descubre servicios profesionales, agenda tu cita en segundos y déjate consentir por nuestros expertos.'}</p>
+          <a href="#servicios" className="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fw-bold" style={{ color: 'var(--text-on-primary)' }}> Explorar Servicios <i className="fas fa-arrow-down ms-2"></i></a>
         </div>
       </header>
 
@@ -246,7 +299,6 @@ export default function EmpresaLanding() {
             <div className="text-center py-5 bg-white rounded-4 shadow-sm border p-5 mx-auto" style={{ maxWidth: '600px' }}>
               <div className="bg-primary-light text-primary-custom rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style={{ width: '80px', height: '80px' }}><i className="fas fa-box-open fa-3x"></i></div>
               <h3 className="fw-bold font-playfair text-dark">Aún no hay servicios disponibles</h3>
-              <p className="text-muted mb-0">Este negocio está preparando su catálogo de servicios. ¡Vuelve pronto para agendar tu cita!</p>
             </div>
           ) : (
             <div className="position-relative px-md-5">
@@ -256,7 +308,6 @@ export default function EmpresaLanding() {
                   <button onClick={nextServices} disabled={serviceIndex >= servicios.length - 3} className="btn btn-light position-absolute end-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: serviceIndex >= servicios.length - 3 ? 0.4 : 1 }}><i className="fas fa-chevron-right text-dark"></i></button>
                 </>
               )}
-
               <div className="row g-4 justify-content-center animate__animated animate__fadeIn">
                 {serviciosVisibles.map((servicio) => (
                   <div className="col-md-6 col-lg-4" key={servicio._id}>
@@ -271,10 +322,7 @@ export default function EmpresaLanding() {
                           <small className="text-muted fw-bold"><i className="far fa-clock me-1"></i> {servicio.duracion} min</small>
                         </div>
                         <p className="card-text text-muted small flex-grow-1 mt-2">{servicio.descripcion || 'Servicio profesional de alta calidad y atención personalizada.'}</p>
-                        {/* 👇 BOTÓN INTELIGENTE DE RESERVA */}
-                        <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm mt-3" onClick={() => handleOpenBooking(servicio)} style={{ color: 'var(--text-on-primary)' }}>
-                          Agendar Cita
-                        </button>
+                        <button className="btn btn-primary w-100 rounded-pill fw-bold shadow-sm mt-3" onClick={() => handleOpenBooking(servicio)} style={{ color: 'var(--text-on-primary)' }}>Agendar Cita</button>
                       </div>
                     </div>
                   </div>
@@ -291,55 +339,30 @@ export default function EmpresaLanding() {
           <div className="text-center mb-5">
             <h2 className="section-title fw-bold font-playfair">Novedades y Promociones</h2>
             <div className="divider mx-auto"></div>
-            <p className="text-muted">Mantente al tanto de nuestros últimos avisos y ofertas especiales</p>
           </div>
-
           {posts.length === 0 ? (
             <div className="text-center py-5 bg-light-custom rounded-4 shadow-sm border p-5 mx-auto" style={{ maxWidth: '600px' }}>
-              <div className="bg-primary-light text-primary-custom rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style={{ width: '80px', height: '80px', backgroundColor: 'rgba(0,0,0,0.04)' }}>
-                <i className="fas fa-bullhorn fa-3x text-muted"></i>
-              </div>
+              <div className="bg-primary-light text-primary-custom rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style={{ width: '80px', height: '80px', backgroundColor: 'rgba(0,0,0,0.04)' }}><i className="fas fa-bullhorn fa-3x text-muted"></i></div>
               <h3 className="fw-bold font-playfair text-dark">No hay publicaciones subidas</h3>
-              <p className="text-muted mb-0">Por el momento este establecimiento no ha compartido publicaciones recientes.</p>
             </div>
           ) : (
             <div className="position-relative px-md-5">
-              
-              {/* FLECHAS DEL SLIDER DE NOVEDADES (> 4) */}
               {posts.length > 4 && (
                 <>
-                  <button onClick={prevPosts} disabled={postIndex === 0} className="btn btn-light position-absolute start-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: postIndex === 0 ? 0.4 : 1 }}>
-                    <i className="fas fa-chevron-left text-dark"></i>
-                  </button>
-                  <button onClick={nextPosts} disabled={postIndex >= posts.length - 4} className="btn btn-light position-absolute end-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: postIndex >= posts.length - 4 ? 0.4 : 1 }}>
-                    <i className="fas fa-chevron-right text-dark"></i>
-                  </button>
+                  <button onClick={prevPosts} disabled={postIndex === 0} className="btn btn-light position-absolute start-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: postIndex === 0 ? 0.4 : 1 }}><i className="fas fa-chevron-left text-dark"></i></button>
+                  <button onClick={nextPosts} disabled={postIndex >= posts.length - 4} className="btn btn-light position-absolute end-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: postIndex >= posts.length - 4 ? 0.4 : 1 }}><i className="fas fa-chevron-right text-dark"></i></button>
                 </>
               )}
-
               <div className="row g-4 justify-content-center animate__animated animate__fadeIn">
                 {postsVisibles.map((post) => (
-                  <div className="col-md-6 col-lg-3" key={post._id}> {/* Reducido a col-lg-3 para acomodar 4 juntos */}
+                  <div className="col-md-6 col-lg-3" key={post._id}> 
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 d-flex flex-column">
-                      {post.image_url && (
-                        <div className="position-relative">
-                          <img 
-                            src={post.image_url} 
-                            className="w-100" 
-                            alt={post.titulo_p} 
-                            style={{ objectFit: 'cover', height: '160px' }}
-                          />
-                        </div>
-                      )}
+                      {post.image_url && <div className="position-relative"><img src={post.image_url} className="w-100" alt={post.titulo_p} style={{ objectFit: 'cover', height: '160px' }}/></div>}
                       <div className="card-body p-4 d-flex flex-column flex-grow-1">
-                        <span className="text-primary-custom fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px', fontSize: '11px' }}>
-                          <i className="far fa-newspaper me-1"></i> Novedad
-                        </span>
+                        <span className="text-primary-custom fw-bold small text-uppercase mb-2" style={{ letterSpacing: '1px', fontSize: '11px' }}><i className="far fa-newspaper me-1"></i> Novedad</span>
                         <h5 className="card-title fw-bold font-playfair text-capitalize text-dark mb-2">{post.titulo_p}</h5>
                         <p className="card-text text-muted small flex-grow-1" style={{ whiteSpace: 'pre-line', fontSize: '13px' }}>{post.contenido}</p>
-                        <small className="text-muted mt-3 block small border-top pt-2" style={{ fontSize: '11px' }}>
-                          <i className="far fa-calendar-alt me-1"></i> {new Date(post.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </small>
+                        <small className="text-muted mt-3 block small border-top pt-2" style={{ fontSize: '11px' }}><i className="far fa-calendar-alt me-1"></i> {new Date(post.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</small>
                       </div>
                     </div>
                   </div>
@@ -382,7 +405,7 @@ export default function EmpresaLanding() {
         </div>
       </footer>
 
-      {/* ================= MODAL: AGENDAR CITA (REDISEÑADO A REACT) ================= */}
+            {/* ================= MODAL: AGENDAR CITA (REDISEÑADO A REACT) ================= */}
       <div className="modal fade" id="bookingModal" tabIndex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
@@ -433,37 +456,109 @@ export default function EmpresaLanding() {
                 </div>
               )}
 
-              {/* PASO 2: SELECTORES DE FECHA/HORA HTML5 */}
               {currentStep === 2 && (
-                <div className="p-4 p-md-5 animate__animated animate__fadeInRight">
-                  <div className="alert alert-info border-0 bg-info-subtle text-info-emphasis d-flex align-items-center mb-4 rounded-4 shadow-sm p-3">
-                    <i className="fas fa-info-circle fa-2x me-3"></i>
-                    <small>Recuerda que solo puedes agendar citas con al menos <strong>48 horas de anticipación</strong>.</small>
-                  </div>
-                  
-                  <div className="row g-4">
-                    <div className="col-md-6 border-end-md pe-md-4">
-                      <h6 className="fw-bold mb-3 font-playfair fs-5 text-dark">Selecciona la Fecha</h6>
-                      <input 
-                        type="date" 
-                        className="form-control form-control-lg bg-white border-light-subtle shadow-sm fw-bold text-muted" 
-                        min={getMinDate()}
-                        value={bookingDate}
-                        onChange={(e) => setBookingDate(e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6 ps-md-4">
-                      <h6 className="fw-bold mb-3 font-playfair fs-5 text-dark">Selecciona la Hora</h6>
-                      <input 
-                        type="time" 
-                        className="form-control form-control-lg bg-white border-light-subtle shadow-sm fw-bold text-muted" 
-                        value={bookingTime}
-                        onChange={(e) => setBookingTime(e.target.value)}
-                      />
-                    </div>
-                  </div>
+  <div className="animate__animated animate__fadeIn">
+    <div className="text-center mb-4">
+      <span className="badge bg-primary-light text-primary-custom mb-2 px-3 py-1 rounded-pill fw-bold">Paso 2 de 3</span>
+      <h4 className="fw-bold font-playfair text-dark">Selecciona Fecha y Hora</h4>
+      <p className="text-muted small">Recuerda que las reservas requieren un mínimo de 48 horas de anticipación.</p>
+    </div>
+
+    {bookingError && (
+      <div className="alert alert-danger py-2 rounded-3 small shadow-sm mb-3">
+        <i className="fas fa-exclamation-circle me-2"></i>{bookingError}
+      </div>
+    )}
+
+    <div className="row g-4">
+      {/* SECCIÓN DEL MINI CALENDARIO */}
+      <div className="col-lg-7">
+        <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+          <i className="far fa-calendar-alt me-2 text-primary-custom"></i>Calendario
+        </label>
+        <div className="bg-light p-3 rounded-4 border border-light-subtle shadow-sm">
+          {/* Encabezado de los días de la semana */}
+          <div className="calendar-grid text-center font-playfair small fw-bold text-muted mb-2">
+            <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div>
+          </div>
+          
+          {/* Grid de días del mes */}
+          <div className="calendar-grid text-center">
+            {generarDiasCalendario().map((dia, index) => {
+              if (!dia.numero) return <div key={`empty-${index}`} className="cal-day disabled"></div>;
+              
+              const isSelected = bookingDate === dia.fechaString;
+              return (
+                <button
+                  key={`day-${dia.numero}`}
+                  type="button"
+                  disabled={dia.disabled}
+                  onClick={() => { setBookingDate(dia.fechaString); setBookingTime(""); }}
+                  className={`btn cal-day p-2 w-100 border-0 ${
+                    dia.disabled ? 'disabled' : isSelected ? 'available active bg-primary-custom text-white' : 'available bg-white shadow-sm border'
+                  }`}
+                >
+                  {dia.numero}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* SECCIÓN DE HORARIOS DISPONIBLES */}
+      <div className="col-lg-5">
+        <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
+          <i className="far fa-clock me-2 text-primary-custom"></i>Horarios
+        </label>
+        
+        {!bookingDate ? (
+          <div className="d-flex align-items-center justify-content-center h-75 bg-light rounded-4 border border-dashed p-4 text-center">
+            <p className="text-muted small mb-0">Selecciona un día del calendario para ver las horas disponibles</p>
+          </div>
+        ) : (
+          <div className="row row-cols-2 g-2 overflow-y-auto" style={{ maxHeight: '240px', paddingRight: '4px' }}>
+            {horasDisponibles.map((hora) => {
+              const estaOcupada = horasOcupadas.includes(hora);
+              const isSelected = bookingTime === hora;
+
+              return (
+                <div className="col" key={hora}>
+                  <button
+                    type="button"
+                    disabled={estaOcupada}
+                    onClick={() => setBookingTime(hora)}
+                    className={`btn w-100 py-2.5 rounded-3 fw-bold small transition-all shadow-sm ${
+                      estaOcupada 
+                        ? 'btn-light text-muted opacity-50 border border-light-subtle' 
+                        : isSelected 
+                          ? 'btn-primary bg-primary-custom text-white' 
+                          : 'btn-outline-primary bg-white border border-light-subtle text-dark'
+                    }`}
+                    style={{ textDecoration: estaOcupada ? 'line-through' : 'none' }}
+                  >
+                    <i className={`far ${estaOcupada ? 'fa-calendar-times' : 'fa-clock'} me-1.5 small`}></i>
+                    {hora}
+                  </button>
                 </div>
-              )}
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* BOTONES DE NAVEGACIÓN PROPIOS DEL MODAL */}
+    <div className="d-flex gap-2 justify-content-between mt-4 pt-3 border-top border-light-subtle">
+      <button type="button" className="btn btn-light rounded-pill px-4 fw-bold shadow-sm" onClick={() => setCurrentStep(1)}>
+        <i className="fas fa-arrow-left me-2"></i>Regresar
+      </button>
+      <button type="button" className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onClick={handleNextToStep3} style={{ backgroundColor: 'var(--primary-color)', color: 'var(--text-on-primary)' }}>
+        Continuar<i className="fas fa-arrow-right ms-2"></i>
+      </button>
+    </div>
+  </div>
+)}
 
               {/* PASO 3: RESUMEN Y CÁLCULOS */}
               {currentStep === 3 && selectedService && (
@@ -527,13 +622,11 @@ export default function EmpresaLanding() {
         </div>
       </div>
 
-      {/* ================= MODAL DE ÉXITO ================= */}
+      {/* ================= MODAL: ÉXITO ================= */}
       <div className="modal fade" id="successModal" tabIndex="-1" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-sm">
           <div className="modal-content border-0 rounded-4 shadow-lg text-center p-4">
-            <div className="text-warning mb-3">
-              <i className="fas fa-hourglass-half fa-4x animate__animated animate__pulse animate__infinite"></i>
-            </div>
+            <div className="text-warning mb-3"><i className="fas fa-hourglass-half fa-4x animate__animated animate__pulse animate__infinite"></i></div>
             <h4 className="fw-bold font-playfair">Cita en Revisión</h4>
             <p className="text-muted small mb-4">Tu solicitud ha sido enviada. El administrador revisará y confirmará tu cita pronto.</p>
             <button type="button" className="btn btn-primary rounded-pill w-100 fw-bold py-2 shadow-sm" data-bs-dismiss="modal">Entendido</button>
@@ -541,8 +634,7 @@ export default function EmpresaLanding() {
         </div>
       </div>
 
-      {/* ================= MODAL: LOGIN ================= */}
-      {/* (Se mantiene intacto el mismo que tenías) */}
+      {/* ================= MODAL: LOGIN FUNCIONAL ================= */}
       <div className="modal fade" id="loginModal" tabIndex="-1" aria-hidden="true">
           <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
@@ -551,23 +643,28 @@ export default function EmpresaLanding() {
                       <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div className="modal-body p-4 p-md-5">
-                      <div className="alert alert-warning small border-0 mb-4 rounded-3"><i className="fas fa-info-circle me-2"></i>Para agendar una cita necesitas iniciar sesión como cliente.</div>
-                      <form>
+                      
+                      {loginError && <div className="alert alert-danger small rounded-3"><i className="fas fa-exclamation-circle me-2"></i>{loginError}</div>}
+                      {loginSuccess && <div className="alert alert-success small rounded-3"><i className="fas fa-check-circle me-2"></i>{loginSuccess}</div>}
+
+                      <div className="alert alert-warning small border-0 mb-4 rounded-3"><i className="fas fa-info-circle me-2"></i>Para agendar una cita o ir a tu panel necesitas iniciar sesión.</div>
+                      
+                      <form onSubmit={handleLogin}>
                           <div className="mb-4">
                               <label className="form-label fw-bold small text-muted text-uppercase" style={{ letterSpacing: '1px' }}>Correo Electrónico</label>
                               <div className="input-group shadow-sm rounded-3">
                                   <span className="input-group-text bg-light border-end-0 border-light-subtle"><i className="fas fa-envelope text-muted"></i></span>
-                                  <input type="email" className="form-control form-control-lg bg-light border-start-0 border-light-subtle ps-0" placeholder="tu@correo.com" />
+                                  <input type="email" className="form-control form-control-lg bg-light border-start-0 border-light-subtle ps-0" placeholder="tu@correo.com" value={loginData.email} onChange={(e) => setLoginData({...loginData, email: e.target.value})} required />
                               </div>
                           </div>
                           <div className="mb-4">
                               <label className="form-label fw-bold small text-muted text-uppercase" style={{ letterSpacing: '1px' }}>Contraseña</label>
                               <div className="input-group shadow-sm rounded-3">
                                   <span className="input-group-text bg-light border-end-0 border-light-subtle"><i className="fas fa-lock text-muted"></i></span>
-                                  <input type="password" className="form-control form-control-lg bg-light border-start-0 border-light-subtle ps-0" placeholder="••••••••" />
+                                  <input type="password" className="form-control form-control-lg bg-light border-start-0 border-light-subtle ps-0" placeholder="••••••••" value={loginData.password} onChange={(e) => setLoginData({...loginData, password: e.target.value})} required />
                               </div>
                           </div>
-                          <button type="button" className="btn btn-primary w-100 rounded-pill py-3 fw-bold mb-4 shadow-sm fs-6">Ingresar al Panel</button>
+                          <button type="submit" className="btn btn-primary w-100 rounded-pill py-3 fw-bold mb-4 shadow-sm fs-6">Ingresar al Panel</button>
                       </form>
                   </div>
               </div>

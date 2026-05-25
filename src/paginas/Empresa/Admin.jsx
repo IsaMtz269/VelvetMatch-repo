@@ -13,11 +13,23 @@ export default function Admin() {
   const [empleados, setEmpleados] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editProfile, setEditProfile] = useState({ nombre: '', apellido: '', email: '', password: '', fechNacimiento: '' });
+  const [profileError, setProfileError] = useState("");
+  const [citaSeleccionada, setCitaSeleccionada] = useState(null);
+const [empleadoFiltradoId, setEmpleadoFiltradoId] = useState('todos');
+
+const [selectedDateDetails, setSelectedDateDetails] = useState(null); // Guarda el día clickeado 'YYYY-MM-DD'
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);  // Abre/Cierra el sidebar
+
+  // Filtramos las citas que aparecerán en el calendario
+  const citasCalendario = citas.filter(c => ['pendiente', 'programada', 'completada', 'cancelada'].includes(c.estado.toLowerCase()));
 
   // ================= ESTADOS DE GESTIÓN DE CITAS =================
   const [asignaciones, setAsignaciones] = useState({}); // { citaId: empleadoId }
   const [citaRechazarId, setCitaRechazarId] = useState(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [citasFiltradasDia, setCitasFiltradasDia] = useState([]);
+  const [diaSeleccionadoTexto, setDiaSeleccionadoTexto] = useState("");
 
   // ================= ESTADOS PARA FORMULARIOS (MODALES) =================
   const [editBusiness, setEditBusiness] = useState({}); 
@@ -154,6 +166,42 @@ export default function Admin() {
     } catch (err) { alert(err.message); }
   };
 
+
+
+  const handleSeleccionarDiaCalendario = (fechaStringIso) => {
+    const citasDelDia = citas.filter(c => c.fecha === fechaStringIso);
+    
+    setCitasFiltradasDia(citasDelDia);
+    setDiaSeleccionadoTexto(fechaStringIso);
+
+    const offcanvasEl = document.getElementById('offcanvasCitasDia');
+    if (offcanvasEl) {
+      const bsOffcanvas = new window.bootstrap.Offcanvas(offcanvasEl);
+      bsOffcanvas.show();
+    }
+  };
+
+  const obtenerNombreEmpleado = (id_emp) => {
+  if (!id_emp) return 'Sin asignar';
+  if (typeof id_emp === 'object') return `${id_emp.nombre} ${id_emp.apellido}`;
+  const emp = empleados.find(e => e._id === id_emp);
+  return emp ? `${emp.nombre} ${emp.apellido}` : 'Empleado';
+};
+
+const obtenerNombreServicio = (id_serv) => {
+  if (!id_serv) return 'Servicio';
+  if (typeof id_serv === 'object') return id_serv.nombre;
+  const serv = servicios.find(s => s._id === id_serv);
+  return serv ? serv.nombre : 'Servicio';
+};
+
+const obtenerNombreCliente = (id_cli) => {
+  if (!id_cli) return 'Cliente Registrado';
+  if (typeof id_cli === 'object') return `${id_cli.nombre} ${id_cli.apellido}`;
+  return 'Cliente';
+};
+
+//EditarNegocio
   const handleUpdateBusiness = async (e) => {
     e.preventDefault();
     try {
@@ -168,6 +216,73 @@ export default function Admin() {
       if (modal) modal.hide();
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  //EditarPerfil
+  const abrirEditarPerfil = () => {
+    if (usuarioActivo) {
+      setEditProfile({
+        nombre: usuarioActivo.nombre || "",
+        apellido: usuarioActivo.apellido || "",
+        email: usuarioActivo.email || "",
+        password: "", // Se deja vacío por seguridad
+        fechNacimiento: usuarioActivo.fechNacimiento ? usuarioActivo.fechNacimiento.split('T')[0] : ""
+      });
+      setProfileError("");
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileError("");
+
+    const { nombre, apellido, email, password, fechNacimiento } = editProfile;
+
+    // VALIDACIÓN JS 1: Solo letras
+    const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
+      setProfileError("El nombre y el apellido solo deben contener letras.");
+      return;
+    }
+
+    // VALIDACIÓN JS 2: Mayor de 16 años
+    const hoy = new Date();
+    const cumpleanos = new Date(fechNacimiento);
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const mes = hoy.getMonth() - cumpleanos.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+      edad--;
+    }
+    if (edad < 16) {
+      setProfileError("Debes ser mayor de 16 años.");
+      return;
+    }
+
+    // VALIDACIÓN JS 3: Contraseña mínima
+    if (password && password.length < 8) {
+      setProfileError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/usuarios/${usuarioActivo._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editProfile)
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Error al actualizar perfil");
+
+      alert("✅ " + data.message);
+      setUsuarioActivo(data.usuario); // Actualizamos el estado global del admin logueado
+      
+      const modalElement = document.getElementById('modalEditarPerfil');
+      const modal = window.bootstrap.Modal.getInstance(modalElement);
+      if (modal) modal.hide();
+    } catch (err) {
+      setProfileError(err.message);
     }
   };
 
@@ -477,6 +592,7 @@ export default function Admin() {
                             <button className="btn btn-sm bg-white bg-opacity-10 ms-2 rounded-circle" style={{width: '28px', height: '28px', padding: '0', color: 'var(--text-on-primary)'}} data-bs-toggle="modal" data-bs-target="#editBusinessModal">
                               <i className="fas fa-pencil-alt" style={{fontSize: '12px'}}></i>
                             </button>
+                            <button className="btn btn-sm btn-light rounded-pill shadow-sm px-3 border" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil" onClick={abrirEditarPerfil}> <i className="fas fa-user-edit me-2 text-primary-custom"></i>Editar Mi Perfil</button>
                           </span>
                         </div>
                       </div>
@@ -585,11 +701,13 @@ export default function Admin() {
                 </div>
               )}
 
-              {/* === PESTAÑA: AGENDA Y EQUIPO (CALENDARIO) === */}
+{/* === PESTAÑA: AGENDA Y EQUIPO (CALENDARIO + SIDEBAR + EMPLEADOS) === */}
               {activeTab === 'informacion' && (
-                <div className="tab-pane fade show active animate__animated animate__fadeIn" id="informacion">
+                <div className="tab-pane fade show active animate__animated animate__fadeIn position-relative" id="informacion" style={{ minHeight: '600px' }}>
+                  
+                  {/* ENCABEZADO DEL CALENDARIO */}
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h4 className="font-playfair text-primary-custom fw-bold m-0"><i className="fas fa-calendar-check me-2"></i>Mi Agenda</h4>
+                    <h4 className="font-playfair text-primary-custom fw-bold m-0"><i className="fas fa-calendar-alt me-2"></i>Mi Agenda</h4>
                     <div className="d-flex gap-2">
                         <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="btn btn-outline-secondary btn-sm fw-bold"><i className="fas fa-chevron-left"></i></button>
                         <button onClick={() => setCurrentDate(new Date())} className="btn btn-light border btn-sm fw-bold px-3">Hoy</button>
@@ -597,40 +715,146 @@ export default function Admin() {
                     </div>
                   </div>
 
-                  <div className="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                  {/* CALENDARIO */}
+                  <div className="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
                       <div className="card-header bg-white border-bottom py-3">
                           <h5 className="m-0 font-dm fw-bold text-center text-capitalize">{monthNames[month]} {year}</h5>
                       </div>
                       <div className="card-body p-0">
                           <div className="calendar-grid bg-light p-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-                              {/* Días de la semana */}
                               {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
                                 <div key={d} className="text-center fw-bold small text-muted py-2">{d}</div>
                               ))}
                               
-                              {/* Espacios en blanco para alinear el primer día */}
-                              {blanks.map((_, i) => <div key={`blank-${i}`} className="cal-day bg-transparent p-2 text-start" style={{ height: '100px' }}></div>)}
+                              {blanks.map((_, i) => <div key={`blank-${i}`} className="cal-day bg-transparent p-2" style={{ height: '100px' }}></div>)}
                               
-                              {/* Días del mes con sus citas */}
                               {daysArray.map(day => {
                                  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                 const citasDelDia = citasProgramadas.filter(c => c.fecha === dateStr);
+                                 const citasDelDia = citasCalendario.filter(c => c.fecha === dateStr);
                                  
                                  return (
-                                   <div key={day} className="cal-day bg-white border p-2 text-start overflow-hidden position-relative shadow-sm rounded-3" style={{ height: '100px' }}>
-                                     <div className="fw-bold mb-1">{day}</div>
+                                   <div 
+                                      key={day} 
+                                      className="cal-day bg-white border p-2 text-start overflow-hidden position-relative shadow-sm rounded-3 cursor-pointer" 
+                                      style={{ height: '100px', transition: 'all 0.2s' }}
+                                      onClick={() => {
+                                        setSelectedDateDetails(dateStr);
+                                        setIsRightSidebarOpen(true);
+                                      }}
+                                      onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                                      onMouseOut={(e) => e.currentTarget.style.borderColor = '#dee2e6'}
+                                    >
+                                     <div className={`fw-bold mb-1 ${dateStr === new Date().toISOString().split('T')[0] ? 'text-primary-custom' : ''}`}>{day}</div>
                                      <div className="d-flex flex-column gap-1 overflow-y-auto" style={{ maxHeight: '70px' }}>
-                                       {citasDelDia.map(cita => (
-                                         <div key={cita._id} className="badge bg-success w-100 text-start text-truncate text-white" style={{ fontSize: '10px' }} title={`${cita.hora} - ${cita.id_servicio?.nombre} | Cliente: ${cita.id_cliente?.nombre}`}>
-                                           <i className="fas fa-cut me-1"></i> {cita.hora} - {cita.id_servicio?.nombre}
-                                         </div>
-                                       ))}
+                                       {citasDelDia.map(cita => {
+                                          let badgeColor = 'bg-secondary';
+                                          if (cita.estado === 'pendiente') badgeColor = 'bg-warning text-dark';
+                                          if (cita.estado === 'programada') badgeColor = 'bg-primary text-white';
+                                          if (cita.estado === 'completada') badgeColor = 'bg-success text-white';
+                                          if (cita.estado === 'cancelada') badgeColor = 'bg-danger text-white';
+
+                                          return (
+                                            <div key={cita._id} className={`badge w-100 text-start text-truncate shadow-sm ${badgeColor}`} style={{ fontSize: '10px' }}>
+                                              {cita.hora} - {cita.id_cliente?.nombre}
+                                            </div>
+                                          )
+                                       })}
                                      </div>
                                    </div>
                                  )
                               })}
                           </div>
                       </div>
+                  </div>
+
+                  {/* SECCIÓN DEL EQUIPO DE TRABAJO */}
+                  <h4 className="font-playfair text-primary-custom fw-bold mb-4"><i className="fas fa-users me-2"></i>Mi Equipo de Trabajo</h4>
+                  {empleados.length === 0 ? (
+                    <div className="text-center p-4 bg-white rounded-4 shadow-sm border text-muted small">No hay empleados registrados.</div>
+                  ) : (
+                    <div className="row g-3">
+                      {empleados.map(emp => {
+                        // Encontramos los nombres de los servicios usando los IDs guardados en el empleado
+                        const serviciosDelEmpleado = emp.servicio_empl?.map(id => servicios.find(s => s._id === id)?.nombre).filter(Boolean).join(', ') || 'Sin servicios';
+                        
+                        return (
+                          <div className="col-md-4" key={emp._id}>
+                            <div className="card border-0 shadow-sm rounded-4 h-100">
+                              <div className="card-body d-flex align-items-center gap-3 p-3 font-dm">
+                                <div className="rounded-circle bg-primary-light text-primary-custom fw-bold d-flex justify-content-center align-items-center fs-5 text-uppercase" style={{ width: '50px', height: '50px' }}>
+                                  {emp.nombre.charAt(0)}
+                                </div>
+                                <div>
+                                  <h6 className="mb-0 fw-bold text-dark text-capitalize">{emp.nombre} {emp.apellido}</h6>
+                                  <small className="text-muted text-capitalize d-inline-block text-truncate" style={{ maxWidth: '200px' }}>
+                                    <i className="fas fa-cut me-1"></i>{serviciosDelEmpleado}
+                                  </small>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* ================= SIDEBAR DERECHO DE DETALLES DEL DÍA ================= */}
+                  {/* Fila oscura de fondo para cerrar al dar clic fuera */}
+                  {isRightSidebarOpen && (
+                    <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-25" style={{ zIndex: 1040 }} onClick={() => setIsRightSidebarOpen(false)}></div>
+                  )}
+
+                  <div className="bg-white shadow-lg h-100 position-absolute top-0 rounded-start-4 font-dm overflow-y-auto" 
+                       style={{ width: '380px', zIndex: 1050, right: isRightSidebarOpen ? '0' : '-400px', transition: 'right 0.3s ease-in-out' }}>
+                    
+                    <div className="p-4 border-bottom bg-light-custom position-sticky top-0 d-flex justify-content-between align-items-center" style={{ zIndex: 1 }}>
+                      <h5 className="fw-bold font-playfair m-0 text-primary-custom">
+                        <i className="far fa-calendar-check me-2"></i>Citas del Día
+                      </h5>
+                      <button className="btn-close shadow-none" onClick={() => setIsRightSidebarOpen(false)}></button>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="text-center mb-4">
+                        <span className="badge bg-dark px-3 py-2 rounded-pill fs-6">{selectedDateDetails}</span>
+                      </div>
+
+                      {citasCalendario.filter(c => c.fecha === selectedDateDetails).length === 0 ? (
+                        <div className="text-center text-muted small mt-5 pt-5">
+                          <i className="fas fa-bed fa-3x mb-3 opacity-25"></i>
+                          <p>No hay citas agendadas para esta fecha.</p>
+                        </div>
+                      ) : (
+                        <div className="d-flex flex-column gap-3">
+                          {citasCalendario.filter(c => c.fecha === selectedDateDetails).map(cita => {
+                            // Definir estilo del borde según estado
+                            let borderClass = 'border-secondary';
+                            if (cita.estado === 'pendiente') borderClass = 'border-warning';
+                            if (cita.estado === 'programada') borderClass = 'border-primary';
+                            if (cita.estado === 'completada') borderClass = 'border-success';
+                            if (cita.estado === 'cancelada') borderClass = 'border-danger';
+
+                            return (
+                              <div key={cita._id} className={`card border-0 shadow-sm rounded-3 border-start border-4 ${borderClass}`}>
+                                <div className="card-body p-3">
+                                  <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <span className="fw-bold text-dark fs-5">{cita.hora}</span>
+                                    <span className={`badge ${borderClass.replace('border-', 'bg-')} text-capitalize`}>{cita.estado}</span>
+                                  </div>
+                                  <h6 className="fw-bold text-capitalize text-dark mb-1">{cita.id_servicio?.nombre}</h6>
+                                  
+                                  <ul className="list-unstyled small text-muted mb-0 mt-2">
+                                    <li className="mb-1"><i className="fas fa-user me-2 text-primary-custom"></i> <span className="text-capitalize">{cita.id_cliente?.nombre} {cita.id_cliente?.apellido}</span></li>
+                                    <li className="mb-1"><i className="fas fa-dollar-sign me-2 text-success"></i> ${cita.id_servicio?.precio}.00 MXN</li>
+                                    <li><i className="fas fa-user-tie me-2 text-info"></i> Asignado a: <span className="text-capitalize fw-bold text-dark">{cita.id_empleado ? `${cita.id_empleado.nombre}` : 'Sin asignar'}</span></li>
+                                  </ul>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1023,6 +1247,50 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* MODAL EDITAR PERFIL ADMIN */}
+<div className="modal fade" id="modalEditarPerfil" tabIndex="-1" aria-hidden="true">
+  <div className="modal-dialog modal-dialog-centered">
+    <div className="modal-content border-0 shadow rounded-4">
+      <div className="modal-header border-0 bg-light-custom rounded-top-4 py-3">
+        <h5 className="fw-bold text-primary-custom mb-0"><i className="fas fa-user-cog me-2"></i>Editar Datos de Perfil</h5>
+        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form onSubmit={handleUpdateProfile}>
+        <div className="modal-body p-4">
+          {profileError && <div className="alert alert-danger rounded-3 py-2 small">{profileError}</div>}
+          
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label fw-bold small text-muted">Nombre</label>
+              <input type="text" className="form-control rounded-3" value={editProfile.nombre} onChange={e => setEditProfile({...editProfile, nombre: e.target.value})} required />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-bold small text-muted">Apellido</label>
+              <input type="text" className="form-control rounded-3" value={editProfile.apellido} onChange={e => setEditProfile({...editProfile, apellido: e.target.value})} required />
+            </div>
+            <div className="col-12">
+              <label className="form-label fw-bold small text-muted">Correo Electrónico</label>
+              <input type="email" className="form-control rounded-3" value={editProfile.email} onChange={e => setEditProfile({...editProfile, email: e.target.value})} required />
+            </div>
+            <div className="col-12">
+              <label className="form-label fw-bold small text-muted">Fecha de Nacimiento</label>
+              <input type="date" className="form-control rounded-3" value={editProfile.fechNacimiento} onChange={e => setEditProfile({...editProfile, fechNacimiento: e.target.value})} required />
+            </div>
+            <div className="col-12">
+              <label className="form-label fw-bold small text-muted">Nueva Contraseña (Opcional)</label>
+              <input type="password" className="form-control rounded-3" placeholder="Mínimo 8 caracteres si deseas cambiarla" value={editProfile.password} onChange={e => setEditProfile({...editProfile, password: e.target.value})} />
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer border-0 bg-light-custom rounded-bottom-4">
+          <button type="button" className="btn btn-light rounded-pill px-4 fw-bold small" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" className="btn btn-dark rounded-pill px-4 shadow-sm fw-bold small">Actualizar Perfil</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
     </>
   );
 }

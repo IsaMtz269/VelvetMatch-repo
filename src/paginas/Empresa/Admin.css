@@ -358,3 +358,11 @@ a { text-decoration: none; }
     background-color: #f1f2f6 !important;
     opacity: 0.5;
 }
+
+.offcanvas-body.bg-light-custom {
+    background-color: var(--bg-body) !important;
+}
+.extra-small {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+}

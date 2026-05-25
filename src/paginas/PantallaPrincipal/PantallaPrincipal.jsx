@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./PantallaPrincipal.css";
 
-const negociosEjemplo = [
-  { id: 1, nombre: "Studio Noir", categoria: "Barbería", rating: 4.8, reseñas: 124, ubicacion: "Monterrey, NL", emoji: "✂️" },
-  { id: 2, nombre: "Blush & Co.", categoria: "Uñas", rating: 4.9, reseñas: 87, ubicacion: "San Pedro, NL", emoji: "💅" },
-  { id: 3, nombre: "Glow Studio", categoria: "Estética", rating: 4.7, reseñas: 203, ubicacion: "Monterrey, NL", emoji: "🌿" },
-  { id: 4, nombre: "Velvet Beauty", categoria: "Maquillaje", rating: 5.0, reseñas: 56, ubicacion: "Guadalupe, NL", emoji: "💄" },
-  { id: 5, nombre: "The Barber Room", categoria: "Barbería", rating: 4.6, reseñas: 311, ubicacion: "Monterrey, NL", emoji: "✂️" },
-  { id: 6, nombre: "Pink Nails", categoria: "Uñas", rating: 4.8, reseñas: 142, ubicacion: "San Pedro, NL", emoji: "💅" },
-];
+const API = "http://localhost:5000/api";
 
 const categorias = [
   { label: "Todos", emoji: "✨" },
@@ -21,13 +14,38 @@ const categorias = [
 
 export default function PantallaPrincipal() {
   const navigate = useNavigate();
+
+  // --- ESTADOS DE DATOS REALES ---
+  const [negocios, setNegocios] = useState([]); // Ahora cargará de la base de datos
+  const [loading, setLoading] = useState(true);
   const [usuarioActivo, setUsuarioActivo] = useState(null);
 
+  // --- ESTADOS DE FILTROS ---
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoria, setSelectedCategoria] = useState("Todos");
+
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuarioActivo(JSON.parse(usuarioGuardado));
+   const u = localStorage.getItem("usuario");
+    if (u) {
+      setUsuarioActivo(JSON.parse(u));
     }
+
+    // Obtener los negocios reales guardados en la BD
+    const fetchNegocios = async () => {
+      try {
+        const res = await fetch(`${API}/negocios`);
+        if (res.ok) {
+          const data = await res.json();
+          setNegocios(data);
+        }
+      } catch (error) {
+        console.error("Error al obtener negocios:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNegocios();
 
     const handleAnchorClick = (e) => {
       const href = e.currentTarget.getAttribute("href");
@@ -49,9 +67,56 @@ export default function PantallaPrincipal() {
     navigate("/");
   };
 
+  const handleDashboardRedirect = () => {
+  if (!usuarioActivo) return;
+
+  const rol = usuarioActivo.roles || usuarioActivo.rol_usuario;
+
+  // ADMIN O SUPERADMIN
+  if (rol === "admin" || rol === "superadmin") {
+
+    if (usuarioActivo.id_negocio) {
+      navigate(`/empresa/${usuarioActivo.id_negocio}`);
+    } else {
+      navigate("/dashboard");
+    }
+
+    return;
+  }
+
+  // EMPLEADO
+  if (rol === "empleado") {
+    navigate(`/empresa/${usuarioActivo.id_negocio}`);
+    return;
+  }
+
+  // CLIENTE
+  navigate("/cliente-dashboard");
+};
+
+  // 3. Filtrado de negocios por búsqueda y categoría
+  const negociosFiltrados = negocios.filter((negocio) => {
+    const cumpleBusqueda = negocio.nombre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           negocio.ubicacion?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Mapeo dinámico o exacto del tipo de negocio con la categoría seleccionada
+    const cumpleCategoria = selectedCategoria === "Todos" || 
+                            negocio.tipo?.toLowerCase() === selectedCategoria.toLowerCase();
+
+    return cumpleBusqueda && cumpleCategoria;
+  });
+
+  // Helper para asignar emojis por categoría si tu base de datos no tiene uno guardado
+  const obtenerEmojiCategoria = (tipo) => {
+    const cat = categorias.find(c => c.label.toLowerCase() === tipo?.toLowerCase());
+    return cat ? cat.emoji : "✨";
+  };
+
   const iniciales = usuarioActivo 
     ? `${usuarioActivo.nombre.charAt(0)}${usuarioActivo.apellido.charAt(0)}`.toUpperCase() 
     : "";
+
+
 
   return (
     <>
@@ -71,16 +136,17 @@ export default function PantallaPrincipal() {
             {usuarioActivo ? (
             <div className="d-flex align-items-center ms-3 gap-3">
               
-              {/* BOTÓN VIP: Solo visible si el rol es 'admin' o 'superadmin' */}
-              {(usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin') && (
-                <Link 
-                  to={usuarioActivo.id_negocio ? `/empresa/${usuarioActivo.id_negocio}` : "/dashboard"} 
-                  className="btn btn-sm text-white rounded-pill px-3 fw-bold" 
-                  style={{ background: 'var(--gradient-primary)', boxShadow: 'var(--shadow-soft)' }}
-                >
-                  ✨ Mi Dashboard
-                </Link>
-              )}
+              <button
+              onClick={handleDashboardRedirect}
+              className="btn btn-sm text-white rounded-pill px-3 fw-bold"
+              style={{
+                background: 'var(--gradient-primary)',
+                boxShadow: 'var(--shadow-soft)',
+                border: 'none'
+              }}
+            >
+              ✨ Mi Dashboard
+            </button>
 
               <div className="d-flex align-items-center gap-2">
                 <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: '35px', height: '35px', fontSize: '14px' }}>
@@ -114,10 +180,12 @@ export default function PantallaPrincipal() {
             <div className="search-input-wrapper">
               <span className="search-icon">🔍</span>
               <input
-                type="text"
-                className="search-input"
-                placeholder="Busca barberías, salones, estéticas..."
-              />
+              type="text"
+              className="search-input"
+              placeholder="Busca barberías, salones, estéticas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             </div>
             <button className="search-button">Buscar</button>
           </div>
@@ -161,7 +229,13 @@ export default function PantallaPrincipal() {
           {/* Filtros por categoría */}
           <div className="categorias-filter">
             {categorias.map((cat) => (
-              <button key={cat.label} className="categoria-chip">
+             <button
+              key={cat.label}
+              className={`categoria-chip ${
+                selectedCategoria === cat.label ? "active" : ""
+              }`}
+              onClick={() => setSelectedCategoria(cat.label)}
+            >
                 <span>{cat.emoji}</span> {cat.label}
               </button>
             ))}
@@ -169,21 +243,32 @@ export default function PantallaPrincipal() {
 
           {/* Grid de negocios */}
           <div className="negocios-grid">
-            {negociosEjemplo.map((negocio) => (
+           {negociosFiltrados.map((negocio) => (
               <div key={negocio.id} className="negocio-card">
                 <div className="negocio-card__image">
-                  <span className="negocio-card__emoji">{negocio.emoji}</span>
-                  <span className="negocio-card__categoria">{negocio.categoria}</span>
+                  <span className="negocio-card__emoji">
+                    {obtenerEmojiCategoria(negocio.tipo)}
+                  </span>
+                 <span className="negocio-card__categoria">
+                {negocio.tipo}
+              </span>
                 </div>
                 <div className="negocio-card__body">
                   <h3 className="negocio-card__nombre">{negocio.nombre}</h3>
                   <div className="negocio-card__rating">
                     <span className="rating-star">★</span>
                     <span className="rating-score">{negocio.rating}</span>
-                    <span className="rating-count">({negocio.reseñas} reseñas)</span>
+                    <span className="rating-count">
+                      ({negocio.reseñas} reseñas)
+                    </span>
                   </div>
                   <p className="negocio-card__ubicacion">📍 {negocio.ubicacion}</p>
-                  <button className="negocio-card__btn">Ver negocio</button>
+                  <button
+                    className="negocio-card__btn"
+                    onClick={() => navigate(`/empresa/${negocio._id}`)}
+                  >
+                    Ver negocio
+                  </button>
                 </div>
               </div>
             ))}
