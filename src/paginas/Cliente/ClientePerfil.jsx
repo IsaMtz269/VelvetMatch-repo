@@ -54,6 +54,14 @@ export default function ClientePerfil() {
 
   const location = useLocation();
 
+  const [toast, setToast] = useState(null);
+
+  // Función helper para mostrar y auto-ocultar el mensaje
+  const mostrarToast = (mensaje, tipo = "exito") => {
+    setToast({ mensaje, tipo });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   // Cargar usuario del localStorage
   useEffect(() => {
     const u = localStorage.getItem("usuario");
@@ -99,7 +107,7 @@ export default function ClientePerfil() {
   const handleRate = (citaId, n) => setRatings(r => ({ ...r, [citaId]: n }));
 
   const handleEnviarReview = async (citaId) => {
-    if (!ratings[citaId]) return alert("Selecciona una calificación antes de enviar.");
+    if (!ratings[citaId]) return mostrarToast("Selecciona una calificación antes de enviar.", "error");
     setEnviandoReview(e => ({ ...e, [citaId]: true }));
     try {
       const res = await fetch(`${API}/citas/${citaId}/resena`, {
@@ -121,17 +129,23 @@ export default function ClientePerfil() {
         ));
       } else {
         const data = await res.json();
-        alert(data.message ?? "Error al enviar reseña");
+        mostrarToast(data.message ?? "Error al enviar reseña", "error");
       }
     } catch (err) {
-      alert("Error de conexión");
+      mostrarToast("Error de conexión", "error");
     } finally {
       setEnviandoReview(e => ({ ...e, [citaId]: false }));
     }
   };
 
+  const [confirmandoCita, setConfirmandoCita] = useState(null);
+
   const handleCancelarCita = async (citaId) => {
-    if (!window.confirm("¿Deseas cancelar esta cita?")) return;
+    if (confirmandoCita !== citaId) {
+      setConfirmandoCita(citaId);
+      return;
+    }
+    setConfirmandoCita(null);
     try {
       const res = await fetch(`${API}/citas/cancelar/${citaId}`, {
         method: "PATCH",
@@ -141,11 +155,12 @@ export default function ClientePerfil() {
       const data = await res.json();
       if (res.ok) {
         setCitas(prev => prev.map(c => c._id === citaId ? { ...c, estado: "cancelada" } : c));
+        mostrarToast("Tu cita ha sido cancelada.");
       } else {
-        alert(data.message ?? "No se pudo cancelar la cita");
+        mostrarToast(data.message ?? "No se pudo cancelar la cita", "error");
       }
     } catch (err) {
-      alert("Error de conexión");
+      mostrarToast("Error de conexión", "error");
     }
   };
 
@@ -175,17 +190,35 @@ export default function ClientePerfil() {
         localStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
         setUsuario(usuarioActualizado);
         setEditando(false);
-        alert("Perfil actualizado correctamente");
+        mostrarToast("Perfil actualizado correctamente");
       } else {
-        alert(data.message ?? "Error al actualizar");
+        mostrarToast(data.message ?? "Error al actualizar", "error");
       }
     } catch (err) {
-      alert("Error de conexión");
+      mostrarToast("Error de conexión", "error");
     }
   };
 
+  
+
   return (
+    
     <div className="cp-wrapper">
+      {toast && (
+      <div style={{
+        position: "fixed", top: "20px", right: "20px", zIndex: 999,
+        padding: "14px 20px", borderRadius: "12px",
+        background: toast.tipo === "error" ? "#fdf0f0" : "#edf7ed",
+        color: toast.tipo === "error" ? "#9a3a3a" : "#3a7a3a",
+        border: `1px solid ${toast.tipo === "error" ? "#e0a0a0" : "#90c890"}`,
+        fontWeight: 600, fontSize: "14px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+        fontFamily: "'DM Sans', sans-serif"
+      }}>
+        {toast.tipo === "error" ? "⚠️" : "✅"} {toast.mensaje}
+      </div>
+    )}
+
       {/* ── Sidebar ── */}
       <aside className={`cp-sidebar${sidebarOpen ? " active" : ""}`}>
         <div className="cp-sidebar-header">
@@ -224,7 +257,7 @@ export default function ClientePerfil() {
           <button className="cp-menu-toggle" onClick={() => setSidebarOpen(true)}>☰</button>
           <span className="cp-topbar-title">Mi perfil</span>
          <button
-            className="...-logout-header"
+            className="cc-logout-header"
             onClick={() => {
               localStorage.clear();
               navigate("/");
@@ -354,9 +387,22 @@ export default function ClientePerfil() {
 
                         {citaTab === "programada" && (
                           <div className="cp-cita-actions">
-                            <button className="cp-btn-cancelar" onClick={() => handleCancelarCita(cita._id)}>
-                              Cancelar cita
-                            </button>
+                            {confirmandoCita === cita._id ? (
+                              <>
+                                <span style={{fontSize:"12px", color:"#9a3a3a"}}>¿Confirmar cancelación?</span>
+                                <button className="cp-btn-cancelar" onClick={() => handleCancelarCita(cita._id)}>
+                                  Sí, cancelar
+                                </button>
+                                <button className="cp-btn-cancelar" onClick={() => setConfirmandoCita(null)}
+                                  style={{borderColor:"#EBD2BE", color:"#8a5070"}}>
+                                  No
+                                </button>
+                              </>
+                            ) : (
+                              <button className="cp-btn-cancelar" onClick={() => handleCancelarCita(cita._id)}>
+                                Cancelar cita
+                              </button>
+                            )}
                           </div>
                         )}
 
@@ -407,5 +453,7 @@ export default function ClientePerfil() {
         </div>
       </main>
     </div>
+
+    
   );
 }

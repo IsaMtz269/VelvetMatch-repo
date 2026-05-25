@@ -172,7 +172,7 @@ export default function ClienteDashboard() {
               {negocioSeleccionado ? "Cambiar negocio" : "Seleccionar negocio"}
             </button>
              <button
-            className="...-logout-header"
+            className="cc-logout-header"
             onClick={() => {
               localStorage.clear();
               navigate("/");

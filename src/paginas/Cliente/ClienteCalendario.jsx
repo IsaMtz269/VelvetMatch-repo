@@ -126,7 +126,7 @@ export default function ClienteCalendario() {
           <button className="cc-menu-toggle" onClick={() => setSidebarOpen(true)}>☰</button>
           <span className="cc-topbar-title">Mi calendario</span>
           <button
-            className="...-logout-header"
+            className="cc-logout-header"
             onClick={() => {
               localStorage.clear();
               navigate("/");
