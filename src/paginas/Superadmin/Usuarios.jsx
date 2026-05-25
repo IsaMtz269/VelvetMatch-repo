@@ -1,37 +1,10 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SharedLayout.css";
 import "./Usuarios.css";
 
-const usuariosData = [
-  { id: 1,  inicial: "A", nombre: "Adriana López",    meta: "Admin · Chapi's Nails",     activo: true,
-    info: { nombreCompleto: "Adriana López Martínez", email: "adriana@chapisnails.com", nacimiento: "14 de marzo, 1990", ingreso: "5 de enero, 2025", rol: "Administrador", estado: "Activo",
-            negocio: "Chapi's Nails", tipo: "Salón de uñas", url: "/nails/chapis-nails", empleados: "4 empleados", citas: "142", cancelaciones: "12" } },
-  { id: 2,  inicial: "C", nombre: "Carlos Garza",     meta: "Admin · Barbería Regia",    activo: true,
-    info: { nombreCompleto: "Carlos Garza Treviño",   email: "carlos@barberiaregia.com", nacimiento: "22 de julio, 1985",   ingreso: "10 de febrero, 2025", rol: "Administrador", estado: "Activo",
-            negocio: "Barbería Regia", tipo: "Barbería", url: "/barber/barberia-regia", empleados: "3 empleados", citas: "98", cancelaciones: "7" } },
-  { id: 3,  inicial: "M", nombre: "María Fernanda",   meta: "Admin · Estética Lumière",  activo: true,
-    info: { nombreCompleto: "María Fernanda Ortiz",   email: "maria@estetica-lumiere.com", nacimiento: "3 de noviembre, 1992", ingreso: "15 de marzo, 2025", rol: "Administrador", estado: "Activo",
-            negocio: "Estética Lumière", tipo: "Estética", url: "/estetica/lumiere", empleados: "5 empleados", citas: "210", cancelaciones: "18" } },
-  { id: 4,  inicial: "P", nombre: "Paola Ríos",       meta: "Empleado · Chapi's Nails",  activo: true,
-    info: { nombreCompleto: "Paola Ríos Garza",       email: "paola@chapisnails.com",    nacimiento: "17 de abril, 1998",   ingreso: "20 de enero, 2025", rol: "Empleado", estado: "Activo",
-            negocio: "Chapi's Nails", tipo: "Salón de uñas", url: "/nails/chapis-nails", empleados: "—", citas: "64", cancelaciones: "3" } },
-  { id: 5,  inicial: "L", nombre: "Lucía Mendoza",    meta: "Cliente · —",               activo: false,
-    info: { nombreCompleto: "Lucía Mendoza Vega",     email: "lucia.mendoza@gmail.com",  nacimiento: "9 de junio, 2000",    ingreso: "2 de abril, 2025", rol: "Cliente", estado: "Inactivo",
-            negocio: "—", tipo: "—", url: "—", empleados: "—", citas: "5", cancelaciones: "2" } },
-  { id: 6,  inicial: "R", nombre: "Roberto Salinas",  meta: "Cliente · —",               activo: true,
-    info: { nombreCompleto: "Roberto Salinas Peña",   email: "r.salinas@hotmail.com",    nacimiento: "30 de enero, 1995",   ingreso: "8 de mayo, 2025", rol: "Cliente", estado: "Activo",
-            negocio: "—", tipo: "—", url: "—", empleados: "—", citas: "11", cancelaciones: "1" } },
-  { id: 7,  inicial: "S", nombre: "Sofía Ramírez",    meta: "Admin · Glam Studio",       activo: false,
-    info: { nombreCompleto: "Sofía Ramírez Luna",     email: "sofia@glamstudio.com",     nacimiento: "25 de septiembre, 1991", ingreso: "1 de marzo, 2025", rol: "Administrador", estado: "Inactivo",
-            negocio: "Glam Studio", tipo: "Maquillaje", url: "/makeup/glam-studio", empleados: "2 empleados", citas: "37", cancelaciones: "9" } },
-  { id: 8,  inicial: "V", nombre: "Valentina Cruz",   meta: "Admin · Beauty Corner",     activo: true,
-    info: { nombreCompleto: "Valentina Cruz Mora",    email: "vale@beautycorner.com",    nacimiento: "12 de diciembre, 1993", ingreso: "18 de febrero, 2025", rol: "Administrador", estado: "Activo",
-            negocio: "Beauty Corner", tipo: "Estética", url: "/estetica/beauty-corner", empleados: "3 empleados", citas: "89", cancelaciones: "6" } },
-  { id: 9,  inicial: "J", nombre: "Jorge Mendez",     meta: "Empleado · Barbería Regia", activo: true,
-    info: { nombreCompleto: "Jorge Mendez Flores",    email: "jorge@barberiaregia.com",  nacimiento: "7 de agosto, 1997",   ingreso: "25 de enero, 2025", rol: "Empleado", estado: "Activo",
-            negocio: "Barbería Regia", tipo: "Barbería", url: "/barber/barberia-regia", empleados: "—", citas: "53", cancelaciones: "4" } },
-];
+const BASE = "http://localhost:5000/api";
+
 
 const TABS = ["Todos", "Admin", "Empleado", "Cliente"];
 
@@ -39,13 +12,56 @@ export default function Usuarios() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
   const [tabActivo, setTabActivo]       = useState("Todos");
   const [busqueda, setBusqueda]         = useState("");
-  const [seleccionado, setSeleccionado] = useState(usuariosData[0]);
+  const [usuarios, setUsuarios]         = useState([]);
+  const [seleccionado, setSeleccionado] = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
   const location = useLocation();
   const toggle = () => setIsSidebarActive(!isSidebarActive);
+  const navigate = useNavigate();
 
-  const usuariosFiltrados = usuariosData.filter((u) => {
-    const coincideTab = tabActivo === "Todos" || u.info.rol.toLowerCase().includes(tabActivo.toLowerCase());
-    const coincideBusqueda = u.nombre.toLowerCase().includes(busqueda.toLowerCase()) || u.meta.toLowerCase().includes(busqueda.toLowerCase());
+  useEffect(() => {
+    async function cargarUsuarios() {
+      try {
+        const res = await fetch(`${BASE}/usuarios`);
+        if (!res.ok) throw new Error("Error al obtener usuarios");
+        const data = await res.json();
+        const lista = Array.isArray(data) ? data : [];
+        setUsuarios(lista);
+        if (lista.length > 0) setSeleccionado(lista[0]);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargarUsuarios();
+  }, []);
+
+  // Helpers para normalizar datos de MongoDB
+  const getNombre = (u) => u.nombre || u.name || "Sin nombre";
+  const getEmail = (u) => u.email || u.correo || "—";
+  const getRol = (u) => {
+    const r = u.roles || u.rol || u.role || u.tipo || "";
+    if (!r) return "—";
+    // Capitalizar primera letra
+    return r.charAt(0).toUpperCase() + r.slice(1).toLowerCase();
+  };
+  const getInicial = (u) => getNombre(u).charAt(0).toUpperCase();
+  const getNegocio = (u) => u.trabaja_en?.nombre || u.negocio || "—";
+  const getTipoNegocio = (u) => u.trabaja_en?.tipo || "—";
+  const getActivo = (u) => u.activo !== false && u.estado !== "inactivo";
+
+  const usuariosFiltrados = usuarios.filter((u) => {
+    const rol = (u.roles || u.rol || u.role || "").toLowerCase();
+    const coincideTab =
+      tabActivo === "Todos" ||
+      (tabActivo === "Admin"    && (rol === "admin" || rol === "administrador" || rol === "superadmin")) ||
+      (tabActivo === "Empleado" && rol === "empleado") ||
+      (tabActivo === "Cliente"  && rol === "cliente");
+    const nombre = getNombre(u).toLowerCase();
+    const email  = getEmail(u).toLowerCase();
+    const coincideBusqueda = nombre.includes(busqueda.toLowerCase()) || email.includes(busqueda.toLowerCase());
     return coincideTab && coincideBusqueda;
   });
 
@@ -83,79 +99,96 @@ export default function Usuarios() {
         <header className="sh-topbar">
           <button className="sh-menu-toggle" onClick={toggle}>☰</button>
           <span className="sh-topbar-title">Usuarios</span>
-          <div className="sh-topbar-right">
-            <Link to="/" className="sh-logout-btn">Cerrar sesión</Link>
-          </div>
+          <button
+            className="sh-logout-btn"
+            onClick={() => {
+              localStorage.clear();
+              navigate("/");
+            }}
+          >
+            Cerrar sesión
+          </button>
         </header>
 
         <div className="usu-content">
-          <div className="usu-layout">
-            {/* Lista */}
-            <div className="usu-list-card">
-              <div className="usu-list-head">
-                <span className="usu-list-head-title">Todos los usuarios</span>
-                <span className="usu-count-badge">{usuariosFiltrados.length}</span>
-              </div>
-              <div className="usu-list-search">
-                <input placeholder="Buscar usuario..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-              </div>
-              <div className="usu-role-tabs">
-                {TABS.map((tab) => (
-                  <button key={tab} className={`usu-role-tab ${tabActivo === tab ? "active" : ""}`} onClick={() => setTabActivo(tab)}>{tab}</button>
-                ))}
-              </div>
-              <div className="usu-list-scroll">
-                {usuariosFiltrados.map((u) => (
-                  <div key={u.id} className={`usu-list-item ${seleccionado?.id === u.id ? "selected" : ""}`} onClick={() => setSeleccionado(u)}>
-                    <div className="usu-list-avatar">{u.inicial}</div>
-                    <div className="usu-list-item-info">
-                      <div className="usu-list-item-name">{u.nombre}</div>
-                      <div className="usu-list-item-meta">{u.meta}</div>
-                    </div>
-                    <div className={`usu-status-dot ${u.activo ? "dot-active" : "dot-inactive"}`} />
-                  </div>
-                ))}
-              </div>
+          {loading ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#8a5070" }}>Cargando usuarios...</div>
+          ) : error ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#c04040" }}>
+              Error: {error}<br />
+              <small>¿Ya agregaste el endpoint <code>GET /api/usuarios</code> al backend?</small>
             </div>
-
-            {/* Detalle */}
-            {seleccionado && (
-              <div className="usu-detail-card">
-                <div className="usu-detail-header">
-                  <div className="usu-detail-avatar">{seleccionado.inicial}</div>
-                  <div className="usu-detail-header-info">
-                    <div className="usu-detail-name">{seleccionado.nombre}</div>
-                    <div className="usu-detail-role-tag">🔑 {seleccionado.info.rol} · {seleccionado.info.negocio}</div>
-                  </div>
-                  <div className="usu-detail-actions">
-                    <button className="usu-btn-outline-light">Editar</button>
-                  </div>
+          ) : (
+            <div className="usu-layout">
+              {/* Lista */}
+              <div className="usu-list-card">
+                <div className="usu-list-head">
+                  <span className="usu-list-head-title">Todos los usuarios</span>
+                  <span className="usu-count-badge">{usuariosFiltrados.length}</span>
                 </div>
-                <div className="usu-detail-body">
-                  <div className="usu-detail-section-title">Información personal</div>
-                  <div className="usu-detail-grid">
-                    <div className="usu-field"><label>Nombre completo</label><p>{seleccionado.info.nombreCompleto}</p></div>
-                    <div className="usu-field"><label>Email</label><p>{seleccionado.info.email}</p></div>
-                    <div className="usu-field"><label>Fecha de nacimiento</label><p>{seleccionado.info.nacimiento}</p></div>
-                    <div className="usu-field"><label>Fecha de ingreso</label><p>{seleccionado.info.ingreso}</p></div>
-                    <div className="usu-field"><label>Rol</label><p><span className="usu-badge usu-badge-role">{seleccionado.info.rol}</span></p></div>
-                    <div className="usu-field"><label>Estado</label><p>
-                      <span className={`usu-badge ${seleccionado.info.estado === "Activo" ? "usu-badge-active" : "usu-badge-inactive"}`}>● {seleccionado.info.estado}</span>
-                    </p></div>
-                  </div>
-                  <div className="usu-detail-section-title">Negocio</div>
-                  <div className="usu-detail-grid">
-                    <div className="usu-field"><label>Nombre del negocio</label><p>{seleccionado.info.negocio}</p></div>
-                    <div className="usu-field"><label>Tipo</label><p>{seleccionado.info.tipo}</p></div>
-                    <div className="usu-field"><label>URL</label><p className="usu-biz-url">{seleccionado.info.url}</p></div>
-                    <div className="usu-field"><label>Empleados a cargo</label><p>{seleccionado.info.empleados}</p></div>
-                    <div className="usu-field"><label>Citas este mes</label><p>{seleccionado.info.citas}</p></div>
-                    <div className="usu-field"><label>Cancelaciones</label><p>{seleccionado.info.cancelaciones}</p></div>
-                  </div>
+                <div className="usu-list-search">
+                  <input placeholder="Buscar usuario..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+                </div>
+                <div className="usu-role-tabs">
+                  {TABS.map((tab) => (
+                    <button key={tab} className={`usu-role-tab ${tabActivo === tab ? "active" : ""}`} onClick={() => setTabActivo(tab)}>{tab}</button>
+                  ))}
+                </div>
+                <div className="usu-list-scroll">
+                  {usuariosFiltrados.length === 0 ? (
+                    <div style={{ padding: "20px", textAlign: "center", color: "#8a5070", fontSize: 13 }}>Sin resultados</div>
+                  ) : usuariosFiltrados.map((u) => (
+                    <div key={u._id} className={`usu-list-item ${seleccionado?._id === u._id ? "selected" : ""}`} onClick={() => setSeleccionado(u)}>
+                      <div className="usu-list-avatar">{getInicial(u)}</div>
+                      <div className="usu-list-item-info">
+                        <div className="usu-list-item-name">{getNombre(u)}</div>
+                        <div className="usu-list-item-meta">{getRol(u)} · {getNegocio(u)}</div>
+                      </div>
+                      <div className={`usu-status-dot ${getActivo(u) ? "dot-active" : "dot-inactive"}`} />
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Detalle */}
+              {seleccionado && (
+                <div className="usu-detail-card">
+                  <div className="usu-detail-header">
+                    <div className="usu-detail-avatar">{getInicial(seleccionado)}</div>
+                    <div className="usu-detail-header-info">
+                      <div className="usu-detail-name">{getNombre(seleccionado)}</div>
+                      <div className="usu-detail-role-tag">🔑 {getRol(seleccionado)} · {getNegocio(seleccionado)}</div>
+                    </div>
+                    <div className="usu-detail-actions">
+                      <button className="usu-btn-outline-light">Editar</button>
+                    </div>
+                  </div>
+                  <div className="usu-detail-body">
+                    <div className="usu-detail-section-title">Información personal</div>
+                    <div className="usu-detail-grid">
+                      <div className="usu-field"><label>Nombre completo</label><p>{getNombre(seleccionado)}</p></div>
+                      <div className="usu-field"><label>Email</label><p>{getEmail(seleccionado)}</p></div>
+                      <div className="usu-field"><label>Apellido</label><p>{seleccionado.apellido || "—"}</p></div>
+                      <div className="usu-field"><label>Fecha de nacimiento</label><p>{seleccionado.fechNacimiento ? new Date(seleccionado.fechNacimiento).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
+                      <div className="usu-field"><label>Fecha de ingreso</label><p>{seleccionado.createdAt ? new Date(seleccionado.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
+                      <div className="usu-field"><label>Rol</label><p><span className="usu-badge usu-badge-role">{getRol(seleccionado)}</span></p></div>
+                      <div className="usu-field"><label>Estado</label><p>
+                        <span className={`usu-badge ${getActivo(seleccionado) ? "usu-badge-active" : "usu-badge-inactive"}`}>
+                          ● {getActivo(seleccionado) ? "Activo" : "Inactivo"}
+                        </span>
+                      </p></div>
+                    </div>
+                    <div className="usu-detail-section-title">Negocio</div>
+                    <div className="usu-detail-grid">
+                      <div className="usu-field"><label>Nombre del negocio</label><p>{getNegocio(seleccionado)}</p></div>
+                      <div className="usu-field"><label>Tipo</label><p>{getTipoNegocio(seleccionado)}</p></div>
+                      <div className="usu-field"><label>ID de negocio</label><p style={{ fontSize: 12, fontFamily: "monospace", color: "#7F055F" }}>{seleccionado.trabaja_en?._id || seleccionado.trabaja_en || "—"}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>

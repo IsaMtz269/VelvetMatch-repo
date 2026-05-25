@@ -1,28 +1,51 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SharedLayout.css";
 import "./Negocios.css";
 
-const negociosData = [
-  { id: 1, emoji: "💅", nombre: "Chapi's Nails",    owner: "Adriana López",  tipo: "Salón de uñas",   url: "/nails/chapis-nails",     citas: 142, activo: true  },
-  { id: 2, emoji: "✂️", nombre: "Barbería Regia",   owner: "Carlos Garza",   tipo: "Barbería",         url: "/barber/barberia-regia",  citas: 89,  activo: true  },
-  { id: 3, emoji: "💆", nombre: "Estética Lumière", owner: "María Fernanda", tipo: "Estética",         url: "/estetica/lumiere",       citas: 214, activo: true  },
-  { id: 4, emoji: "💇", nombre: "Glam Studio",      owner: "Sofía Ramírez",  tipo: "Salón de belleza", url: "/salon/glam-studio",      citas: 37,  activo: false },
-  { id: 5, emoji: "💄", nombre: "Beauty Corner",    owner: "Valentina Cruz", tipo: "Estética",         url: "/estetica/beauty-corner", citas: 176, activo: true  },
-];
+const BASE = "http://localhost:5000/api";
 
-const TIPOS = ["Todos", "Barbería", "Estética", "Salón de uñas", "Salón de belleza"];
+// Emoji por tipo de negocio
+const EMOJI_MAP = {
+  "Barbería": "✂️",
+  "Estética": "💆",
+  "Salón de uñas": "💅",
+  "Salón de belleza": "💇",
+  "Maquillaje": "💄",
+};
 
 export default function Negocios() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
+  const [negocios, setNegocios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
   const toggle = () => setIsSidebarActive(!isSidebarActive);
+  const navigate = useNavigate();
+  useEffect(() => {
+    async function cargarNegocios() {
+      try {
+        const res = await fetch(`${BASE}/negocios`);
+        if (!res.ok) throw new Error("Error al obtener negocios");
+        const data = await res.json();
+        setNegocios(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargarNegocios();
+  }, []);
 
-  const negociosFiltrados = negociosData.filter((n) => {
+  // Tipos únicos para los chips de filtro
+  const tipos = ["Todos", ...new Set(negocios.map((n) => n.tipo).filter(Boolean))];
+
+  const negociosFiltrados = negocios.filter((n) => {
     const cumpleTipo = filtroTipo === "Todos" || n.tipo === filtroTipo;
-    const cumpleBusqueda = n.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    const cumpleBusqueda = n.nombre?.toLowerCase().includes(busqueda.toLowerCase());
     return cumpleTipo && cumpleBusqueda;
   });
 
@@ -60,9 +83,15 @@ export default function Negocios() {
         <header className="sh-topbar">
           <button className="sh-menu-toggle" onClick={toggle}>☰</button>
           <span className="sh-topbar-title">Negocios</span>
-          <div className="sh-topbar-right">
-            <Link to="/" className="sh-logout-btn">Cerrar sesión</Link>
-          </div>
+          <button
+            className="sh-logout-btn"
+            onClick={() => {
+              localStorage.clear();
+              navigate("/");
+            }}
+          >
+            Cerrar sesión
+          </button>
         </header>
 
         <div className="neg-content">
@@ -70,7 +99,7 @@ export default function Negocios() {
           <div className="neg-filter-row">
             <span className="neg-filter-label">Tipo:</span>
             <div className="neg-filter-chips">
-              {TIPOS.map((t) => (
+              {tipos.map((t) => (
                 <button key={t} className={`neg-chip-btn ${filtroTipo === t ? "active" : ""}`} onClick={() => setFiltroTipo(t)}>{t}</button>
               ))}
             </div>
@@ -83,63 +112,79 @@ export default function Negocios() {
               <button className="neg-btn-sm">⬇ Exportar</button>
             </div>
 
-            {/* Tabla desktop */}
-            <div className="neg-table-wrapper">
-              <table className="neg-table">
-                <thead>
-                  <tr>
-                    <th>Negocio</th><th>Tipo</th><th>URL</th><th>Citas este mes</th><th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {negociosFiltrados.map((n) => (
-                    <tr key={n.id}>
-                      <td>
-                        <div className="neg-biz-cell">
-                          <div className="neg-biz-avatar">{n.emoji}</div>
-                          <div><div className="neg-biz-name">{n.nombre}</div><div className="neg-biz-owner">{n.owner}</div></div>
-                        </div>
-                      </td>
-                      <td><span className="neg-badge neg-badge-type">{n.tipo}</span></td>
-                      <td className="neg-biz-url">{n.url}</td>
-                      <td><strong>{n.citas}</strong></td>
-                      <td><span className={`neg-badge ${n.activo ? "neg-badge-active" : "neg-badge-inactive"}`}>● {n.activo ? "Activo" : "Inactivo"}</span></td>
-                    </tr>
-                  ))}
-                  {negociosFiltrados.length === 0 && (
-                    <tr><td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#8a5070" }}>No se encontraron negocios</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Cards móvil */}
-            <div className="neg-mobile-cards">
-              {negociosFiltrados.map((n) => (
-                <div key={n.id} className="neg-mobile-card">
-                  <div className="neg-mobile-card-header">
-                    <div className="neg-biz-avatar">{n.emoji}</div>
-                    <div><div className="neg-biz-name">{n.nombre}</div><div className="neg-biz-owner">{n.owner}</div></div>
-                  </div>
-                  <div className="neg-mobile-card-details">
-                    <div className="neg-detail-row"><span className="neg-detail-label">Tipo:</span> <span className="neg-badge neg-badge-type">{n.tipo}</span></div>
-                    <div className="neg-detail-row"><span className="neg-detail-label">URL:</span> <span className="neg-biz-url">{n.url}</span></div>
-                    <div className="neg-detail-row"><span className="neg-detail-label">Citas:</span> <strong>{n.citas}</strong> este mes</div>
-                    <div className="neg-detail-row"><span className="neg-detail-label">Estado:</span> <span className={`neg-badge ${n.activo ? "neg-badge-active" : "neg-badge-inactive"}`}>● {n.activo ? "Activo" : "Inactivo"}</span></div>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}><button className="neg-btn-sm">Ver</button></div>
+            {loading ? (
+              <div style={{ padding: "40px", textAlign: "center", color: "#8a5070" }}>Cargando negocios...</div>
+            ) : error ? (
+              <div style={{ padding: "40px", textAlign: "center", color: "#c04040" }}>Error: {error}</div>
+            ) : (
+              <>
+                {/* Tabla desktop */}
+                <div className="neg-table-wrapper">
+                  <table className="neg-table">
+                    <thead>
+                      <tr>
+                        <th>Negocio</th><th>Tipo</th><th>Ubicación</th><th>Celular</th><th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {negociosFiltrados.map((n) => (
+                        <tr key={n._id}>
+                          <td>
+                            <div className="neg-biz-cell">
+                              <div className="neg-biz-avatar">{EMOJI_MAP[n.tipo] || "🏪"}</div>
+                              <div>
+                                <div className="neg-biz-name">{n.nombre}</div>
+                                <div className="neg-biz-owner">{n.eslogan || n.descripcion?.slice(0, 40) || "—"}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td><span className="neg-badge neg-badge-type">{n.tipo || "—"}</span></td>
+                          <td className="neg-biz-url">{n.ubicacion || "—"}</td>
+                          <td>{n.celular || "—"}</td>
+                          <td>
+                            <span className={`neg-badge ${n.activo !== false ? "neg-badge-active" : "neg-badge-inactive"}`}>
+                              ● {n.activo !== false ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                      {negociosFiltrados.length === 0 && (
+                        <tr><td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#8a5070" }}>No se encontraron negocios</td></tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
-            </div>
+
+                {/* Cards móvil */}
+                <div className="neg-mobile-cards">
+                  {negociosFiltrados.map((n) => (
+                    <div key={n._id} className="neg-mobile-card">
+                      <div className="neg-mobile-card-header">
+                        <div className="neg-biz-avatar">{EMOJI_MAP[n.tipo] || "🏪"}</div>
+                        <div>
+                          <div className="neg-biz-name">{n.nombre}</div>
+                          <div className="neg-biz-owner">{n.eslogan || "—"}</div>
+                        </div>
+                      </div>
+                      <div className="neg-mobile-card-details">
+                        <div className="neg-detail-row"><span className="neg-detail-label">Tipo:</span> <span className="neg-badge neg-badge-type">{n.tipo}</span></div>
+                        <div className="neg-detail-row"><span className="neg-detail-label">Ubicación:</span> <span>{n.ubicacion || "—"}</span></div>
+                        <div className="neg-detail-row"><span className="neg-detail-label">Celular:</span> <span>{n.celular || "—"}</span></div>
+                        <div className="neg-detail-row"><span className="neg-detail-label">Estado:</span>
+                          <span className={`neg-badge ${n.activo !== false ? "neg-badge-active" : "neg-badge-inactive"}`}>
+                            ● {n.activo !== false ? "Activo" : "Inactivo"}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "flex-end" }}><button className="neg-btn-sm">Ver</button></div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             <div className="neg-table-footer">
-              <span>Mostrando {negociosFiltrados.length} de {negociosData.length} negocios</span>
-              <div className="neg-pagination">
-                <div className="neg-page-btn active">1</div>
-                <div className="neg-page-btn">2</div>
-                <div className="neg-page-btn">3</div>
-                <div className="neg-page-btn">›</div>
-              </div>
+              <span>Mostrando {negociosFiltrados.length} de {negocios.length} negocios</span>
             </div>
           </div>
         </div>
