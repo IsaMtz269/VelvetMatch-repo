@@ -30,9 +30,6 @@ a { text-decoration: none; }
 .text-primary-custom { color: var(--primary-color) !important; }
 .bg-light-custom { background-color: var(--bg-body) !important; }
 
-/* =========================================
-   2. SIDEBAR (MENÚ LATERAL)
-   ========================================= */
 .sidebar {
     width: var(--sidebar-w);
     background: var(--primary-color);
@@ -51,14 +48,15 @@ a { text-decoration: none; }
     align-items: center;
     justify-content: space-between;
     padding: 24px 20px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* Línea separadora inteligente que se adapta al texto */
+    border-bottom: 1px solid color-mix(in srgb, var(--text-on-primary) 15%, transparent);
 }
 
 .brand-name {
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     font-weight: bold;
-    color: #ffffff;
+    color: var(--text-on-primary); 
     line-height: 1.2;
 }
 
@@ -82,7 +80,8 @@ a { text-decoration: none; }
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.4);
+    /* Texto semi-transparente inteligente */
+    color: color-mix(in srgb, var(--text-on-primary) 50%, transparent); 
     padding: 10px 12px 4px;
     font-weight: bold;
 }
@@ -95,26 +94,29 @@ a { text-decoration: none; }
     border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.6) !important;
+    /* El texto del botón normal, adaptable */
+    color: color-mix(in srgb, var(--text-on-primary) 70%, transparent) !important; 
     border: none;
     background: transparent;
     transition: all 0.2s ease;
 }
 
 .custom-sidebar-nav .nav-link:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff !important;
+    /* Fondo que reacciona oscureciéndose o aclarando dependiendo del texto */
+    background: color-mix(in srgb, var(--text-on-primary) 10%, transparent);
+    color: var(--text-on-primary) !important; 
 }
 
 .custom-sidebar-nav .nav-link.active {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff !important;
+    background: color-mix(in srgb, var(--text-on-primary) 15%, transparent);
+    color: var(--text-on-primary) !important; 
     border-left: 4px solid var(--secondary-color);
 }
 
 .sidebar-footer {
     padding: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    /* Línea separadora inteligente */
+    border-top: 1px solid color-mix(in srgb, var(--text-on-primary) 15%, transparent);
     display: flex;
     align-items: center;
     gap: 12px;

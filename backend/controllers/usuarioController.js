@@ -3,47 +3,64 @@ const Usuario = require('../models/Usuario');
 const Negocio = require('../models/Negocio');
 const Servicio = require('../models/Servicio');
 
+// Función auxiliar para validar la edad en el servidor
+const esMayorDe16 = (fecha) => {
+    if (!fecha) return false;
+    const hoy = new Date();
+    const cumpleanos = new Date(fecha);
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const mes = hoy.getMonth() - cumpleanos.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+        edad--;
+    }
+    return edad >= 16;
+};
 
-//EMPLEADO
-
-// Función para registrar un empleado (usada por el Administrador)
 exports.crearEmpleado = async (req, res) => {
     try {
         const { 
             nombre, apellido, email, password, fechNacimiento, 
-            id_negocio, servicio_empl, horario_dia, horario_inicio, horario_final 
+            id_negocio, servicio_empl, horario_dia, rol_usuario 
         } = req.body;
 
+        // VALIDACIÓN 1: Administrador
+        if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin') {
+            return res.status(403).json({ message: 'Acceso denegado. Solo el administrador puede agregar empleados.' });
+        }
+
         if (!nombre || !apellido || !email || !password || !fechNacimiento || !id_negocio) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios' });
+            return res.status(400).json({ message: 'Faltan campos obligatorios para registrar al empleado.' });
         }
 
-        const negocio = await Negocio.findById(id_negocio);
-        if (!negocio) {
-            return res.status(404).json({ message: 'Negocio no encontrado' });
+        // VALIDACIÓN 2: Solo letras
+        const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
+            return res.status(400).json({ message: 'El nombre y apellido solo deben contener letras.' });
         }
 
-        const cantidadServicios = await Servicio.countDocuments({ id_negocio: id_negocio });
-        
-        if (cantidadServicios === 0) {
-            return res.status(400).json({ 
-                message: 'No puedes agregar empleados sin antes haber registrado al menos un servicio en tu negocio.' 
-            });
+        // 👇 NUEVA VALIDACIÓN: Contraseña mínimo de 8 caracteres
+        if (password.length < 8) {
+            return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres.' });
+        }
+
+        // 👇 NUEVA VALIDACIÓN: Edad mínima de 16 años
+        if (!esMayorDe16(fechNacimiento)) {
+            return res.status(400).json({ message: 'El empleado debe ser mayor de 16 años para ser registrado.' });
+        }
+
+        if (!servicio_empl || servicio_empl.length === 0) {
+            return res.status(400).json({ message: 'El empleado debe tener al menos una especialidad (servicio) asignada.' });
+        }
+
+        const emailExist = await Usuario.findOne({ email });
+        if (emailExist) {
+            return res.status(400).json({ message: 'Este correo electrónico ya está registrado en otra cuenta.' });
         }
 
         const nuevoEmpleado = new Usuario({
-            nombre, 
-            apellido, 
-            email, 
-            password,
-            fechNacimiento, 
-            trabaja_en: id_negocio,
-            roles: 'empleado',
-            is_empleado: true,
-            servicio_empl,
-            horario_dia,
-            horario_inicio,
-            horario_final
+            nombre, apellido, email, password, fechNacimiento, 
+            trabaja_en: id_negocio, roles: 'empleado', is_empleado: true,
+            servicio_empl, horario_dia
         });
 
         await nuevoEmpleado.save();

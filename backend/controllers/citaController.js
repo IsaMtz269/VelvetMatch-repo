@@ -1,6 +1,7 @@
 // backend/controllers/citaController.js
 const Cita = require('../models/Cita');
-const FechaProhibida = require('../models/FechaProhibida'); // Necesario para la validación al agendar
+const FechaProhibida = require('../models/FechaProhibida'); 
+const Usuario = require('../models/Usuario'); // <-- AGREGAR ESTA IMPORTACIÓN
 
 // 1. Agendar una nueva cita
 exports.crearCita = async (req, res) => {
@@ -14,6 +15,13 @@ exports.crearCita = async (req, res) => {
             return res.status(400).json({ message: 'Faltan campos obligatorios para agendar la cita' });
         }
 
+        // VALIDACIÓN 1: El cliente debe existir en la base de datos (Estar registrado)
+        const clienteValido = await Usuario.findById(id_cliente);
+        if (!clienteValido) {
+            return res.status(403).json({ message: 'Acceso denegado. Solo los clientes registrados pueden agendar citas.' });
+        }
+
+        // VALIDACIÓN 2: Mínimo 48 horas de anticipación (Tu lógica original intacta)
         const fechaHoraCita = new Date(`${fecha}T${hora}:00`); 
         const ahora = new Date();
         
@@ -38,21 +46,12 @@ exports.crearCita = async (req, res) => {
         }
 
         const nuevaCita = new Cita({
-            id_cliente,
-            id_negocio,
-            id_servicio,
-            fecha,
-            hora,
-            precio_final,
-            anticipo_pagado
+            id_cliente, id_negocio, id_servicio, fecha, hora, precio_final, anticipo_pagado
         });
 
         await nuevaCita.save();
 
-        res.status(201).json({ 
-            message: 'Tu cita ha sido enviada y está en revisión', 
-            cita: nuevaCita 
-        });
+        res.status(201).json({ message: 'Tu cita ha sido enviada y está en revisión', cita: nuevaCita });
 
     } catch (error) {
         res.status(500).json({ message: 'Error al agendar la cita', error: error.message });

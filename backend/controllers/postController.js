@@ -4,15 +4,38 @@ const Post = require('../models/Post');
 // 1. Agregar post a un negocio
 exports.crearPost = async (req, res) => {
     try {
-        const nuevoPost = new Post(req.body);
+        const { titulo_p, contenido, image_url, id_negocio, rol_usuario } = req.body;
+
+        // VALIDACIÓN 1: Seguridad de Roles (Cadenero del Back-End)
+        if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin' && rol_usuario !== 'empleado') {
+            return res.status(403).json({ message: 'Acceso denegado. No tienes permisos para publicar novedades.' });
+        }
+
+        if (!titulo_p || !contenido || !id_negocio) {
+            return res.status(400).json({ message: 'El título y el contenido son obligatorios.' });
+        }
+
+        // VALIDACIÓN 2: La imagen solo puede ser JPG o PNG
+        if (image_url) {
+            if (!image_url.startsWith('data:image/jpeg') && !image_url.startsWith('data:image/png') && !image_url.startsWith('data:image/jpg')) {
+                return res.status(400).json({ message: 'Formato de imagen no válido. Solo se admiten JPG y PNG.' });
+            }
+        }
+
+        const nuevoPost = new Post({
+            titulo_p,
+            contenido,
+            image_url,
+            id_negocio
+        });
+
         await nuevoPost.save();
-        res.status(201).json({ message: 'Post creado', post: nuevoPost });
+        res.status(201).json({ message: 'Post publicado exitosamente', post: nuevoPost });
     } catch (error) {
-        res.status(400).json({ message: 'Error al crear post', error: error.message });
+        res.status(500).json({ message: 'Error al crear post', error: error.message });
     }
 };
 
-// 2. Eliminar post
 exports.eliminarPost = async (req, res) => {
     try {
         await Post.findByIdAndDelete(req.params.id);
