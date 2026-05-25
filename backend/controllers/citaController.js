@@ -61,14 +61,44 @@ exports.crearCita = async (req, res) => {
 // 2. Obtener citas de un Negocio (Dashboard del Admin)
 exports.obtenerCitasPorNegocio = async (req, res) => {
     try {
-        const citas = await Cita.find({ id_negocio: req.params.id_negocio })
+        const { id_negocio } = req.params;
+        
+        // El populate nos trae los datos reales (nombre, precio) en vez de solo el ID
+        let citas = await Cita.find({ id_negocio })
             .populate('id_cliente', 'nombre apellido email')
             .populate('id_servicio', 'nombre precio duracion')
             .populate('id_empleado', 'nombre apellido');
-            
+
+        const ahora = new Date();
+        let cambiosRealizados = false;
+
+        // VALIDACIÓN: Si la fecha ya pasó y sigue "pendiente", se auto-rechaza
+        for (let cita of citas) {
+            if (cita.estado === 'pendiente') {
+                const fechaCita = new Date(`${cita.fecha}T${cita.hora}:00`);
+                if (fechaCita < ahora) {
+                    cita.estado = 'rechazada';
+                    cita.motivo_rechazo = 'La fecha solicitada expiró sin ser confirmada por el administrador.';
+                    await cita.save();
+                    cambiosRealizados = true;
+                }
+            }
+        }
+
+        // Si el sistema caducó alguna cita, volvemos a consultar la base de datos fresca
+        if (cambiosRealizados) {
+            citas = await Cita.find({ id_negocio })
+                .populate('id_cliente', 'nombre apellido email')
+                .populate('id_servicio', 'nombre precio duracion')
+                .populate('id_empleado', 'nombre apellido');
+        }
+
+        // Ordenamos para que las más próximas salgan primero
+        citas.sort((a, b) => new Date(`${a.fecha}T${a.hora}:00`) - new Date(`${b.fecha}T${b.hora}:00`));
+
         res.status(200).json(citas);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener citas del negocio', error: error.message });
+        res.status(500).json({ message: 'Error al obtener las citas', error: error.message });
     }
 };
 
@@ -99,6 +129,30 @@ exports.obtenerCitasPorCliente = async (req, res) => {
     }
 };
 
+exports.aceptarCita = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { id_empleado, rol_usuario } = req.body;
+
+        if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin') {
+            return res.status(403).json({ message: 'Solo el administrador puede aceptar citas.' });
+        }
+        if (!id_empleado) {
+            return res.status(400).json({ message: 'Debes asignar un profesional a esta cita.' });
+        }
+
+        const citaActualizada = await Cita.findByIdAndUpdate(
+            id, 
+            { estado: 'programada', id_empleado: id_empleado }, 
+            { new: true }
+        ).populate('id_empleado', 'nombre apellido').populate('id_cliente').populate('id_servicio');
+
+        res.status(200).json({ message: 'Cita aprobada y programada', cita: citaActualizada });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al aceptar la cita', error: error.message });
+    }
+};
+
 // 5. APROBAR una cita administrador
 exports.aprobarCita = async (req, res) => {
     try {
@@ -124,6 +178,30 @@ exports.aprobarCita = async (req, res) => {
         res.status(200).json({ message: 'Cita aprobada y asignada con éxito', cita: citaActualizada });
     } catch (error) {
         res.status(500).json({ message: 'Error al aprobar la cita', error: error.message });
+    }
+};
+
+exports.rechazarCita = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { motivo_rechazo, rol_usuario } = req.body;
+
+        if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin') {
+            return res.status(403).json({ message: 'Solo el administrador puede rechazar citas.' });
+        }
+        if (!motivo_rechazo) {
+            return res.status(400).json({ message: 'Debes escribir un motivo de rechazo.' });
+        }
+
+        const citaActualizada = await Cita.findByIdAndUpdate(
+            id, 
+            { estado: 'rechazada', motivo_rechazo: motivo_rechazo }, 
+            { new: true }
+        );
+
+        res.status(200).json({ message: 'Cita rechazada', cita: citaActualizada });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al rechazar la cita', error: error.message });
     }
 };
 

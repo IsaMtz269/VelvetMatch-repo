@@ -1,5 +1,5 @@
-// backend/controllers/servicioController.js
-// backend/controllers/servicioController.js
+const Cita = require('../models/Cita');      
+const Usuario = require('../models/Usuario');
 const Servicio = require('../models/Servicio');
 
 // 1. Agregar servicio a un negocio
@@ -51,10 +51,37 @@ exports.crearServicio = async (req, res) => {
 // 2. Eliminar servicio
 exports.eliminarServicio = async (req, res) => {
     try {
-        await Servicio.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Servicio eliminado correctamente' });
+        const idServicio = req.params.id;
+
+        // VALIDACIÓN 1: Verificar si hay citas PENDIENTES o PROGRAMADAS con este servicio
+        const citasActivas = await Cita.find({
+            id_servicio: idServicio,
+            estado: { $in: ['pendiente', 'programada'] }
+        });
+
+        if (citasActivas.length > 0) {
+            return res.status(400).json({ 
+                message: 'No se puede eliminar: Tienes citas pendientes o programadas para este servicio.' 
+            });
+        }
+
+        // VALIDACIÓN 2: Verificar si hay empleados que tengan asignado este servicio
+        const empleadosAsignados = await Usuario.find({
+            roles: 'empleado',
+            servicio_empl: idServicio
+        });
+
+        if (empleadosAsignados.length > 0) {
+            return res.status(400).json({ 
+                message: 'No se puede eliminar: Hay empleados que tienen asignado este servicio. Por favor, edita los perfiles de tus empleados y desasigna este servicio primero.' 
+            });
+        }
+
+        // Si pasa las validaciones, procedemos a eliminar
+        await Servicio.findByIdAndDelete(idServicio);
+        res.status(200).json({ message: 'Servicio eliminado correctamente' });
     } catch (error) {
-        res.status(400).json({ message: 'Error al eliminar', error: error.message });
+        res.status(500).json({ message: 'Error interno al intentar eliminar el servicio', error: error.message });
     }
 };
 

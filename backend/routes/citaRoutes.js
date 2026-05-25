@@ -17,4 +17,7 @@ router.patch('/aprobar/:id_cita', citaController.aprobarCita);
 router.patch('/cancelar/:id_cita', citaController.cancelarCita);
 router.patch('/completar/:id_cita', citaController.completarCita);
 
+router.put('/:id/aceptar', citaController.aceptarCita);
+router.put('/:id/rechazar', citaController.rechazarCita);
+
 module.exports = router;

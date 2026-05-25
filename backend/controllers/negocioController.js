@@ -96,7 +96,7 @@ exports.actualizarNegocio = async (req, res) => {
         const negocioActualizado = await Negocio.findByIdAndUpdate(
             id,
             req.body,
-            { new: true, runValidators: true } 
+            { returnDocument: 'after', runValidators: true } 
         );
 
         if (!negocioActualizado) {

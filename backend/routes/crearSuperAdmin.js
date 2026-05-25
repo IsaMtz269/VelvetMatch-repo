@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Usuario = require('./models/Usuario');
+const Usuario = require('../models/Usuario');
 
 async function crearSuperAdmin() {
   await mongoose.connect('mongodb://localhost:27017/velvet_match_db');
