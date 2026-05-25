@@ -83,3 +83,41 @@ exports.obtenerEmpleadosPorNegocio = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener los empleados', error: error.message });
     }
 };
+
+// Actualizar perfil de usuario (usada por el cliente para actualizar su perfil)
+exports.actualizarUsuario = async (req, res) => {
+  try {
+    const { nombre, apellido, email, fechNacimiento } = req.body;
+
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(
+      req.params.id,
+      { nombre, apellido, email, fechNacimiento },
+      { new: true, runValidators: true }
+    );
+
+    if (!usuarioActualizado) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ 
+      message: 'Perfil actualizado correctamente', 
+      usuario: usuarioActualizado 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar perfil', error: error.message });
+  }
+
+    
+
+};
+
+// Obtener todos los usuarios (para superadmin)
+    exports.obtenerTodosUsuarios = async (req, res) => {
+    try {
+        const usuarios = await Usuario.find()
+        .populate('trabaja_en', 'nombre tipo');
+        res.status(200).json(usuarios);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener usuarios', error: error.message });
+    }
+    };

@@ -1,60 +1,188 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./ClientePerfil.css";
 
-const citasData = {
-  pendientes: [
-    { id: 1, dia: 26, mes: "Feb", servicio: "Uñas acrílicas", hora: "12:00 pm", duracion: "90 min", precio: "$350", empleada: "Empleada aún por asignar" },
-    { id: 2, dia: 28, mes: "Feb", servicio: "Nail art",        hora: "3:00 pm",  duracion: "45 min", precio: "$150", empleada: "Empleada aún por asignar" },
-  ],
-  programadas: [
-    { id: 3, dia: 5, mes: "Mar", servicio: "Gel semipermanente", hora: "11:00 am", duracion: "60 min", precio: "$250", empleada: "👩 Paola Ríos" },
-  ],
-  completadas: [
-    { id: 4, dia: 15, mes: "Feb", servicio: "Manicure clásico", hora: "10:00 am", duracion: "40 min", precio: "$120", empleada: "👩 Paola Ríos", reviewDone: false },
-    { id: 5, dia: 8,  mes: "Feb", servicio: "Uñas acrílicas",   hora: "12:00 pm", duracion: "90 min", precio: "$350", empleada: "👩 Paola Ríos", reviewDone: true, reviewStars: 5, reviewTexto: '"Excelente servicio, quedé muy satisfecha con el resultado. Muy recomendada."' },
-    { id: 6, dia: 20, mes: "Ene", servicio: "Nail art",          hora: "2:30 pm",  duracion: "45 min", precio: "$150", empleada: "👩 Paola Ríos", reviewDone: true },
-  ],
-  canceladas: [
-    { id: 7, dia: 10, mes: "Ene", servicio: "Gel semipermanente", hora: "11:00 am", duracion: "60 min", precio: "$250", empleada: "—" },
-  ],
-  rechazadas: [
-    { id: 8, dia: 3, mes: "Ene", servicio: "Manicure clásico", hora: "3:00 pm", duracion: "40 min", precio: "$120", empleada: "—", motivo: "Sin disponibilidad en ese horario." },
-  ],
-};
+const API = "http://localhost:5000/api";
 
 const TABS_CITAS = [
-  { key: "pendientes",  label: "Pendientes" },
-  { key: "programadas", label: "Programadas" },
-  { key: "completadas", label: "Completadas" },
-  { key: "canceladas",  label: "Canceladas" },
-  { key: "rechazadas",  label: "Rechazadas" },
+  { key: "pendiente",   label: "Pendientes" },
+  { key: "programada",  label: "Programadas" },
+  { key: "completada",  label: "Completadas" },
+  { key: "cancelada",   label: "Canceladas" },
+  { key: "rechazada",   label: "Rechazadas" },
 ];
 
-function BadgeCita({ tipo }) {
+function BadgeCita({ estado }) {
   const map = {
-    pendientes:  { cls: "cp-badge-pendiente",  text: "⏳ Pendiente de aprobación" },
-    programadas: { cls: "cp-badge-programada", text: "✅ Programada" },
-    completadas: { cls: "cp-badge-completada", text: "✔ Completada" },
-    canceladas:  { cls: "cp-badge-cancelada",  text: "✕ Cancelada por cliente" },
-    rechazadas:  { cls: "cp-badge-rechazada",  text: "✕ Rechazada por administrador" },
+    pendiente:  { cls: "cp-badge-pendiente",  text: "⏳ Pendiente de aprobación" },
+    programada: { cls: "cp-badge-programada", text: "✅ Programada" },
+    completada: { cls: "cp-badge-completada", text: "✔ Completada" },
+    cancelada:  { cls: "cp-badge-cancelada",  text: "✕ Cancelada por cliente" },
+    rechazada:  { cls: "cp-badge-rechazada",  text: "✕ Rechazada por administrador" },
   };
-  const b = map[tipo];
+  const b = map[estado] ?? { cls: "", text: estado };
   return <span className={`cp-badge ${b.cls}`}>{b.text}</span>;
 }
 
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return "";
+  const [anio, mes, dia] = fechaStr.split("-");
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  return { dia: parseInt(dia), mes: meses[parseInt(mes) - 1] ?? mes };
+}
+
 export default function ClientePerfil() {
-  const [sidebarOpen, setSidebarOpen]  = useState(false);
-  const [mainTab, setMainTab]          = useState("perfil");
-  const [citaTab, setCitaTab]          = useState("pendientes");
-  const [ratings, setRatings]          = useState({});
-  const [comentarios, setComentarios]  = useState({});
-  const [reviewsEnviadas, setReviews]  = useState({});
-  const [editando, setEditando]        = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mainTab, setMainTab]         = useState("perfil");
+  const [citaTab, setCitaTab]         = useState("pendiente");
+
+  // Datos reales
+  const navigate = useNavigate(); 
+  const [usuario, setUsuario]   = useState(null);
+  const [citas, setCitas]       = useState([]);
+  const [loadingCitas, setLoadingCitas] = useState(false);
+
+  // Reseñas locales
+  const [ratings, setRatings]         = useState({});
+  const [comentarios, setComentarios] = useState({});
+  const [reviewsEnviadas, setReviews] = useState({});
+  const [enviandoReview, setEnviandoReview] = useState({});
+
+  // Edición de perfil
+  const [editando, setEditando]     = useState(false);
+  const [formPerfil, setFormPerfil] = useState({});
+
   const location = useLocation();
 
+  // Cargar usuario del localStorage
+  useEffect(() => {
+    const u = localStorage.getItem("usuario");
+    if (u) {
+      const parsed = JSON.parse(u);
+      setUsuario(parsed);
+      setFormPerfil({
+        nombre:         parsed.nombre ?? "",
+        apellido:       parsed.apellido ?? "",
+        email:          parsed.email ?? "",
+        fechNacimiento: parsed.fechNacimiento?.split("T")[0] ?? "",
+      });
+    }
+  }, []);
+
+  // Cargar citas del cliente
+  useEffect(() => {
+    if (!usuario?.id) return;
+    const fetchCitas = async () => {
+      setLoadingCitas(true);
+      try {
+        const res = await fetch(`${API}/citas/cliente/${usuario.id}`);
+        const data = await res.json();
+        setCitas(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error al cargar citas:", err);
+      } finally {
+        setLoadingCitas(false);
+      }
+    };
+    fetchCitas();
+  }, [usuario]);
+
+  // Filtrar citas por estado activo
+  const citasFiltradas = citas.filter(c => c.estado === citaTab);
+
+  // Contar citas por estado
+  const contarCitas = (estado) => citas.filter(c => c.estado === estado).length;
+
+  // Citas completadas totales
+  const citasCompletadas = citas.filter(c => c.estado === "completada").length;
+
   const handleRate = (citaId, n) => setRatings(r => ({ ...r, [citaId]: n }));
-  const handleEnviarReview = (citaId) => setReviews(r => ({ ...r, [citaId]: true }));
+
+  const handleEnviarReview = async (citaId) => {
+    if (!ratings[citaId]) return alert("Selecciona una calificación antes de enviar.");
+    setEnviandoReview(e => ({ ...e, [citaId]: true }));
+    try {
+      const res = await fetch(`${API}/citas/${citaId}/resena`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_cliente:   usuario.id,
+          review_stars: ratings[citaId],
+          review_texto: comentarios[citaId] ?? "",
+        }),
+      });
+      if (res.ok) {
+        setReviews(r => ({ ...r, [citaId]: true }));
+        // Actualizar la cita en el estado local
+        setCitas(prev => prev.map(c =>
+          c._id === citaId
+            ? { ...c, review_done: true, review_stars: ratings[citaId], review_texto: comentarios[citaId] ?? "" }
+            : c
+        ));
+      } else {
+        const data = await res.json();
+        alert(data.message ?? "Error al enviar reseña");
+      }
+    } catch (err) {
+      alert("Error de conexión");
+    } finally {
+      setEnviandoReview(e => ({ ...e, [citaId]: false }));
+    }
+  };
+
+  const handleCancelarCita = async (citaId) => {
+    if (!window.confirm("¿Deseas cancelar esta cita?")) return;
+    try {
+      const res = await fetch(`${API}/citas/cancelar/${citaId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ es_admin: false }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCitas(prev => prev.map(c => c._id === citaId ? { ...c, estado: "cancelada" } : c));
+      } else {
+        alert(data.message ?? "No se pudo cancelar la cita");
+      }
+    } catch (err) {
+      alert("Error de conexión");
+    }
+  };
+
+  const iniciales = usuario
+    ? `${usuario.nombre?.charAt(0) ?? ""}${usuario.apellido?.charAt(0) ?? ""}`.toUpperCase()
+    : "?";
+
+  const nombreCompleto = usuario
+    ? `${usuario.nombre ?? ""} ${usuario.apellido ?? ""}`.trim()
+    : "Cliente";
+
+  const miembroDesde = usuario?.createdAt
+    ? new Date(usuario.createdAt).toLocaleDateString("es-MX", { month: "long", year: "numeric" })
+    : "—";
+
+  const handleGuardarPerfil = async () => {
+    try {
+      const res = await fetch(`${API}/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formPerfil),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Actualizar localStorage con los nuevos datos
+        const usuarioActualizado = { ...usuario, ...formPerfil };
+        localStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
+        setUsuario(usuarioActualizado);
+        setEditando(false);
+        alert("Perfil actualizado correctamente");
+      } else {
+        alert(data.message ?? "Error al actualizar");
+      }
+    } catch (err) {
+      alert("Error de conexión");
+    }
+  };
 
   return (
     <div className="cp-wrapper">
@@ -62,8 +190,8 @@ export default function ClientePerfil() {
       <aside className={`cp-sidebar${sidebarOpen ? " active" : ""}`}>
         <div className="cp-sidebar-header">
           <div className="cp-brand">
-            <div className="cp-brand-name">Chapi's Nails</div>
-            <div className="cp-brand-sub">Salón de uñas</div>
+            <div className="cp-brand-name">Velvet Match</div>
+            <div className="cp-brand-sub">Tu plataforma de belleza</div>
           </div>
           <button className="cp-close-sidebar" onClick={() => setSidebarOpen(false)}>✕</button>
         </div>
@@ -80,9 +208,9 @@ export default function ClientePerfil() {
           </Link>
         </nav>
         <div className="cp-sidebar-footer">
-          <div className="cp-user-dot">L</div>
+          <div className="cp-user-dot">{iniciales}</div>
           <div className="cp-user-info">
-            <div className="cp-name">Lucía Mendoza</div>
+            <div className="cp-name">{nombreCompleto}</div>
             <div className="cp-role">Cliente</div>
           </div>
         </div>
@@ -95,9 +223,15 @@ export default function ClientePerfil() {
         <header className="cp-topbar">
           <button className="cp-menu-toggle" onClick={() => setSidebarOpen(true)}>☰</button>
           <span className="cp-topbar-title">Mi perfil</span>
-          <div className="cp-topbar-right">
-            <Link to="/" className="cp-logout-header">Cerrar sesión</Link>
-          </div>
+         <button
+            className="...-logout-header"
+            onClick={() => {
+              localStorage.clear();
+              navigate("/");
+            }}
+          >
+            Cerrar sesión
+          </button>
         </header>
 
         <div className="cp-content">
@@ -112,15 +246,14 @@ export default function ClientePerfil() {
             <div className="cp-perfil-layout">
               <div className="cp-perfil-card">
                 <div className="cp-perfil-header">
-                  <div className="cp-perfil-avatar">L</div>
-                  <div className="cp-perfil-nombre">Lucía Mendoza</div>
+                  <div className="cp-perfil-avatar">{iniciales}</div>
+                  <div className="cp-perfil-nombre">{nombreCompleto}</div>
                   <div className="cp-perfil-rol">Cliente</div>
                 </div>
                 <div className="cp-perfil-body">
-                  <div className="cp-perfil-field"><label>Usuario</label><p>@lucia.mendoza</p></div>
-                  <div className="cp-perfil-field"><label>Correo</label><p>lucia@email.com</p></div>
-                  <div className="cp-perfil-field"><label>Miembro desde</label><p>Enero 2025</p></div>
-                  <div className="cp-perfil-field"><label>Citas completadas</label><p>8 citas</p></div>
+                  <div className="cp-perfil-field"><label>Correo</label><p>{usuario?.email ?? "—"}</p></div>
+                  <div className="cp-perfil-field"><label>Miembro desde</label><p>{miembroDesde}</p></div>
+                  <div className="cp-perfil-field"><label>Citas completadas</label><p>{citasCompletadas} citas</p></div>
                 </div>
               </div>
 
@@ -128,20 +261,35 @@ export default function ClientePerfil() {
                 <div className="cp-datos-title">Información personal</div>
                 <div className="cp-datos-grid">
                   {[
-                    { label: "Nombre(s)",           type: "text",     value: "Lucía" },
-                    { label: "Apellidos",            type: "text",     value: "Mendoza García" },
-                    { label: "Correo electrónico",   type: "email",    value: "lucia@email.com" },
-                    { label: "Fecha de nacimiento",  type: "date",     value: "1998-06-14" },
-                    { label: "Teléfono",             type: "tel",      value: "81 1234 5678" },
-                    { label: "Contraseña",           type: "password", value: "••••••••" },
+                    { label: "Nombre(s)",          key: "nombre",         type: "text" },
+                    { label: "Apellidos",           key: "apellido",       type: "text" },
+                    { label: "Correo electrónico",  key: "email",          type: "email" },
+                    { label: "Fecha de nacimiento", key: "fechNacimiento", type: "date" },
                   ].map(f => (
-                    <div key={f.label} className="cp-datos-field">
+                    <div key={f.key} className="cp-datos-field">
                       <label>{f.label}</label>
-                      <input type={f.type} defaultValue={f.value} disabled={!editando} />
+                      {!editando && f.type === "date" ? (
+                        <input
+                          type="text"
+                          value={
+                            formPerfil[f.key]
+                              ? new Date(formPerfil[f.key] + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })
+                              : "—"
+                          }
+                          disabled
+                        />
+                      ) : (
+                        <input
+                          type={f.type}
+                          value={formPerfil[f.key] ?? ""}
+                          disabled={!editando}
+                          onChange={e => setFormPerfil(p => ({ ...p, [f.key]: e.target.value }))}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
-                <button className="cp-btn-save" onClick={() => setEditando(e => !e)}>
+                <button className="cp-btn-save" onClick={editando ? handleGuardarPerfil : () => setEditando(true)}>
                   {editando ? "Guardar cambios" : "Editar perfil"}
                 </button>
               </div>
@@ -159,85 +307,100 @@ export default function ClientePerfil() {
                     onClick={() => setCitaTab(t.key)}
                   >
                     {t.label}
-                    <span className="cp-count">{citasData[t.key].length}</span>
+                    <span className="cp-count">{contarCitas(t.key)}</span>
                   </button>
                 ))}
               </div>
 
               <div className="cp-cita-panel">
-                {citasData[citaTab].length === 0 && (
+                {loadingCitas && <div className="cp-empty-state"><div className="cp-empty-text">Cargando citas...</div></div>}
+
+                {!loadingCitas && citasFiltradas.length === 0 && (
                   <div className="cp-empty-state">
                     <div className="cp-empty-icon">📅</div>
                     <div className="cp-empty-text">No hay citas en esta categoría</div>
                   </div>
                 )}
 
-                {citasData[citaTab].map(cita => (
-                  <div key={cita.id} className={`cp-cita-card${citaTab === "completadas" && !cita.reviewDone ? " cp-cita-card-column" : ""}`}>
-                    <div className="cp-cita-header-row">
-                      <div className="cp-cita-fecha-box">
-                        <div className="cp-cita-dia">{cita.dia}</div>
-                        <div className="cp-cita-mes">{cita.mes}</div>
-                      </div>
-                      <div className="cp-cita-info">
-                        <div className="cp-cita-servicio">{cita.servicio}</div>
-                        <div className="cp-cita-details">
-                          <span>⏰ {cita.hora}</span>
-                          <span>⏱ {cita.duracion}</span>
-                          <span>💰 {cita.precio}</span>
+                {!loadingCitas && citasFiltradas.map(cita => {
+                  const { dia, mes } = formatearFecha(cita.fecha);
+                  const yaReseñada = cita.review_done || reviewsEnviadas[cita._id];
+
+                  return (
+                    <div key={cita._id} className={`cp-cita-card${citaTab === "completada" && !yaReseñada ? " cp-cita-card-column" : ""}`}>
+                      <div className="cp-cita-header-row">
+                        <div className="cp-cita-fecha-box">
+                          <div className="cp-cita-dia">{dia}</div>
+                          <div className="cp-cita-mes">{mes}</div>
                         </div>
-                        <div className="cp-cita-empleada">{cita.empleada}</div>
-                        <BadgeCita tipo={citaTab} />
-                        {cita.motivo && <div className="cp-cita-motivo">Motivo: {cita.motivo}</div>}
-                      </div>
-                      {citaTab === "programadas" && (
-                        <div className="cp-cita-actions">
-                          <button className="cp-btn-cancelar">Cancelar cita</button>
+                        <div className="cp-cita-info">
+                          <div className="cp-cita-servicio">
+                            {cita.id_servicio?.nombre ?? "Servicio"}
+                          </div>
+                          <div className="cp-cita-details">
+                            <span>⏰ {cita.hora}</span>
+                            {cita.id_servicio?.precio && <span>💰 ${cita.id_servicio.precio}</span>}
+                          </div>
+                          <div className="cp-cita-empleada">
+                            {cita.id_empleado
+                              ? `👤 ${cita.id_empleado.nombre} ${cita.id_empleado.apellido}`
+                              : "Empleado aún por asignar"}
+                          </div>
+                          <BadgeCita estado={cita.estado} />
+                          {cita.motivo_rechazo && (
+                            <div className="cp-cita-motivo">Motivo: {cita.motivo_rechazo}</div>
+                          )}
                         </div>
-                      )}
-                      {citaTab === "completadas" && cita.reviewDone && cita.reviewTexto && (
-                        <div className="cp-review-done">
-                          <div className="cp-review-stars">{"★".repeat(cita.reviewStars ?? 5)}</div>
-                          <div className="cp-review-text">{cita.reviewTexto}</div>
+
+                        {citaTab === "programada" && (
+                          <div className="cp-cita-actions">
+                            <button className="cp-btn-cancelar" onClick={() => handleCancelarCita(cita._id)}>
+                              Cancelar cita
+                            </button>
+                          </div>
+                        )}
+
+                        {citaTab === "completada" && yaReseñada && (
+                          <div className="cp-review-done">
+                            <div className="cp-review-stars">{"★".repeat(cita.review_stars ?? ratings[cita._id] ?? 5)}</div>
+                            {cita.review_texto && <div className="cp-review-text">"{cita.review_texto}"</div>}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Rating para completadas sin reseña */}
+                      {citaTab === "completada" && !yaReseñada && (
+                        <div className="cp-rating-section">
+                          <div className="cp-rating-label">¿Cómo fue tu experiencia? Deja una calificación:</div>
+                          <div className="cp-stars">
+                            {[1,2,3,4,5].map(n => (
+                              <span
+                                key={n}
+                                className={`cp-star${(ratings[cita._id] ?? 0) >= n ? " filled" : ""}`}
+                                onClick={() => handleRate(cita._id, n)}
+                              >★</span>
+                            ))}
+                          </div>
+                          <textarea
+                            className="cp-rating-comment"
+                            rows={2}
+                            placeholder="Escribe un comentario (opcional)..."
+                            value={comentarios[cita._id] ?? ""}
+                            onChange={e => setComentarios(c => ({ ...c, [cita._id]: e.target.value }))}
+                          />
+                          <br />
+                          <button
+                            className="cp-btn-review"
+                            onClick={() => handleEnviarReview(cita._id)}
+                            disabled={enviandoReview[cita._id]}
+                          >
+                            {enviandoReview[cita._id] ? "Enviando..." : "Enviar reseña"}
+                          </button>
                         </div>
                       )}
                     </div>
-
-                    {/* Rating para completadas sin review */}
-                    {citaTab === "completadas" && !cita.reviewDone && !reviewsEnviadas[cita.id] && (
-                      <div className="cp-rating-section">
-                        <div className="cp-rating-label">¿Cómo fue tu experiencia? Deja una calificación:</div>
-                        <div className="cp-stars">
-                          {[1,2,3,4,5].map(n => (
-                            <span
-                              key={n}
-                              className={`cp-star${(ratings[cita.id] ?? 0) >= n ? " filled" : ""}`}
-                              onClick={() => handleRate(cita.id, n)}
-                            >★</span>
-                          ))}
-                        </div>
-                        <textarea
-                          className="cp-rating-comment"
-                          rows={2}
-                          placeholder="Escribe un comentario (opcional)..."
-                          value={comentarios[cita.id] ?? ""}
-                          onChange={e => setComentarios(c => ({ ...c, [cita.id]: e.target.value }))}
-                        />
-                        <br />
-                        <button className="cp-btn-review" onClick={() => handleEnviarReview(cita.id)}>
-                          Enviar reseña
-                        </button>
-                      </div>
-                    )}
-
-                    {citaTab === "completadas" && reviewsEnviadas[cita.id] && (
-                      <div className="cp-review-done">
-                        <div className="cp-review-stars">{"★".repeat(ratings[cita.id] ?? 5)}</div>
-                        <div className="cp-review-text">"{comentarios[cita.id] || "Muy buen servicio."}"</div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

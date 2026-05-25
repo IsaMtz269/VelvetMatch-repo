@@ -35,8 +35,12 @@ export default function Login() {
       if (response.ok) {
         localStorage.setItem("usuario", JSON.stringify(data.Usuario));
         localStorage.setItem("token", data.token);
+
         
-        navigate("/");
+        const rol = data.Usuario.roles;
+        if (rol === "superadmin") navigate("/dashboard");
+        else if (rol === "admin") navigate("/admin");
+        else navigate("/clienteDashboard");
       } else {
         setErrorMensaje(data.message || "Credenciales inválidas.");
       }

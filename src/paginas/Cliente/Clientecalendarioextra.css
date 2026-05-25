@@ -1,0 +1,157 @@
+/* ===== ESTILOS ADICIONALES — pegar al final de ClienteCalendario.css ===== */
+
+.cc-loading-state {
+  text-align: center;
+  padding: 60px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* Punto indicador de cita en el día */
+.cc-dia-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  background: #E5A4CB;
+  border-radius: 50%;
+  margin: 2px auto 0;
+}
+
+.cc-cal-day {
+  flex-direction: column;
+}
+
+.cc-legend-dot {
+  width: 10px;
+  height: 10px;
+  background: #E5A4CB;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+/* Citas del día seleccionado */
+.cc-dia-citas {
+  margin-top: 16px;
+  border-top: 1px solid #EBD2BE;
+  padding: 14px 20px 20px;
+}
+
+.cc-dia-citas-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #45062E;
+  margin-bottom: 10px;
+}
+
+.cc-dia-vacio {
+  color: #999;
+  font-size: 13px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.cc-dia-cita-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #faf8f5;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.cc-dia-cita-hora {
+  font-weight: 700;
+  font-size: 13px;
+  color: #45062E;
+  min-width: 45px;
+}
+
+.cc-dia-cita-info { flex: 1; }
+
+.cc-dia-cita-servicio {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d1b1b;
+}
+
+.cc-dia-cita-negocio {
+  font-size: 12px;
+  color: #888;
+}
+
+.cc-dia-cita-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Lista de citas del mes */
+.cc-empty-mes {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.cc-btn-explorar {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: #45062E;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.cc-btn-explorar:hover { background: #7F055F; }
+
+.cc-mes-lista { display: flex; flex-direction: column; gap: 8px; }
+
+.cc-mes-cita-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #faf8f5;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cc-mes-cita-item:hover { background: #f0e8e0; }
+
+.cc-mes-fecha-box {
+  text-align: center;
+  min-width: 36px;
+  background: #45062E;
+  color: white;
+  border-radius: 8px;
+  padding: 4px 6px;
+}
+
+.cc-mes-dia { font-size: 16px; font-weight: 700; line-height: 1; }
+.cc-mes-mes { font-size: 10px; text-transform: uppercase; }
+
+.cc-mes-info { flex: 1; }
+.cc-mes-servicio { font-size: 13px; font-weight: 600; color: #2d1b1b; }
+.cc-mes-hora { font-size: 12px; color: #666; }
+.cc-mes-negocio { font-size: 11px; color: #999; }
+
+.cc-mes-badge {
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Resumen de citas */
+.cc-neg-label { font-size: 13px; font-weight: 600; color: #8a5070; white-space: nowrap; }
+.cc-neg-opciones { display: flex; gap: 8px; flex-wrap: wrap; }

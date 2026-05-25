@@ -10,6 +10,9 @@ import Analytics from "./paginas/Superadmin/Analytics";
 import Admin from "./paginas/Empresa/Admin"; 
 import EmpresaLanding from "./paginas/Empresa/Empresa"; 
 import Empleado from "./paginas/Empresa/Empleado"; 
+import ClienteDashboard from "./paginas/Cliente/ClienteDashboard";
+import ClientePerfil from "./paginas/Cliente/ClientePerfil";
+import ClienteCalendario from "./paginas/Cliente/ClienteCalendario";
 
 export default function App() {
   return (
@@ -26,6 +29,9 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/empresa/:id" element={<EmpresaLanding />} />
         <Route path="/empleado" element={<Empleado />} />
+        <Route path="/ClienteDashboard" element={<ClienteDashboard />} />
+        <Route path="/ClientePerfil" element={<ClientePerfil />} />
+        <Route path="/ClienteCalendario" element={<ClienteCalendario />} />
 
       </Routes>
     </BrowserRouter>

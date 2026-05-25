@@ -70,11 +70,12 @@ exports.loginUsuario = async (req, res) => {
             return res.status(400).json({ message: 'Credenciales inválidas' });
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET|| '83035891fe00eb4e3b0183c08427746a192e85ff6354a12e05b4a51f875b7976fb8d327e89f6dbb84f795f689feaa9a73809f27ec28bbe377d5fc73be', 
+        { expiresIn: '1h' });
 
         res.json({
             mensaje: 'Login exitoso',
-            Usuario: { id: user._id, nombre: user.nombre, apellido: user.apellido, email: user.email, roles: user.roles,id_negocio: user.trabaja_en }, 
+            Usuario: { id: user._id, nombre: user.nombre, apellido: user.apellido, email: user.email, roles: user.roles,id_negocio: user.trabaja_en, fechNacimiento: user.fechNacimiento, createdAt: user.createdAt }, 
             token 
         });
     } catch (error) {

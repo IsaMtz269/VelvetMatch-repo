@@ -1,19 +1,43 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SharedLayout.css";
 import "./Analytics.css";
 
-const analyticsData = [
-  { id: 1, emoji: "💅", nombre: "Chapi's Nails",    owner: "Adriana López",  tipo: "Salón de uñas", citas: 142, cancelaciones: 8,  ventas: 18500, empleados: 3 },
-  { id: 2, emoji: "✂️", nombre: "Barbería Regia",   owner: "Carlos Garza",   tipo: "Barbería",       citas: 89,  cancelaciones: 12, ventas: 12400, empleados: 2 },
-  { id: 3, emoji: "💆", nombre: "Estética Lumière", owner: "María Fernanda", tipo: "Estética",       citas: 214, cancelaciones: 5,  ventas: 42300, empleados: 6 },
-  { id: 4, emoji: "💄", nombre: "Beauty Corner",    owner: "Valentina Cruz", tipo: "Estética",       citas: 176, cancelaciones: 14, ventas: 22800, empleados: 5 },
-];
+const BASE = "http://localhost:5000/api";
 
 export default function Analytics() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+  const [negocios, setNegocios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
   const toggle = () => setIsSidebarActive(!isSidebarActive);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const [analyticsRes, negociosRes] = await Promise.all([
+          fetch(`${BASE}/analytics/global`),
+          fetch(`${BASE}/negocios`),
+        ]);
+        if (!analyticsRes.ok) throw new Error("Error al obtener analytics");
+        if (!negociosRes.ok) throw new Error("Error al obtener negocios");
+
+        const analyticsData = await analyticsRes.json();
+        const negociosData = await negociosRes.json();
+
+        setAnalytics(analyticsData);
+        setNegocios(Array.isArray(negociosData) ? negociosData : []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargarDatos();
+  }, []);
 
   return (
     <div className="sh-root">
@@ -50,68 +74,85 @@ export default function Analytics() {
           <button className="sh-menu-toggle" onClick={toggle}>☰</button>
           <span className="sh-topbar-title">Analytics</span>
           <div className="sh-topbar-right">
-            <Link to="/" className="sh-logout-btn">Cerrar sesión</Link>
+            <button
+              className="sh-logout-btn"
+              onClick={() => {
+                localStorage.clear();
+                navigate("/");
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </header>
 
         <div className="ana-content">
-          {/* KPIs */}
-          <div className="ana-kpi-grid">
-            <div className="ana-kpi-card">
-              <div className="ana-kpi-label">Ingresos Totales</div>
-              <div className="ana-kpi-value">$96,000</div>
-              <div className="ana-kpi-trend">↑ 12% vs mes anterior</div>
-            </div>
-            <div className="ana-kpi-card">
-              <div className="ana-kpi-label">Citas del Mes</div>
-              <div className="ana-kpi-value">621</div>
-              <div className="ana-kpi-trend">↑ 8% vs mes anterior</div>
-            </div>
-            <div className="ana-kpi-card">
-              <div className="ana-kpi-label">Nuevos Negocios</div>
-              <div className="ana-kpi-value">14</div>
-              <div className="ana-kpi-trend">+3 esta semana</div>
-            </div>
-          </div>
+          {loading ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#8a5070" }}>Cargando analytics...</div>
+          ) : error ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#c04040" }}>Error: {error}</div>
+          ) : (
+            <>
+              {/* KPIs */}
+              <div className="ana-kpi-grid">
+                <div className="ana-kpi-card">
+                  <div className="ana-kpi-label">Total Negocios</div>
+                  <div className="ana-kpi-value">{analytics?.totalEmpresas ?? "—"}</div>
+                  <div className="ana-kpi-trend">Negocios en plataforma</div>
+                </div>
+                <div className="ana-kpi-card">
+                  <div className="ana-kpi-label">Total Usuarios</div>
+                  <div className="ana-kpi-value">{analytics?.totalUsuarios ?? "—"}</div>
+                  <div className="ana-kpi-trend">Usuarios registrados</div>
+                </div>
+                <div className="ana-kpi-card">
+                  <div className="ana-kpi-label">Total Citas</div>
+                  <div className="ana-kpi-value">{analytics?.totalOperaciones ?? "—"}</div>
+                  <div className="ana-kpi-trend">Operaciones registradas</div>
+                </div>
+              </div>
 
-          {/* Tabla */}
-          <div className="ana-table-card">
-            <div className="ana-card-head">
-              <h2 className="ana-card-title">Rendimiento por Negocio</h2>
-            </div>
-            <div className="ana-table-responsive">
-              <table className="ana-custom-table">
-                <thead>
-                  <tr>
-                    <th>Negocio</th><th>Dueño</th><th>Citas</th><th>Canc.</th><th>Ventas</th><th>Emp.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analyticsData.map((n) => (
-                    <tr key={n.id}>
-                      <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 20 }}>{n.emoji}</span>
-                          <div>
-                            <div style={{ fontWeight: 600 }}>{n.nombre}</div>
-                            <div style={{ fontSize: 11, color: "#888" }}>{n.tipo}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{n.owner}</td>
-                      <td>{n.citas}</td>
-                      <td style={{ color: "#ff4d4d" }}>{n.cancelaciones}</td>
-                      <td><strong>${n.ventas.toLocaleString()}</strong></td>
-                      <td>{n.empleados}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="ana-table-footer">
-              <span>Mostrando {analyticsData.length} negocios activos este mes</span>
-            </div>
-          </div>
+              {/* Tabla de negocios */}
+              <div className="ana-table-card">
+                <div className="ana-card-head">
+                  <h2 className="ana-card-title">Negocios registrados</h2>
+                </div>
+                <div className="ana-table-responsive">
+                  <table className="ana-custom-table">
+                    <thead>
+                      <tr>
+                        <th>Negocio</th><th>Tipo</th><th>Ubicación</th><th>Celular</th><th>Instagram</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {negocios.length === 0 ? (
+                        <tr><td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#8a5070" }}>Sin negocios registrados</td></tr>
+                      ) : negocios.map((n) => (
+                        <tr key={n._id}>
+                          <td>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontSize: 20 }}>🏪</span>
+                              <div>
+                                <div style={{ fontWeight: 600 }}>{n.nombre}</div>
+                                <div style={{ fontSize: 11, color: "#888" }}>{n.eslogan || n.descripcion?.slice(0, 35) || "—"}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>{n.tipo || "—"}</td>
+                          <td>{n.ubicacion || "—"}</td>
+                          <td>{n.celular || "—"}</td>
+                          <td style={{ color: "#7F055F", fontFamily: "monospace" }}>{n.instagram || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="ana-table-footer">
+                  <span>Mostrando {negocios.length} negocios activos</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>

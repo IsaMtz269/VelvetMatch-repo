@@ -1,24 +1,55 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SharedLayout.css";
 import "./Dashboard.css";
 
-const stats = [
-  { label: "Total negocios",       value: "38",    sub: "▲ 4 nuevos este mes" },
-  { label: "Usuarios registrados", value: "214",   sub: "▲ 21 nuevos este mes" },
-  { label: "Citas este mes",       value: "1,082", sub: "▲ 8% vs mes anterior" },
-];
+const BASE = "http://localhost:5000/api";
 
 const quickCards = [
-  { icon: "🏪", name: "Negocios",  desc: "Visualiza y filtra los negocios registrados en la plataforma.", chip: "38 activos",   path: "/negocios" },
-  { icon: "👥", name: "Usuarios",  desc: "Lista completa de usuarios con roles y detalles personales.",  chip: "214 usuarios", path: "/usuarios" },
-  { icon: "📊", name: "Analytics", desc: "Estadísticas y reportes por negocio, exportables a Excel.",    chip: "Exportable",   path: "/analytics" },
+  { icon: "🏪", name: "Negocios",  desc: "Visualiza y filtra los negocios registrados en la plataforma.", path: "/negocios" },
+  { icon: "👥", name: "Usuarios",  desc: "Lista completa de usuarios con roles y detalles personales.",  path: "/usuarios" },
+  { icon: "📊", name: "Analytics", desc: "Estadísticas y reportes por negocio, exportables a Excel.",    path: "/analytics" },
 ];
 
 export default function Dashboard() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
   const toggle = () => setIsSidebarActive(!isSidebarActive);
+
+  useEffect(() => {
+    async function cargarStats() {
+      try {
+        const [negRes, analyticsRes] = await Promise.all([
+          fetch(`${BASE}/negocios`),
+          fetch(`${BASE}/analytics/global`),
+        ]);
+        const negocios = await negRes.json();
+        const analytics = await analyticsRes.json();
+
+        setStats({
+          totalNegocios: Array.isArray(negocios) ? negocios.length : analytics.totalEmpresas,
+          totalUsuarios: analytics.totalUsuarios,
+          totalCitas: analytics.totalOperaciones,
+        });
+      } catch (err) {
+        console.error("Error cargando stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargarStats();
+  }, []);
+
+  const statCards = stats
+    ? [
+        { label: "Total negocios",       value: stats.totalNegocios, sub: "Negocios en la plataforma" },
+        { label: "Usuarios registrados", value: stats.totalUsuarios, sub: "Usuarios totales" },
+        { label: "Citas registradas",    value: stats.totalCitas,    sub: "Operaciones totales" },
+      ]
+    : [];
 
   return (
     <div className="sh-root">
@@ -55,22 +86,34 @@ export default function Dashboard() {
           <button className="sh-menu-toggle" onClick={toggle}>☰</button>
           <span className="sh-topbar-title">Dashboard</span>
           <div className="sh-topbar-right">
-            <Link to="/" className="sh-logout-btn">Cerrar sesión</Link>
+            <button
+              className="sh-logout-btn"
+              onClick={() => {
+                localStorage.clear();
+                navigate("/");
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </header>
 
         <div className="db-page-content">
           <p className="db-page-intro">Bienvenido. Aquí tienes un resumen general de la plataforma.</p>
 
-          <div className="db-stats-grid">
-            {stats.map((s) => (
-              <div key={s.label} className="db-stat-card">
-                <div className="db-stat-label">{s.label}</div>
-                <div className="db-stat-value">{s.value}</div>
-                <div className="db-stat-sub">{s.sub}</div>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#8a5070" }}>Cargando estadísticas...</div>
+          ) : (
+            <div className="db-stats-grid">
+              {statCards.map((s) => (
+                <div key={s.label} className="db-stat-card">
+                  <div className="db-stat-label">{s.label}</div>
+                  <div className="db-stat-value">{s.value ?? "—"}</div>
+                  <div className="db-stat-sub">{s.sub}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="db-section-title">Acceso rápido</div>
           <div className="db-quick-grid">
@@ -79,7 +122,6 @@ export default function Dashboard() {
                 <div className="db-quick-icon">{c.icon}</div>
                 <div className="db-quick-name">{c.name}</div>
                 <div className="db-quick-desc">{c.desc}</div>
-                <span className="db-quick-chip">{c.chip}</span>
               </Link>
             ))}
           </div>
