@@ -1,10 +1,8 @@
-// backend/controllers/negocioController.js
 const Negocio = require('../models/Negocio');
 const Usuario = require('../models/Usuario');
 
 // 1. Agregar un negocio
 exports.crearNegocio = async (req, res) => {
-    // Usamos 'let' para poder modificar 'instagram' antes de guardarlo
     let { 
         nombre, tipo, eslogan, descripcion, celular, ubicacion, 
         instagram, facebook, banner, primaryColor, secondaryColor, 
@@ -15,23 +13,18 @@ exports.crearNegocio = async (req, res) => {
         return res.status(400).json({ message: 'Faltan campos obligatorios para crear el negocio' });
     }
 
-    // VALIDACIÓN: Celular debe ser de exactamente 10 números
     const regexNumeros = /^\d{10}$/;
     if (!regexNumeros.test(celular)) {
         return res.status(400).json({ message: 'El celular debe contener exactamente 10 números.' });
     }
 
-    // VALIDACIÓN: Ubicación (Ciudad) solo letras
     const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (!regexLetras.test(ubicacion)) {
         return res.status(400).json({ message: 'La ciudad solo debe contener letras.' });
     }
 
-    // VALIDACIÓN Y LIMPIEZA: Instagram sin espacios y con '@'
     if (instagram) {
-        // Quita todos los espacios en blanco
         instagram = instagram.replace(/\s/g, '');
-        // Agrega el '@' al inicio si no lo tiene
         if (!instagram.startsWith('@')) {
             instagram = '@' + instagram;
         }
@@ -51,7 +44,6 @@ exports.crearNegocio = async (req, res) => {
 
         await nuevoNegocio.save();
 
-        // Actualizamos al admin para vincularlo con su nuevo negocio
         adminExiste.trabaja_en = nuevoNegocio._id;
         await adminExiste.save();
 
@@ -88,7 +80,6 @@ exports.obtenerNegocioPorId = async (req, res) => {
 };
 
 // 4. Actualizar un negocio 
-//verificar si esta correcto y una validacion de que el admin sea el que lo este cambiando
 exports.actualizarNegocio = async (req, res) => {
     try {
         const { id } = req.params;

@@ -16,8 +16,7 @@ export default function PantallaPrincipal() {
   const navigate = useNavigate();
 
   // --- ESTADOS DE DATOS REALES ---
-  const [negocios, setNegocios] = useState([]); // Ahora cargará de la base de datos
-  const [loading, setLoading] = useState(true);
+  const [negocios, setNegocios] = useState([]);
   const [usuarioActivo, setUsuarioActivo] = useState(null);
 
   // --- ESTADOS DE FILTROS ---
@@ -30,7 +29,6 @@ export default function PantallaPrincipal() {
       setUsuarioActivo(JSON.parse(u));
     }
 
-    // Obtener los negocios reales guardados en la BD
     const fetchNegocios = async () => {
       try {
         const res = await fetch(`${API}/negocios`);
@@ -72,7 +70,6 @@ export default function PantallaPrincipal() {
 
   const rol = usuarioActivo.roles || usuarioActivo.rol_usuario;
 
-  // ADMIN O SUPERADMIN
   if (rol === "admin" || rol === "superadmin") {
 
     if (usuarioActivo.id_negocio) {
@@ -84,29 +81,24 @@ export default function PantallaPrincipal() {
     return;
   }
 
-  // EMPLEADO
   if (rol === "empleado") {
     navigate(`/empresa/${usuarioActivo.id_negocio}`);
     return;
   }
 
-  // CLIENTE
   navigate("/cliente-dashboard");
 };
 
-  // 3. Filtrado de negocios por búsqueda y categoría
   const negociosFiltrados = negocios.filter((negocio) => {
     const cumpleBusqueda = negocio.nombre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            negocio.ubicacion?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Mapeo dinámico o exacto del tipo de negocio con la categoría seleccionada
     const cumpleCategoria = selectedCategoria === "Todos" || 
                             negocio.tipo?.toLowerCase() === selectedCategoria.toLowerCase();
 
     return cumpleBusqueda && cumpleCategoria;
   });
 
-  // Helper para asignar emojis por categoría si tu base de datos no tiene uno guardado
   const obtenerEmojiCategoria = (tipo) => {
     const cat = categorias.find(c => c.label.toLowerCase() === tipo?.toLowerCase());
     return cat ? cat.emoji : "✨";
@@ -122,7 +114,7 @@ export default function PantallaPrincipal() {
     <>
      <div className="background-animation" />
 
-      {/* ── Header Modificado ── */}
+      {/* ── Header ── */}
       <header className="header">
         <div className="logo-container">
           <div className="logo"><span className="logo-text">VM</span></div>
@@ -132,7 +124,6 @@ export default function PantallaPrincipal() {
           <a href="#negocios" className="nav-link">Explorar</a>
           <a href="#about" className="nav-link">Nosotros</a>
           
-          {/* LÓGICA CONDICIONAL AQUÍ */}
             {usuarioActivo ? (
             <div className="d-flex align-items-center ms-3 gap-3">
               

@@ -1,4 +1,3 @@
-// backend/controllers/analyticsController.js
 const Cita = require('../models/Cita');
 const Negocio = require('../models/Negocio');
 const Usuario = require('../models/Usuario');

@@ -5,10 +5,8 @@ const Servicio = require('../models/Servicio');
 // 1. Agregar servicio a un negocio
 exports.crearServicio = async (req, res) => {
     try {
-        // Recibimos los datos, incluyendo el rol del usuario que hace la petición
         const { nombre, precio, duracion, descripcion, imagen, id_negocio, rol_usuario } = req.body;
 
-        // VALIDACIÓN 1: ¿Es administrador?
         if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin') {
             return res.status(403).json({ message: 'Acceso denegado. Solo el dueño del negocio puede crear servicios.' });
         }
@@ -17,7 +15,6 @@ exports.crearServicio = async (req, res) => {
             return res.status(400).json({ message: 'Por favor, completa los campos obligatorios (Nombre, Precio y Duración).' });
         }
 
-        // VALIDACIÓN 2: Precio y Duración estrictamente números
         const precioNum = Number(precio);
         const duracionNum = Number(duracion);
         
@@ -25,7 +22,6 @@ exports.crearServicio = async (req, res) => {
             return res.status(400).json({ message: 'El precio y la duración deben ser valores numéricos.' });
         }
 
-        // VALIDACIÓN 3: La imagen solo puede ser JPG o PNG (leyendo el encabezado Base64)
         if (imagen) {
             if (!imagen.startsWith('data:image/jpeg') && !imagen.startsWith('data:image/png') && !imagen.startsWith('data:image/jpg')) {
                 return res.status(400).json({ message: 'Archivo de imagen no válido. Solo se admiten formatos .JPG y .PNG.' });
@@ -53,7 +49,6 @@ exports.eliminarServicio = async (req, res) => {
     try {
         const idServicio = req.params.id;
 
-        // VALIDACIÓN 1: Verificar si hay citas PENDIENTES o PROGRAMADAS con este servicio
         const citasActivas = await Cita.find({
             id_servicio: idServicio,
             estado: { $in: ['pendiente', 'programada'] }
@@ -65,7 +60,6 @@ exports.eliminarServicio = async (req, res) => {
             });
         }
 
-        // VALIDACIÓN 2: Verificar si hay empleados que tengan asignado este servicio
         const empleadosAsignados = await Usuario.find({
             roles: 'empleado',
             servicio_empl: idServicio
@@ -77,7 +71,6 @@ exports.eliminarServicio = async (req, res) => {
             });
         }
 
-        // Si pasa las validaciones, procedemos a eliminar
         await Servicio.findByIdAndDelete(idServicio);
         res.status(200).json({ message: 'Servicio eliminado correctamente' });
     } catch (error) {

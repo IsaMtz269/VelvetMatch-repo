@@ -1,4 +1,3 @@
-// backend/controllers/postController.js
 const Post = require('../models/Post');
 
 // 1. Agregar post a un negocio
@@ -6,7 +5,6 @@ exports.crearPost = async (req, res) => {
     try {
         const { titulo_p, contenido, image_url, id_negocio, rol_usuario } = req.body;
 
-        // VALIDACIÓN 1: Seguridad de Roles (Cadenero del Back-End)
         if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin' && rol_usuario !== 'empleado') {
             return res.status(403).json({ message: 'Acceso denegado. No tienes permisos para publicar novedades.' });
         }
@@ -15,7 +13,6 @@ exports.crearPost = async (req, res) => {
             return res.status(400).json({ message: 'El título y el contenido son obligatorios.' });
         }
 
-        // VALIDACIÓN 2: La imagen solo puede ser JPG o PNG
         if (image_url) {
             if (!image_url.startsWith('data:image/jpeg') && !image_url.startsWith('data:image/png') && !image_url.startsWith('data:image/jpg')) {
                 return res.status(400).json({ message: 'Formato de imagen no válido. Solo se admiten JPG y PNG.' });
@@ -50,7 +47,6 @@ exports.obtenerPostsPorNegocio = async (req, res) => {
     try {
         const { id_negocio } = req.params;
         
-        // .sort({ createdAt: -1 }) ordena los posts para que los más recientes salgan primero
         const posts = await Post.find({ id_negocio: id_negocio }).sort({ createdAt: -1 });
         
         res.status(200).json(posts);

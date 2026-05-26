@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
-// Función para calcular si es mayor de 16 años en el backend
 const esMayorDe16 = (fecha) => {
     if (!fecha) return false;
     const hoy = new Date();
@@ -17,7 +16,6 @@ const esMayorDe16 = (fecha) => {
     return edad >= 16;
 };
 
-// Exportamos la función de registro
 exports.registrarUsuario = async (req, res) => {
    const { nombre, apellido, email, password, fechNacimiento, roles } = req.body;
     
@@ -25,13 +23,11 @@ exports.registrarUsuario = async (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    // VALIDACIÓN: Nombre y Apellido solo letras
     const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
         return res.status(400).json({ message: 'El nombre y apellido solo deben contener letras.' });
     }
 
-    // VALIDACIÓN: Mayor de 16 años
     if (!esMayorDe16(fechNacimiento)) {
         return res.status(400).json({ message: 'Debes ser mayor de 16 años para registrarte.' });
     }
@@ -51,7 +47,7 @@ exports.registrarUsuario = async (req, res) => {
     }
 };
 
-// Exportamos la función de login
+//función de login
 exports.loginUsuario = async (req, res) => {
     const { email, password } = req.body;
     
@@ -59,7 +55,7 @@ exports.loginUsuario = async (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    try {
+    try {S
         const user = await Usuario.findOne({ email }).select('+password');
         if(!user) {
             return res.status(400).json({ message: 'Credenciales inválidas' });

@@ -32,27 +32,23 @@ export default function Empleado() {
         fetch(`http://localhost:5000/api/negocios/${user.id_negocio}`),
         fetch(`http://localhost:5000/api/citas/negocio/${user.id_negocio}`),
         fetch(`http://localhost:5000/api/citas/negocio/${user.id_negocio}/resenas`),
-        // 👇 SOLUCIÓN: Obtenemos el perfil completo de los empleados del negocio
         fetch(`http://localhost:5000/api/usuarios/empleados/negocio/${user.id_negocio}`) 
       ]);
 
       if (resNeg.ok) setNegocio(await resNeg.json());
       
-      // Filtramos las citas
       if (resCitas.ok) {
         const todasLasCitas = await resCitas.json();
         const citasAsignadas = todasLasCitas.filter(c => c.id_empleado?._id === user.id || c.id_empleado === user.id);
         setCitas(citasAsignadas);
       }
 
-      // Filtramos las reseñas
       if (resResenas.ok) {
         const todasLasResenas = await resResenas.json();
         const misResenas = todasLasResenas.filter(r => r.id_empleado?._id === user.id || r.id_empleado === user.id);
         setResenas(misResenas);
       }
 
-      // 👇 SOLUCIÓN: Encontramos nuestro perfil y enriquecemos la sesión local con el horario real
       if (resEmpleados.ok) {
         const listaEmpleados = await resEmpleados.json();
         const miPerfilCompleto = listaEmpleados.find(e => e._id === user.id);
@@ -134,7 +130,6 @@ export default function Empleado() {
   const obtenerHorarioHoy = () => {
     if (!usuarioActivo || !usuarioActivo.horario_dia) return "Día libre";
     try {
-      // Como guardamos el JSON en la base de datos, lo parseamos
       const horarioArray = typeof usuarioActivo.horario_dia === 'string' 
         ? JSON.parse(usuarioActivo.horario_dia) 
         : usuarioActivo.horario_dia;
@@ -249,7 +244,7 @@ export default function Empleado() {
                   </button>
                 </div>
 
-                {/* TARJETAS DE RESUMEN DIARIO (CON DISEÑO EXACTO DE HTML) */}
+                {/* TARJETAS DE RESUMEN DIARIO  */}
                 <div className="row g-4 mb-5">
                   {/* Tarjeta 1: Bienvenida */}
                   <div className="col-md-4">
@@ -459,7 +454,6 @@ export default function Empleado() {
                 )}
               </div>
             </div>
-            {/* FIN SIDEBAR DERECHO */}
           </div>
         </main>
       </div>
@@ -502,7 +496,6 @@ export default function Empleado() {
           </div>
         </div>
       </div>
-      {/* FIN MODAL */}
 
     </>
   );

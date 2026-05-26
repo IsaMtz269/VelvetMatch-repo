@@ -4,7 +4,6 @@ const Negocio = require('../models/Negocio');
 const Servicio = require('../models/Servicio');
 const bcrypt = require('bcryptjs');
 
-// Función auxiliar para validar la edad en el servidor
 const esMayorDe16 = (fecha) => {
     if (!fecha) return false;
     const hoy = new Date();
@@ -24,7 +23,6 @@ exports.crearEmpleado = async (req, res) => {
             id_negocio, servicio_empl, horario_dia, rol_usuario 
         } = req.body;
 
-        // VALIDACIÓN 1: Administrador
         if (rol_usuario !== 'admin' && rol_usuario !== 'superadmin') {
             return res.status(403).json({ message: 'Acceso denegado. Solo el administrador puede agregar empleados.' });
         }
@@ -33,18 +31,15 @@ exports.crearEmpleado = async (req, res) => {
             return res.status(400).json({ message: 'Faltan campos obligatorios para registrar al empleado.' });
         }
 
-        // VALIDACIÓN 2: Solo letras
         const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
         if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
             return res.status(400).json({ message: 'El nombre y apellido solo deben contener letras.' });
         }
 
-        // 👇 NUEVA VALIDACIÓN: Contraseña mínimo de 8 caracteres
         if (password.length < 8) {
             return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres.' });
         }
 
-        // 👇 NUEVA VALIDACIÓN: Edad mínima de 16 años
         if (!esMayorDe16(fechNacimiento)) {
             return res.status(400).json({ message: 'El empleado debe ser mayor de 16 años para ser registrado.' });
         }
@@ -91,37 +86,30 @@ exports.actualizarUsuario = async (req, res) => {
     const { nombre, apellido, email, fechNacimiento, password } = req.body;
     const idUsuario = req.params.id;
 
-    // 1. VALIDACIÓN: Campos obligatorios básicos
     if (!nombre || !apellido || !email || !fechNacimiento) {
         return res.status(400).json({ message: 'Nombre, Apellido, Email y Fecha de Nacimiento son campos obligatorios.' });
     }
 
-    // 2. VALIDACIÓN: Nombre y Apellido solo letras
     const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
         return res.status(400).json({ message: 'El nombre y el apellido solo deben contener letras.' });
     }
 
-    // 3. VALIDACIÓN: Mayor de 16 años (Reutiliza tu función auxiliar esMayorDe16)
     if (!esMayorDe16(fechNacimiento)) {
         return res.status(400).json({ message: 'Debes ser mayor de 16 años para actualizar tu perfil.' });
     }
 
-    // 4. VALIDACIÓN: Correo electrónico único (exceptuando al propio usuario actual)
     const emailExiste = await Usuario.findOne({ email, _id: { $ne: idUsuario } });
     if (emailExiste) {
         return res.status(400).json({ message: 'El correo electrónico ingresado ya pertenece a otro usuario.' });
     }
 
-    // Estructuramos los datos básicos para actualizar
     const datosActualizar = { nombre, apellido, email, fechNacimiento };
 
-    // 5. VALIDACIÓN: Contraseña (Solo si decide rellenarla para cambiarla)
     if (password && password.trim() !== "") {
         if (password.length < 8) {
             return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
         }
-        // Encriptamos la contraseña con bcrypt antes de guardarla
         const salt = await bcrypt.genSalt(10);
         datosActualizar.password = await bcrypt.hash(password, salt);
     }

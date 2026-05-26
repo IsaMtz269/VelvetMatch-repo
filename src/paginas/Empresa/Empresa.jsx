@@ -11,12 +11,14 @@ export default function EmpresaLanding() {
   const [negocio, setNegocio] = useState(null);
   const [servicios, setServicios] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // --- ESTADOS DE SLIDERS ---
   const [serviceIndex, setServiceIndex] = useState(0);
   const [postIndex, setPostIndex] = useState(0);
+  const [resenaIndex, setResenaIndex] = useState(0);
 
   // --- ESTADOS DEL MODAL DE RESERVA ---
   const [currentStep, setCurrentStep] = useState(1);
@@ -27,7 +29,6 @@ export default function EmpresaLanding() {
   const [horasOcupadas, setHorasOcupadas] = useState([]);
   const horasDisponibles = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
-  // --- 👇 NUEVOS ESTADOS DE LOGIN ---
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loginError, setLoginError] = useState("");
   const [loginSuccess, setLoginSuccess] = useState("");
@@ -49,7 +50,6 @@ export default function EmpresaLanding() {
         const res = await fetch(`http://localhost:5000/api/citas/ocupadas?id_negocio=${negocio._id}&fecha=${bookingDate}`);
         if (res.ok) {
           const data = await res.json();
-          // Se espera que el backend retorne un array de strings, ej: ["10:00", "14:00"]
           setHorasOcupadas(data.horasOcupadas || data);
         }
       } catch (err) {
@@ -65,18 +65,15 @@ const generarDiasCalendario = () => {
   const añoActual = hoy.getFullYear();
   const mesActual = hoy.getMonth();
 
-  // Primer día del mes y total de días
-  const primerDiaIndex = new Date(añoActual, mesActual, 1).getDay(); // 0: Dom, 1: Lun...
+  const primerDiaIndex = new Date(añoActual, mesActual, 1).getDay();
   const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
 
   const dias = [];
   
-  // Rellenar espacios vacíos antes del primer día del mes
   for (let i = 0; i < primerDiaIndex; i++) {
     dias.push({ numero: "", fechaString: "", disabled: true });
   }
 
-  // Generar los días reales del mes
   for (let dia = 1; dia <= totalDias; dia++) {
     const fechaObj = new Date(añoActual, mesActual, dia);
     const fechaString = fechaObj.toISOString().split('T')[0];
@@ -101,16 +98,20 @@ const generarDiasCalendario = () => {
 
     const fetchAllData = async () => {
       try {
-        const resNegocio = await fetch(`http://localhost:5000/api/negocios/${id}`);
+        const [resNegocio, resServicios, resPosts, resResenas] = await Promise.all([
+          fetch(`http://localhost:5000/api/negocios/${id}`),
+          fetch(`http://localhost:5000/api/servicios/negocio/${id}`),
+          fetch(`http://localhost:5000/api/posts/negocio/${id}`),
+          fetch(`http://localhost:5000/api/citas/negocio/${id}/resenas`) 
+        ]);
+
         if (!resNegocio.ok) throw new Error('No se encontró el negocio');
-        const dataNegocio = await resNegocio.json();
-        setNegocio(dataNegocio);
+        setNegocio(await resNegocio.json());
 
-        const resServicios = await fetch(`http://localhost:5000/api/servicios/negocio/${id}`);
         if (resServicios.ok) setServicios(await resServicios.json());
-
-        const resPosts = await fetch(`http://localhost:5000/api/posts/negocio/${id}`);
         if (resPosts.ok) setPosts(await resPosts.json());
+        if (resResenas.ok) setResenas(await resResenas.json());
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -124,8 +125,16 @@ const generarDiasCalendario = () => {
   const prevServices = () => { if (serviceIndex > 0) setServiceIndex(prev => prev - 1); };
   const nextPosts = () => { if (postIndex < posts.length - 4) setPostIndex(prev => prev + 1); };
   const prevPosts = () => { if (postIndex > 0) setPostIndex(prev => prev - 1); };
+  const nextResenas = () => { if (resenaIndex < resenas.length - 4) setResenaIndex(prev => prev + 1); };
+  const prevResenas = () => { if (resenaIndex > 0) setResenaIndex(prev => prev - 1); };
 
-  // --- 👇 LÓGICA DE INICIO DE SESIÓN ---
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <i key={i} className={`fas fa-star ${i < rating ? 'text-warning' : 'text-muted opacity-25'}`}></i>
+    ));
+  };
+
+  // --- LÓGICA DE INICIO DE SESIÓN ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError(""); setLoginSuccess("");
@@ -151,7 +160,7 @@ const generarDiasCalendario = () => {
         const modalEl = document.getElementById('loginModal');
         const modal = window.bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
-        setLoginData({ email: '', password: '' }); // Limpiamos el form
+        setLoginData({ email: '', password: '' }); 
       }, 1000);
 
     } catch (err) {
@@ -159,18 +168,14 @@ const generarDiasCalendario = () => {
     }
   };
 
-  // --- 👇 LÓGICA DEL BOTÓN "MI PANEL" ---
   const irAlPanel = () => {
-    // 1. Verificamos si es un empleado o admin intentando entrar al panel
     if (usuarioActivo.roles === 'admin' || usuarioActivo.roles === 'superadmin' || usuarioActivo.roles === 'empleado') {
       
-      // 2. Comprobamos que pertenezca a ESTE negocio específicamente
       if (usuarioActivo.id_negocio !== negocio._id) {
         alert("Acceso denegado: Tu cuenta de empleado/administrador pertenece a otro establecimiento.");
         return;
       }
 
-      // 3. Lo mandamos a su panel correspondiente
       if (usuarioActivo.roles === 'empleado') {
         navigate('/empleado');
       } else {
@@ -179,7 +184,6 @@ const generarDiasCalendario = () => {
     }
   };
 
-  // --- LÓGICA DE AGENDAMIENTO ---
   const handleOpenBooking = (servicio) => {
     if (!usuarioActivo) {
       const loginModal = new window.bootstrap.Modal(document.getElementById('loginModal'));
@@ -234,6 +238,7 @@ const generarDiasCalendario = () => {
   const dynamicTextColor = getContrastColor(negocio.primaryColor);
   const serviciosVisibles = servicios.slice(serviceIndex, serviceIndex + 3);
   const postsVisibles = posts.slice(postIndex, postIndex + 4);
+  const resenasVisibles = resenas.slice(resenaIndex, resenaIndex + 4);
   const anticipoMonto = selectedService ? (selectedService.precio * (negocio.anticipo / 100)) : 0;
   const restanteMonto = selectedService ? (selectedService.precio - anticipoMonto) : 0;
   const getMinDate = () => { const d = new Date(); d.setHours(d.getHours() + 48); return d.toISOString().split('T')[0]; };
@@ -373,6 +378,59 @@ const generarDiasCalendario = () => {
         </div>
       </section>
 
+      {/* ================= RESEÑAS ================= */}
+      <section id="reviews" className="py-5 bg-light-custom">
+        <div className="container py-5 position-relative">
+          <div className="text-center mb-5">
+            <h2 className="section-title fw-bold font-playfair">Lo que dicen nuestros clientes</h2>
+            <div className="divider mx-auto"></div>
+            <p className="text-muted">Opiniones y calificaciones de quienes ya nos visitaron</p>
+          </div>
+
+          {resenas.length === 0 ? (
+            <div className="text-center py-5 bg-white rounded-4 shadow-sm border p-5 mx-auto" style={{ maxWidth: '600px' }}>
+              <div className="bg-primary-light text-primary-custom rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style={{ width: '80px', height: '80px' }}><i className="fas fa-star-half-alt fa-3x text-warning"></i></div>
+              <h3 className="fw-bold font-playfair text-dark">Aún no hay reseñas</h3>
+              <p className="text-muted mb-0">Sé uno de los primeros en dejar tu opinión después de completar tu cita.</p>
+            </div>
+          ) : (
+            <div className="position-relative px-md-5">
+              {resenas.length > 4 && (
+                <>
+                  <button onClick={prevResenas} disabled={resenaIndex === 0} className="btn btn-light position-absolute start-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: resenaIndex === 0 ? 0.4 : 1 }}><i className="fas fa-chevron-left text-dark"></i></button>
+                  <button onClick={nextResenas} disabled={resenaIndex >= resenas.length - 4} className="btn btn-light position-absolute end-0 top-50 translate-middle-y rounded-circle shadow border d-flex align-items-center justify-content-center z-3" style={{ width: '45px', height: '45px', opacity: resenaIndex >= resenas.length - 4 ? 0.4 : 1 }}><i className="fas fa-chevron-right text-dark"></i></button>
+                </>
+              )}
+
+              <div className="row g-4 justify-content-center animate__animated animate__fadeIn">
+                {resenasVisibles.map((resena) => (
+                  <div className="col-md-6 col-lg-3" key={resena._id}> 
+                    <div className="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column p-4">
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <div className="fs-6">
+                          {renderStars(resena.review_stars || 5)}
+                        </div>
+                        <span className="text-muted" style={{ fontSize: '11px' }}>{resena.fecha}</span>
+                      </div>
+                      
+                      <p className="card-text text-muted small flex-grow-1 mb-4 fst-italic">"{resena.review_texto || 'Excelente servicio.'}"</p>
+                      
+                      <div className="border-top pt-3">
+                        <h6 className="fw-bold text-dark m-0 text-capitalize">{resena.id_cliente?.nombre} {resena.id_cliente?.apellido}</h6>
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                          <span className="badge bg-light text-dark border px-2 py-1 text-capitalize" style={{ fontSize: '10px' }}>{resena.id_servicio?.nombre}</span>
+                          <span className="small text-muted" style={{ fontSize: '10px' }}><i className="fas fa-user-tie me-1"></i>{resena.id_empleado ? resena.id_empleado.nombre : 'General'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ================= FOOTER ================= */}
       <footer className="text-white py-5">
         <div className="container py-4">
@@ -405,7 +463,7 @@ const generarDiasCalendario = () => {
         </div>
       </footer>
 
-            {/* ================= MODAL: AGENDAR CITA (REDISEÑADO A REACT) ================= */}
+            {/* ================= MODA CITA ================= */}
       <div className="modal fade" id="bookingModal" tabIndex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
@@ -471,18 +529,15 @@ const generarDiasCalendario = () => {
     )}
 
     <div className="row g-4">
-      {/* SECCIÓN DEL MINI CALENDARIO */}
       <div className="col-lg-7">
         <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
           <i className="far fa-calendar-alt me-2 text-primary-custom"></i>Calendario
         </label>
         <div className="bg-light p-3 rounded-4 border border-light-subtle shadow-sm">
-          {/* Encabezado de los días de la semana */}
           <div className="calendar-grid text-center font-playfair small fw-bold text-muted mb-2">
             <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div>
           </div>
           
-          {/* Grid de días del mes */}
           <div className="calendar-grid text-center">
             {generarDiasCalendario().map((dia, index) => {
               if (!dia.numero) return <div key={`empty-${index}`} className="cal-day disabled"></div>;
@@ -506,7 +561,6 @@ const generarDiasCalendario = () => {
         </div>
       </div>
 
-      {/* SECCIÓN DE HORARIOS DISPONIBLES */}
       <div className="col-lg-5">
         <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
           <i className="far fa-clock me-2 text-primary-custom"></i>Horarios
@@ -548,7 +602,6 @@ const generarDiasCalendario = () => {
       </div>
     </div>
 
-    {/* BOTONES DE NAVEGACIÓN PROPIOS DEL MODAL */}
     <div className="d-flex gap-2 justify-content-between mt-4 pt-3 border-top border-light-subtle">
       <button type="button" className="btn btn-light rounded-pill px-4 fw-bold shadow-sm" onClick={() => setCurrentStep(1)}>
         <i className="fas fa-arrow-left me-2"></i>Regresar
@@ -560,7 +613,6 @@ const generarDiasCalendario = () => {
   </div>
 )}
 
-              {/* PASO 3: RESUMEN Y CÁLCULOS */}
               {currentStep === 3 && selectedService && (
                 <div className="p-4 p-md-5 animate__animated animate__fadeInRight">
                   <div className="text-center mb-4">

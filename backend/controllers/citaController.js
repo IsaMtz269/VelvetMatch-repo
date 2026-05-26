@@ -1,7 +1,6 @@
-// backend/controllers/citaController.js
 const Cita = require('../models/Cita');
 const FechaProhibida = require('../models/FechaProhibida'); 
-const Usuario = require('../models/Usuario'); // <-- AGREGAR ESTA IMPORTACIÓN
+const Usuario = require('../models/Usuario'); 
 
 // 1. Agendar una nueva cita
 exports.crearCita = async (req, res) => {
@@ -15,13 +14,11 @@ exports.crearCita = async (req, res) => {
             return res.status(400).json({ message: 'Faltan campos obligatorios para agendar la cita' });
         }
 
-        // VALIDACIÓN 1: El cliente debe existir en la base de datos (Estar registrado)
         const clienteValido = await Usuario.findById(id_cliente);
         if (!clienteValido) {
             return res.status(403).json({ message: 'Acceso denegado. Solo los clientes registrados pueden agendar citas.' });
         }
 
-        // VALIDACIÓN 2: Mínimo 48 horas de anticipación (Tu lógica original intacta)
         const fechaHoraCita = new Date(`${fecha}T${hora}:00`); 
         const ahora = new Date();
         
@@ -63,7 +60,6 @@ exports.obtenerCitasPorNegocio = async (req, res) => {
     try {
         const { id_negocio } = req.params;
         
-        // El populate nos trae los datos reales (nombre, precio) en vez de solo el ID
         let citas = await Cita.find({ id_negocio })
             .populate('id_cliente', 'nombre apellido email')
             .populate('id_servicio', 'nombre precio duracion')
@@ -72,7 +68,6 @@ exports.obtenerCitasPorNegocio = async (req, res) => {
         const ahora = new Date();
         let cambiosRealizados = false;
 
-        // VALIDACIÓN: Si la fecha ya pasó y sigue "pendiente", se auto-rechaza
         for (let cita of citas) {
             if (cita.estado === 'pendiente') {
                 const fechaCita = new Date(`${cita.fecha}T${cita.hora}:00`);
@@ -85,7 +80,6 @@ exports.obtenerCitasPorNegocio = async (req, res) => {
             }
         }
 
-        // Si el sistema caducó alguna cita, volvemos a consultar la base de datos fresca
         if (cambiosRealizados) {
             citas = await Cita.find({ id_negocio })
                 .populate('id_cliente', 'nombre apellido email')
@@ -93,7 +87,6 @@ exports.obtenerCitasPorNegocio = async (req, res) => {
                 .populate('id_empleado', 'nombre apellido');
         }
 
-        // Ordenamos para que las más próximas salgan primero
         citas.sort((a, b) => new Date(`${a.fecha}T${a.hora}:00`) - new Date(`${b.fecha}T${b.hora}:00`));
 
         res.status(200).json(citas);

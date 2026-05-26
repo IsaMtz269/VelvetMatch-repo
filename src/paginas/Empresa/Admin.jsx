@@ -18,14 +18,14 @@ export default function Admin() {
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 const [empleadoFiltradoId, setEmpleadoFiltradoId] = useState('todos');
 
-const [selectedDateDetails, setSelectedDateDetails] = useState(null); // Guarda el día clickeado 'YYYY-MM-DD'
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);  // Abre/Cierra el sidebar
+const [selectedDateDetails, setSelectedDateDetails] = useState(null); 
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false); 
 
   // Filtramos las citas que aparecerán en el calendario
   const citasCalendario = citas.filter(c => ['pendiente', 'programada', 'completada', 'cancelada'].includes(c.estado.toLowerCase()));
 
   // ================= ESTADOS DE GESTIÓN DE CITAS =================
-  const [asignaciones, setAsignaciones] = useState({}); // { citaId: empleadoId }
+  const [asignaciones, setAsignaciones] = useState({}); 
   const [citaRechazarId, setCitaRechazarId] = useState(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const [citasFiltradasDia, setCitasFiltradasDia] = useState([]);
@@ -226,7 +226,7 @@ const obtenerNombreCliente = (id_cli) => {
         nombre: usuarioActivo.nombre || "",
         apellido: usuarioActivo.apellido || "",
         email: usuarioActivo.email || "",
-        password: "", // Se deja vacío por seguridad
+        password: "", 
         fechNacimiento: usuarioActivo.fechNacimiento ? usuarioActivo.fechNacimiento.split('T')[0] : ""
       });
       setProfileError("");
@@ -239,14 +239,12 @@ const obtenerNombreCliente = (id_cli) => {
 
     const { nombre, apellido, email, password, fechNacimiento } = editProfile;
 
-    // VALIDACIÓN JS 1: Solo letras
     const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (!regexLetras.test(nombre) || !regexLetras.test(apellido)) {
       setProfileError("El nombre y el apellido solo deben contener letras.");
       return;
     }
 
-    // VALIDACIÓN JS 2: Mayor de 16 años
     const hoy = new Date();
     const cumpleanos = new Date(fechNacimiento);
     let edad = hoy.getFullYear() - cumpleanos.getFullYear();
@@ -259,7 +257,6 @@ const obtenerNombreCliente = (id_cli) => {
       return;
     }
 
-    // VALIDACIÓN JS 3: Contraseña mínima
     if (password && password.length < 8) {
       setProfileError("La contraseña debe tener al menos 8 caracteres.");
       return;
@@ -276,7 +273,7 @@ const obtenerNombreCliente = (id_cli) => {
       if (!res.ok) throw new Error(data.message || "Error al actualizar perfil");
 
       alert("✅ " + data.message);
-      setUsuarioActivo(data.usuario); // Actualizamos el estado global del admin logueado
+      setUsuarioActivo(data.usuario); 
       
       const modalElement = document.getElementById('modalEditarPerfil');
       const modal = window.bootstrap.Modal.getInstance(modalElement);
@@ -395,7 +392,6 @@ const obtenerNombreCliente = (id_cli) => {
     
     if (newEmployee.password.length < 8) return setEmployeeError("La contraseña debe tener al menos 8 caracteres.");
     
-    // Validación de edad
     const hoy = new Date(); 
     const cumpleanos = new Date(newEmployee.fechNacimiento);
     let edad = hoy.getFullYear() - cumpleanos.getFullYear();
@@ -405,7 +401,7 @@ const obtenerNombreCliente = (id_cli) => {
     
     if (newEmployee.serviciosSeleccionados.length === 0) return setEmployeeError("Debes asignar al menos una especialidad.");
     
-    setEmployeeStep(2); // ¡Aquí es donde ocurre la magia!
+    setEmployeeStep(2); 
   };
 
 
@@ -503,7 +499,6 @@ const obtenerNombreCliente = (id_cli) => {
   const citasProgramadas = citas.filter(c => c.estado === 'programada');
   const ingresosTotales = citas.filter(c => c.estado === 'completada').reduce((acc, curr) => acc + (curr.precio_final || 0), 0);
 
-  // Variables del Calendario
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
@@ -604,7 +599,6 @@ const obtenerNombreCliente = (id_cli) => {
                     </div>
                   </div>
 
-                  {/* Botones de Acción Rápida */}
                   <div className="d-flex flex-wrap gap-2 mb-4 font-dm align-items-center">
                     <span className="text-muted small fw-bold text-uppercase me-2" style={{ letterSpacing: '1px' }}>Acciones Rápidas:</span>
                     <button className="action-chip btn" data-bs-toggle="modal" data-bs-target="#newServiceModal"><i className="fas fa-plus-circle"></i> Nuevo Servicio</button>
@@ -774,7 +768,6 @@ const obtenerNombreCliente = (id_cli) => {
                   ) : (
                     <div className="row g-3">
                       {empleados.map(emp => {
-                        // Encontramos los nombres de los servicios usando los IDs guardados en el empleado
                         const serviciosDelEmpleado = emp.servicio_empl?.map(id => servicios.find(s => s._id === id)?.nombre).filter(Boolean).join(', ') || 'Sin servicios';
                         
                         return (
@@ -799,7 +792,6 @@ const obtenerNombreCliente = (id_cli) => {
                   )}
 
                   {/* ================= SIDEBAR DERECHO DE DETALLES DEL DÍA ================= */}
-                  {/* Fila oscura de fondo para cerrar al dar clic fuera */}
                   {isRightSidebarOpen && (
                     <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-25" style={{ zIndex: 1040 }} onClick={() => setIsRightSidebarOpen(false)}></div>
                   )}
@@ -827,7 +819,6 @@ const obtenerNombreCliente = (id_cli) => {
                       ) : (
                         <div className="d-flex flex-column gap-3">
                           {citasCalendario.filter(c => c.fecha === selectedDateDetails).map(cita => {
-                            // Definir estilo del borde según estado
                             let borderClass = 'border-secondary';
                             if (cita.estado === 'pendiente') borderClass = 'border-warning';
                             if (cita.estado === 'programada') borderClass = 'border-primary';
@@ -913,7 +904,6 @@ const obtenerNombreCliente = (id_cli) => {
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
             
-            {/* CABECERA DEL MODAL CON BARRA DE PROGRESO */}
             <div className="modal-header bg-primary-custom text-white border-0 flex-column align-items-start p-4" style={{ backgroundColor: 'var(--primary-color)' }}>
               <div className="d-flex justify-content-between w-100 mb-3">
                 <h5 className="modal-title fw-bold" id="empModalTitle"><i className="fas fa-user-plus me-2"></i>Registrar Profesional</h5>
@@ -931,7 +921,6 @@ const obtenerNombreCliente = (id_cli) => {
             </div>
 
             <div className="modal-body p-0 font-dm bg-light-custom">
-              {/* BANNERS DE ERROR Y ÉXITO FLOTANTES */}
               <div className="px-4 pt-3">
                 {employeeError && (
                   <div className="alert alert-danger d-flex align-items-center rounded-3 shadow-sm py-2 px-3 mb-0"><i className="fas fa-exclamation-circle me-2"></i><div className="small fw-bold">{employeeError}</div></div>
@@ -941,7 +930,6 @@ const obtenerNombreCliente = (id_cli) => {
                 )}
               </div>
 
-              {/* ================= PASO 1: DATOS PERSONALES ================= */}
               {employeeStep === 1 && (
                 <div className="p-4 p-md-5 animate__animated animate__fadeIn">
                   <h6 className="text-primary-custom fw-bold text-uppercase small mb-4 border-bottom pb-2">Datos de Identidad</h6>
@@ -997,17 +985,14 @@ const obtenerNombreCliente = (id_cli) => {
               {employeeStep === 2 && (
                 <div className="p-4 p-md-5 animate__animated animate__fadeInRight">
                   
-                  {/* GRÁFICA DE BARRAS INVERTIDA */}
                   <div className="mb-5">
                     <h6 className="text-primary-custom fw-bold text-uppercase small mb-3 text-center">Edición de Jornada (00:00 - 24:00)</h6>
                     <div className="d-flex mx-auto" style={{ height: '220px', maxWidth: '580px' }}>
                       
-                      {/* Eje Y invertido: 00h arriba y 24h abajo */}
                       <div className="d-flex flex-column justify-content-between text-muted fw-bold pe-2 text-end" style={{ width: '40px', fontSize: '10px', paddingBottom: '26px', paddingTop: '4px' }}>
                         <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span>
                       </div>
                       
-                      {/* Contenedor de las barras */}
                       <div id="vertical-chart" className="d-flex justify-content-between flex-grow-1 h-100 position-relative" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(0,0,0,0.04) 24px, rgba(0,0,0,0.04) 25px)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
                         
                         {employeeData.horario.map((item, index) => {
@@ -1015,14 +1000,12 @@ const obtenerNombreCliente = (id_cli) => {
                           let barContent = null;
 
                           if (!item.activo) {
-                            // Si está inactivo, se dibuja un pequeño bloque en el tope superior (00h)
                             barContent = <div className="bg-secondary bg-opacity-25 w-100" style={{ height: '12px', borderRadius: '4px' }}></div>;
                           } else {
                             const startDec = timeToDecimal(item.entrada);
                             const endDec = timeToDecimal(item.salida);
                             let heightPct = ((endDec - startDec) / 24) * 100;
                             
-                            // 👇 TRUCO: Usamos 'top' en lugar de 'bottom' para que baje desde las 00h
                             let topPct = (startDec / 24) * 100; 
                             if (heightPct < 0) heightPct = 0;
 
@@ -1034,7 +1017,6 @@ const obtenerNombreCliente = (id_cli) => {
 
                           return (
                             <div key={index} className="d-flex flex-column align-items-center h-100 cursor-pointer" style={{ width: '12%' }} onClick={() => setSelectedDayIndex(index)}>
-                              {/* 👇 Cambiamos 'align-items-end' por 'align-items-start' para consistencia */}
                               <div className="w-75 flex-grow-1 position-relative d-flex align-items-start justify-content-center mb-2" style={{ backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: '8px' }}>
                                 {barContent}
                               </div>
@@ -1046,7 +1028,6 @@ const obtenerNombreCliente = (id_cli) => {
                     </div>
                   </div>
 
-                  {/* CONTROLES DEL DÍA SELECCIONADO (Se mantiene igual a lo que tenías) */}
                   <div className="bg-white rounded-4 p-4 shadow-sm border border-light-subtle mx-auto" style={{ maxWidth: '600px' }}>
                     <div className="row g-3 align-items-end">
                       <div className="col-md-4">
@@ -1075,7 +1056,6 @@ const obtenerNombreCliente = (id_cli) => {
               )}
             </div>
 
-            {/* PIE DEL MODAL (BOTONES DE ACCIÓN) */}
             <div className="modal-footer border-0 p-4 pt-0 bg-light-custom">
               {employeeStep === 1 ? (
                 <button className="btn btn-primary rounded-pill px-5 shadow-sm fw-bold ms-auto" onClick={handleNextEmployeeStep}>
